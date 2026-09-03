@@ -58,6 +58,13 @@ server {
 }
 EOF
 
+echo "[entrypoint] Migrations DB (idempotent)..."
+node /app/scripts/db-migrate.js
+echo "[entrypoint] Seed DB (idempotent)..."
+node /app/scripts/db-seed.js
+echo "[entrypoint] Seed JS (comptes demo)..."
+node /app/seed/seed.js
+
 echo "[entrypoint] Demarrage du backend node sur :4000 (PORT web = ${LISTEN_PORT})"
 PORT=4000 node /app/src/server.js &
 NODE_PID=$!
