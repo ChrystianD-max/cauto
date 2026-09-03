@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="C-AUTO">
+  <defs>
+    <linearGradient id="wBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0c0e14"/>
+      <stop offset="1" stop-color="#1b212e"/>
+    </linearGradient>
+    <linearGradient id="wGold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff0c2"/>
+      <stop offset="0.42" stop-color="#cda051"/>
+      <stop offset="1" stop-color="#96741f"/>
+    </linearGradient>
+    <linearGradient id="wBlue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4a6cc0"/>
+      <stop offset="1" stop-color="#1d2f57"/>
+    </linearGradient>
+  </defs>
+  <rect x="3" y="3" width="94" height="94" rx="26" fill="url(#wBg)"/>
+  <rect x="3" y="3" width="94" height="94" rx="26" fill="none" stroke="url(#wGold)" stroke-width="2.4"/>
+  <path d="M50 24 L56 36 L70 36 L59 45 L64 58 L50 50 L36 58 L41 45 L30 36 L44 36 Z"
+        fill="url(#wBlue)" stroke="url(#wGold)" stroke-width="1.7"/>
+  <text x="50" y="69" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif"
+        font-size="31" font-weight="700" letter-spacing="1" fill="url(#wGold)">C·AUTO</text>
+  <line x1="24" y1="77" x2="76" y2="77" stroke="#d4af6a" stroke-opacity="0.55" stroke-width="1.6"/>
+</svg>

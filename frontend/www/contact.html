@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact — C-AUTO</title>
+  <link rel="icon" type="image/png" href="app/icons/favicon-32.png" />
+  <link rel="stylesheet" href="css/public.css?v=1.1">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="index.html" class="nav-logo"><svg width="36" height="36" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d0f15"/><stop offset="1" stop-color="#1a1f2b"/></linearGradient><linearGradient id="go" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe9b8"/><stop offset=".4" stop-color="#d4af6a"/><stop offset="1" stop-color="#a8853f"/></linearGradient><linearGradient id="bl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4a6cc0"/><stop offset="1" stop-color="#1d2f57"/></linearGradient></defs><rect x="2" y="2" width="96" height="96" rx="24" fill="url(#lg)"/><rect x="2" y="2" width="96" height="96" rx="24" fill="none" stroke="url(#go)" stroke-width="2.4"/><path d="M50 25 L58 44 L78 44 L62 56 L69 75 L50 63 L31 75 L38 56 L22 44 L42 44 Z" fill="url(#bl)" stroke="url(#go)" stroke-width="1.8"/><path d="M29 51 C30 43 37 39 45 39 C52 39 57 42 58 47" stroke="url(#go)" stroke-width="6" fill="none" stroke-linecap="round"/></svg> <span class="wordmark">C-AUTO</span></a>
+    <div class="nav-links">
+      <a href="comment-ca-marche.html">Comment ça marche</a>
+      <a href="professionnels.html">Professionnels</a>
+      <a href="entreprises.html">Entreprises</a>
+      <a href="pieces.html">Pièces</a>
+      <a href="aide.html">Aide</a>
+    </div>
+    <div class="nav-cta">
+      <a href="app/#/login" class="btn btn-outline btn-sm">Se connecter</a>
+      <a href="app/#/register" class="btn btn-primary btn-sm">S'inscrire</a>
+    </div>
+    <button class="hamburger" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  </div>
+</nav>
+
+<section class="page-header">
+  <div class="container">
+    <span class="section-label">Contact</span>
+    <h1>Parlons de votre projet.</h1>
+    <p>Questions, démos, partenariats — nous sommes à votre écoute.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="grid-2">
+      <div class="animate">
+        <h2 style="margin-bottom:1.5rem">Envoyez-nous un message</h2>
+        <form id="f-contact">
+          <div class="grid-2" style="gap:1rem">
+            <div class="form-group">
+              <label for="name">Nom complet</label>
+              <input type="text" id="name" name="name" required placeholder="Votre nom">
+            </div>
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" required placeholder="vous@email.com">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="subject">Sujet</label>
+            <select id="subject" name="subject" required>
+              <option value="">Choisir un sujet...</option>
+              <option value="question">Question générale</option>
+              <option value="support">Support technique</option>
+              <option value="pro">Devenir professionnel</option>
+              <option value="fleet">Découvrir C-AUTO FLEET</option>
+              <option value="partner">Partenariat</option>
+              <option value="press">Presse / Média</option>
+              <option value="other">Autre</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" rows="5" required placeholder="Décrivez votre demande..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg" style="width:100%">Envoyer le message →</button>
+        </form>
+        <div id="contact-status" style="margin-top:1rem"></div>
+      </div>
+
+      <div class="animate" style="padding-left:2rem">
+        <h2 style="margin-bottom:1.5rem">Nos coordonnées</h2>
+        <div class="card" style="margin-bottom:1rem">
+          <h3>📧 Email</h3>
+          <p><a href="mailto:contact@cauto.local">contact@cauto.local</a></p>
+        </div>
+        <div class="card" style="margin-bottom:1rem">
+          <h3>📞 Téléphone</h3>
+          <p>+229 90 00 00 00</p>
+        </div>
+        <div class="card" style="margin-bottom:1rem">
+          <h3>📍 Adresse</h3>
+          <p>C-AUTO HQ<br>Cotonou, Bénin</p>
+        </div>
+        <div class="card">
+          <h3>🕐 Horaires</h3>
+          <p>Lun - Ven : 8h00 - 18h00<br>Sam : 9h00 - 13h00</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <p>&copy; 2026 C-AUTO. Tous droits réservés.</p>
+      <div style="display:flex;gap:1rem"><a href="conditions.html">Conditions</a><a href="confidentialite.html">Confidentialité</a><a href="contact.html">Contact</a></div>
+    </div>
+  </div>
+</footer>
+<script src="js/public.js"></script>
+<script>
+document.getElementById('f-contact').addEventListener('submit', function(e) {
+  e.preventDefault();
+  document.getElementById('contact-status').innerHTML = '<div class="card" style="border-color:var(--green);text-align:center;padding:1.5rem"><h3 style="color:var(--green)">✓ Message envoyé</h3><p style="color:var(--muted);margin-top:0.5rem">Merci ! Nous vous répondrons sous 24h.</p></div>';
+  this.reset();
+});
+</script>
+</body>
+</html>

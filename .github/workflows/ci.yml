@@ -1,0 +1,266 @@
+# =============================================================================
+# C-AUTO — CI/CD (module 63)
+# -----------------------------------------------------------------------------
+# Chaîne :  Git push → Lint → Type check → Tests → Build → Docker build → Deploy
+#
+# Règle critique : le job `deploy` dépend de `lint-typecheck`, `tests` (suite
+# backend 72 + suite e2e Playwright) et `build`. Si l'un échoue — tests
+# critiques en tête — le déploiement est bloqué (GitHub n'exécute pas un job
+# dont un `need` est en échec).
+#
+# Déploiement : branche `main` uniquement, environnement `production`
+# (protection par approbation configurable dans les settings), via SSH.
+# Secrets du repo : SSH_HOST, SSH_USER, SSH_PRIVATE_KEY (clé en base64),
+# SSH_DEPLOY_DIR (défaut /srv/cauto), DEPLOY_PUBLIC_URL (défaut https://HOST).
+# =============================================================================
+name: CI/CD - C-AUTO
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '20'
+  APP_ENV: ci
+  # Limites de rate-limit relevées pour l'exécution automatisée des tests
+  # (staging local conserve ses valeurs serrées).
+  RATE_LIMIT_AUTH_MAX: '100000'
+  RATE_LIMIT_API_MAX: '200000'
+  RATE_LIMIT_OTP_MAX: '10000'
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # 1) Lint + 2) Type check — rapides, sans infrastructure
+  # ---------------------------------------------------------------------------
+  lint-typecheck:
+    name: Lint + Type check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend deps
+        working-directory: backend
+        run: npm ci
+
+      - name: Lint (ESLint — grille sur erreurs structurelles)
+        working-directory: backend
+        run: npm run lint
+
+      - name: Type check (tsc --noEmit)
+        working-directory: backend
+        run: npm run typecheck
+
+      # --- Règle migrations (module 81) --------------------------------------
+      # Toute modification de base passe par db/migration_v*.sql (registre
+      # schema_migrations). Vérifie la convention + interdiction de DDL dans
+      # les seeds + séquence sans trou. Bloque la PR/déploiement.
+      - name: Politique migrations (module 81) — évolution DB versionnée
+        working-directory: backend
+        run: npm run db:check
+
+      # --- Règle anti-mock (module 67) ---------------------------------------
+      # Interdit les tableaux/Map statiques du niveau module nommés comme une
+      # table métier (fausse base de données en mémoire). Bloque la PR.
+      - name: Anti-mock (module 67) — pas de fausse base de données en mémoire
+        working-directory: backend
+        run: npm run check:antimock
+
+      # --- Règle anti-boutons fictifs (module 68) ----------------------------
+      # Interdit alert("Coming soon") et le libellé "Coming soon" (bouton sans
+      # fonction). Le message légitime « Fonctionnalité en préparation. » est
+      # autorisé pour une fonctionnalité explicitement future. Bloque la PR.
+      - name: Anti-boutons fictifs (module 68)
+        working-directory: backend
+        run: npm run check:nofakebuttons
+
+  # ---------------------------------------------------------------------------
+  # 3) Tests — les "tests critiques" qui bloquent le déploiement.
+  #    Suite backend (node --test) + suite e2e Playwright (10 profils)
+  #    contre la stack dockérisée : postgres/redis/backend/worker/frontend/nginx.
+  # ---------------------------------------------------------------------------
+  tests:
+    name: Tests (backend + e2e)
+    runs-on: ubuntu-latest
+    env:
+      JWT_SECRET: ci-secret-2a9f4c61c4d3c7ec519ba1d4cca7a5e7b1a55c4d7d4fe6f0c6b8a2d4e6f0c1a2
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
+
+      - name: Install e2e deps
+        working-directory: e2e
+        run: npm ci
+
+      - name: Start stack (compose — schéma DB au premier boot via db/init.sql)
+        run: docker compose up -d postgres redis backend worker frontend reverse-proxy
+
+      # Les seeds SQL (scripts/db-seed.js) lisent db/seed_v*.sql à la racine du
+      # repo : à l'exécuter depuis l'hôte (port 5432 publié), pas dans le
+      # conteneur backend (l'image ne contient pas le dossier db/).
+      - name: Install backend deps (seeds)
+        working-directory: backend
+        run: npm ci
+
+      - name: Seeds (SQL + données démo, idempotent)
+        working-directory: backend
+        run: npm run db:seed
+
+      - name: Wait backend healthy (https://localhost/api/health via nginx)
+        run: |
+          for i in $(seq 1 60); do
+            if curl -ksf https://localhost/api/health >/dev/null 2>&1; then
+              echo "backend UP"; exit 0
+            fi
+            sleep 2
+          done
+          echo "backend NOT healthy after 120s" >&2
+          docker compose ps
+          exit 1
+
+      - name: Test backend (node --test, 72 tests)
+        working-directory: backend
+        run: npm test
+
+      # --- Observabilité (module 65) -----------------------------------------
+      # Disponibilité /ready, en-têtes de traçabilité, export Prometheus protégé
+      # par token (sans token = refusé en prod, contaminé sinon). Bloquant pour
+      # le déploiement (job tests = gate de deploy).
+      - name: Observabilité (module 65) — /ready, X-Request-Id, Prometheus protégé
+        env:
+          METRICS_TOKEN: ci-observability-token
+        run: |
+          set -euo pipefail
+          TOKEN="$METRICS_TOKEN"
+          # Redémarre le backend avec le token pour vérifier que l'export est
+          # bien PROTÉGÉ (401 sans Bearer, 200 avec).
+          docker compose up -d --no-deps --force-recreate backend
+          for i in $(seq 1 60); do
+            curl -ksf https://localhost/api/health >/dev/null 2>&1 && break
+            sleep 2
+          done
+          # Disponibilité réelle (db+redis) + en-têtes de traçabilité
+          curl -ksf https://localhost/health/ready | grep -q '"status":"ok"'
+          rid=$(curl -ks -D - -o /dev/null https://localhost/health/ready | grep -i '^x-request-id:' | tr -d '\r')
+          test -n "$rid"
+          # /api/ops/info : runtime + alertes + latences
+          curl -ksf https://localhost/api/ops/info | grep -q '"version"'
+          # Export Prometheus PROTÉGÉ : sans token -> 401 ; avec token -> 200 + texte
+          code_no=$(curl -ks -o /dev/null -w '%{http_code}' https://localhost/api/ops/metrics)
+          test "$code_no" = "401" || { echo "metrics SANS token attendu 401, obtenu $code_no"; exit 1; }
+          curl -ksf -H "Authorization: Bearer $TOKEN" https://localhost/api/ops/metrics | grep -q '^cauto_http_requests_total{'
+
+      - name: Install Chrome (canal chrome utilisé par les 10 profils)
+        working-directory: e2e
+        run: npx playwright install --with-deps chrome
+
+      - name: Test e2e (Playwright)
+        working-directory: e2e
+        run: npx playwright test
+
+      # --- Tests de sauvegarde / restauration (module 64) -------------------
+      # Un backup n'est "réussi" que s'il est relu (pg_restore --list, tables
+      # critiques) ET restauré dans une base jetable (compteurs comparés).
+      - name: Backup + restauration testée (module 64)
+        env:
+          BACKUP_DIR: ${{ github.workspace }}/backups
+        run: |
+          ./deploy/backup.sh
+          ./deploy/restore-test.sh
+
+      - name: Upload traces e2e en cas d'échec
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: e2e/test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # 4) Build + 5) Docker build — les images doivent se construire sur main
+  # ---------------------------------------------------------------------------
+  build:
+    name: Build + Docker build
+    runs-on: ubuntu-latest
+    needs: [lint-typecheck, tests]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate compose file
+        run: docker compose config --quiet
+
+      - name: Build images (backend, worker, frontend)
+        run: docker compose build backend worker frontend
+
+  # ---------------------------------------------------------------------------
+  # 6) Deploy — main branch uniquement ; bloqué tant que tests critiques ou
+  #    build ne sont pas passés (needs). Approbation : environment production.
+  # ---------------------------------------------------------------------------
+  deploy:
+    name: Deploy production (SSH)
+    runs-on: ubuntu-latest
+    environment: production
+    needs: [lint-typecheck, tests, build]
+    if: |
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+      github.ref == 'refs/heads/main' &&
+      secrets.SSH_HOST != ''
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install SSH key (secret SSH_PRIVATE_KEY au format base64)
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | base64 -d > "$RUNNER_TEMP/id_deploy"
+          chmod 600 "$RUNNER_TEMP/id_deploy"
+
+      - name: Deploy remote (git pull + compose pull + up)
+        env:
+          HOST: ${{ secrets.SSH_HOST }}
+          USER: ${{ secrets.SSH_USER }}
+          DEPLOY_DIR: ${{ secrets.SSH_DEPLOY_DIR || '/srv/cauto' }}
+        run: |
+          ssh -oStrictHostKeyChecking=accept-new -i "$RUNNER_TEMP/id_deploy" "${USER}@${HOST}" \
+            'set -e
+             cd "$DEPLOY_DIR"
+             git fetch origin
+             git checkout main
+             git pull --ff-only
+             docker compose pull
+             docker compose up -d --force-recreate backend worker frontend reverse-proxy
+             docker image prune -f'
+
+      - name: Healthcheck après déploiement
+        env:
+          DEPLOY_PUBLIC_URL: ${{ secrets.DEPLOY_PUBLIC_URL || format('https://{0}', secrets.SSH_HOST) }}
+        run: |
+          for i in $(seq 1 60); do
+            if curl -ksf "$DEPLOY_PUBLIC_URL/api/health" >/dev/null 2>&1; then
+              echo "production UP"; exit 0
+            fi
+            sleep 2
+          done
+          echo "production NOT healthy après 120s" >&2
+          exit 1

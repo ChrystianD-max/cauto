@@ -1,0 +1,14 @@
+{
+  "name": "cauto-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tests E2E Playwright (module 55) + contrôle responsive (module 56) - C-AUTO",
+  "scripts": {
+    "test": "playwright test",
+    "test:parcours": "playwright test --project=parcours",
+    "test:responsive": "playwright test --project=responsive-*"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.1"
+  }
+}

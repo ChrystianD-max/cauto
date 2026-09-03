@@ -1,0 +1,11 @@
+{
+  "name": "cauto-worker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "main": "index.js",
+  "dependencies": {
+    "ioredis": "^5.4.1",
+    "pg": "^8.12.0"
+  }
+}

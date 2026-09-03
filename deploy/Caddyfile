@@ -1,0 +1,120 @@
+# C-AUTO — proxy TLS de production (Caddy) — Module 61 : domaines
+# -----------------------------------------------------------------------------
+# Remplacé par les plateformes qui gèrent déjà le TLS (Railway, Render, Fly, …).
+# Sur un VPS : Caddy émet et renouvelle automatiquement les certificats Let's
+# Encrypt pour CHAQUE hôte déclaré ci-dessous — aucun fichier de certificat à
+# gérer. Les variables sont injectées par docker compose
+# (deploy/docker-compose.caddy.yml), elles-mêmes pilotées par .env (module 61).
+#
+# Topologie des domaines :
+#   c-auto.xxx / www.c-auto.xxx   -> marketing + application (SPA /app) + /api
+#   app.c-auto.xxx                -> application (SPA) + /api
+#   admin.c-auto.xxx              -> application (SPA) — zone admin par défaut
+#   api.c-auto.xxx                -> API seule
+#
+# Aucun hébergeur n'est imposé ; le(s) domaine(s) viennent de l'environnement.
+# Exemple réel plus tard : remplacer cauto.test par le domaine définitif dans
+# .env — aucun changement de code ni de Caddyfile.
+
+# ----- Module 62 — HTTPS : HTTP → redirection permanente → HTTPS ---------------
+# Caddy force déjà HTTPS par défaut (auto-HTTPS Let's Encrypt). Cette règle
+# explicite rend l'exigence VÉRIFIABLE : tout accès en clair sur un des cinq
+# hôtes est redirigé en 308 vers la version TLS du même hôte (et la même URL).
+# Les cookies de session du backend sont Secure en production (voir config.js).
+http://{$CADDY_DOMAIN}, http://{$CADDY_WWW_DOMAIN}, http://{$CADDY_APP_DOMAIN}, http://{$CADDY_ADMIN_DOMAIN}, http://{$CADDY_API_DOMAIN} {
+	redir https://{host}{uri} permanent
+}
+
+# ----- Racine : marketing + application + API --------------------------------
+{$CADDY_DOMAIN}, {$CADDY_WWW_DOMAIN} {
+	encode zstd gzip
+	request_body {
+		max_size 6MB
+	}
+	# HSTS : le navigateur n'accepte plus que HTTPS (sous-domaines inclus).
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options nosniff
+	}
+
+	# API C-AUTO
+	handle /api/* {
+		reverse_proxy backend:4000
+	}
+	handle /health* {
+		reverse_proxy backend:4000
+	}
+
+	# Application + pages marketing (SPA statique servie par nginx/frontend)
+	handle {
+		reverse_proxy frontend:80
+	}
+}
+
+# ----- app.c-auto.xxx : application ------------------------------------------
+{$CADDY_APP_DOMAIN} {
+	encode zstd gzip
+	request_body {
+		max_size 6MB
+	}
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options nosniff
+	}
+
+	handle /api/* {
+		reverse_proxy backend:4000
+	}
+	handle /health* {
+		reverse_proxy backend:4000
+	}
+
+	handle {
+		reverse_proxy frontend:80
+	}
+}
+
+# ----- admin.c-auto.xxx : application (zone admin) ---------------------------
+{$CADDY_ADMIN_DOMAIN} {
+	encode zstd gzip
+	request_body {
+		max_size 6MB
+	}
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options nosniff
+	}
+
+	handle /api/* {
+		reverse_proxy backend:4000
+	}
+	handle /health* {
+		reverse_proxy backend:4000
+	}
+
+	handle {
+		reverse_proxy frontend:80
+	}
+}
+
+# ----- api.c-auto.xxx : API seule --------------------------------------------
+{$CADDY_API_DOMAIN} {
+	encode zstd gzip
+	request_body {
+		max_size 6MB
+	}
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options nosniff
+	}
+
+	# Healthchecks exposés aussi sur l'hôte API
+	handle /health* {
+		reverse_proxy backend:4000
+	}
+
+	# API (toute autre route)
+	handle {
+		reverse_proxy backend:4000
+	}
+}

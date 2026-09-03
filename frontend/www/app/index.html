@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="C-AUTO — Plateforme de maintenance automobile intelligente. Suivi vehicules, diagnostics, devis, paiement securise." />
+<meta name="theme-color" content="#0f1420" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="C-AUTO" />
+<title>C-AUTO — La confiance au coeur de l'automobile</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<link rel="icon" type="image/png" href="app/icons/favicon-32.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<script src="vendor/lucide.min.js?v=1.0" defer></script>
+<link rel="stylesheet" href="styles.css?v=10.15" />
+<link rel="stylesheet" href="design-system.css?v=1.0" />
+<link rel="stylesheet" href="glass-theme.css?v=1.5" />
+</head>
+<body>
+<div id="toast-container"></div>
+<div id="loading-overlay" class="hidden"><div class="loader"><div class="spinner"></div><div class="loader-tag">C-AUTO</div></div></div>
+<header>
+  <div class="header-inner">
+    <a href="#/" class="logo">
+      <svg width="28" height="28" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="apHl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d0f15"/><stop offset="1" stop-color="#1a1f2b"/></linearGradient><linearGradient id="apHo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe9b8"/><stop offset=".4" stop-color="#d4af6a"/><stop offset="1" stop-color="#a8853f"/></linearGradient><linearGradient id="apHb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4a6cc0"/><stop offset="1" stop-color="#1d2f57"/></linearGradient></defs><rect x="2" y="2" width="96" height="96" rx="24" fill="url(#apHl)"/><rect x="2" y="2" width="96" height="96" rx="24" fill="none" stroke="url(#apHo)" stroke-width="2.4"/><path d="M50 25 L58 44 L78 44 L62 56 L69 75 L50 63 L31 75 L38 56 L22 44 L42 44 Z" fill="url(#apHb)" stroke="url(#apHo)" stroke-width="1.8"/><path d="M29 51 C30 43 37 39 45 39 C52 39 57 42 58 47" stroke="url(#apHo)" stroke-width="6" fill="none" stroke-linecap="round"/></svg>
+      <span data-i18n="app.name" class="logo-word">C-AUTO</span>
+    </a>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav id="nav"></nav>
+    <div id="lang-host"></div>
+  </div>
+</header>
+<div id="offline-banner" class="hidden">
+  <i data-lucide="wifi-off" style="width:16px;height:16px"></i>
+  Mode hors connexion — les saisies locales sont conservees et seront synchronisees.
+</div>
+<div id="pwa-install-host" class="hidden">
+  <button id="btn-pwa-install" class="btn btn-sm" type="button"><i data-lucide="download" style="width:16px;height:16px"></i> Installer l'application</button>
+</div>
+<main id="app"></main>
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <svg width="20" height="20" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="apFl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d0f15"/><stop offset="1" stop-color="#1a1f2b"/></linearGradient><linearGradient id="apFo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe9b8"/><stop offset=".4" stop-color="#d4af6a"/><stop offset="1" stop-color="#a8853f"/></linearGradient><linearGradient id="apFb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4a6cc0"/><stop offset="1" stop-color="#1d2f57"/></linearGradient></defs><rect x="2" y="2" width="96" height="96" rx="24" fill="url(#apFl)"/><rect x="2" y="2" width="96" height="96" rx="24" fill="none" stroke="url(#apFo)" stroke-width="2.4"/><path d="M50 25 L58 44 L78 44 L62 56 L69 75 L50 63 L31 75 L38 56 L22 44 L42 44 Z" fill="url(#apFb)" stroke="url(#apFo)" stroke-width="1.8"/><path d="M29 51 C30 43 37 39 45 39 C52 39 57 42 58 47" stroke="url(#apFo)" stroke-width="6" fill="none" stroke-linecap="round"/></svg>
+      <span data-i18n="app.name" class="logo-word">C-AUTO</span>
+    </div>
+    <p data-i18n="footer.tagline">La confiance au coeur de l'automobile &middot; Staging</p>
+    <p class="footer-copy" data-i18n="footer.copy"></p>
+  </div>
+</footer>
+<script src="views-admin.js?v=2.3" defer></script>
+<script src="ux-states.js?v=1.0" defer></script>
+<script src="app-i18n.js?v=1.1" defer></script>
+<script src="app-v8.js?v=11.7" defer></script>
+  <script src="views-professionals-v8.js?v=1.11" defer></script>
+<script src="views-modules-v2.js?v=1.6" defer></script>
+  <script src="views-chat.js?v=2.1" defer></script>
+<script src="views-innovations.js?v=1.0" defer></script>
+<script src="pwa.js?v=1.0" defer></script>
+</body>
+</html>

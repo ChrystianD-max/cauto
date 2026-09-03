@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="C-AUTO">
+  <defs>
+    <linearGradient id="mBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0d0f15"/>
+      <stop offset="1" stop-color="#1a1f2b"/>
+    </linearGradient>
+    <linearGradient id="mGold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe9b8"/>
+      <stop offset="0.42" stop-color="#d4af6a"/>
+      <stop offset="1" stop-color="#a8853f"/>
+    </linearGradient>
+    <linearGradient id="mBlue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4a6cc0"/>
+      <stop offset="1" stop-color="#1d2f57"/>
+    </linearGradient>
+    <radialGradient id="mGlow" cx="0.5" cy="0.3" r="0.6">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.2"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect x="2" y="2" width="96" height="96" rx="26" fill="url(#mBg)"/>
+  <rect x="2" y="2" width="96" height="96" rx="26" fill="none" stroke="url(#mGold)" stroke-width="2.2"/>
+  <path d="M14 14 L56 14 C38 18 24 30 19 52 Z" fill="url(#mGlow)"/>
+  <!-- Étoile compacte en couronnement -->
+  <path d="M50 24 L56 36 L70 36 L59 45 L64 58 L50 50 L36 58 L41 45 L30 36 L44 36 Z"
+        fill="url(#mBlue)" stroke="url(#mGold)" stroke-width="1.6"/>
+  <!-- Wordmark C·AUTO -->
+  <text x="50" y="68" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif"
+        font-size="31" font-weight="700" letter-spacing="1" fill="url(#mGold)">C·AUTO</text>
+  <!-- filet de base -->
+  <line x1="24" y1="76" x2="76" y2="76" stroke="#d4af6a" stroke-opacity="0.6" stroke-width="1.6"/>
+</svg>

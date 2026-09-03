@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="C-AUTO">
+  <defs>
+    <linearGradient id="lBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b0d12"/>
+      <stop offset="0.55" stop-color="#151923"/>
+      <stop offset="1" stop-color="#0a0c11"/>
+    </linearGradient>
+    <linearGradient id="lGold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fdf3d3"/>
+      <stop offset="0.32" stop-color="#e6c27a"/>
+      <stop offset="0.62" stop-color="#f6dda0"/>
+      <stop offset="1" stop-color="#b89248"/>
+    </linearGradient>
+    <linearGradient id="lEdge" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff2c5"/>
+      <stop offset="0.5" stop-color="#cfab62"/>
+      <stop offset="1" stop-color="#8f6d33"/>
+    </linearGradient>
+    <linearGradient id="lBlue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4a6cc0"/>
+      <stop offset="1" stop-color="#1c2f56"/>
+    </linearGradient>
+    <radialGradient id="lGlow" cx="0.5" cy="0.28" r="0.7">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="lShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="7" stdDeviation="14" flood-color="#000000" flood-opacity="0.75"/>
+    </filter>
+  </defs>
+
+  <!-- Écusson squircle de fond -->
+  <g filter="url(#lShadow)">
+    <rect x="14" y="14" width="484" height="484" rx="118" fill="url(#lBg)"/>
+  </g>
+  <rect x="14" y="14" width="484" height="484" rx="118" fill="none" stroke="url(#lEdge)" stroke-width="7"/>
+  <rect x="27" y="27" width="458" height="458" rx="106" fill="none" stroke="#d4af6a" stroke-opacity="0.35" stroke-width="1.6"/>
+
+  <!-- Reflet de prestige -->
+  <rect x="14" y="14" width="484" height="484" rx="118" fill="url(#lGlow)"/>
+
+  <!-- Petite étoile de confiance (compacte, en couronnement) -->
+  <g transform="translate(256 88)">
+    <path d="M0 -34 L9 -20 L26 -22 L22 -6 L40 7 L20 14 L24 32 L7 24 L0 38 L-7 24 L-24 32 L-20 14 L-40 7 L-22 -6 L-26 -22 L-9 -20 Z"
+          fill="url(#lBlue)" stroke="url(#lGold)" stroke-width="3"/>
+    <circle r="8" fill="url(#lGold)"/>
+  </g>
+
+  <!-- Filets courbés décoratifs -->
+  <g fill="none" stroke="#d4af6a" stroke-opacity="0.5" stroke-width="3" stroke-linecap="round">
+    <path d="M150 200 C150 160 196 138 256 138 C316 138 362 160 362 200"/>
+    <path d="M162 220 C162 186 200 166 256 166 C312 166 350 186 350 220"/>
+  </g>
+
+  <!-- WORDMARK C·AUTO (domine le centre) -->
+  <text x="256" y="300" text-anchor="middle"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-size="150" font-weight="700" letter-spacing="4"
+        fill="url(#lGold)">C·AUTO</text>
+
+  <!-- Ligne d'accent or sous le wordmark -->
+  <g>
+    <line x1="150" y1="332" x2="226" y2="332" stroke="url(#lEdge)" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="256" cy="332" r="6" fill="url(#lGold)"/>
+    <line x1="286" y1="332" x2="362" y2="332" stroke="url(#lEdge)" stroke-width="5" stroke-linecap="round"/>
+  </g>
+
+  <!-- Bas de ligne : tagline -->
+  <text x="256" y="380" text-anchor="middle"
+        font-family="Arial, Helvetica, sans-serif" font-size="30"
+        letter-spacing="12" font-weight="600" fill="#cbbf9f">LA CONFIANCE AU CŒUR</text>
+  <text x="256" y="416" text-anchor="middle"
+        font-family="Arial, Helvetica, sans-serif" font-size="24"
+        letter-spacing="10" fill="#8f846b" font-weight="500">DE L'AUTOMOBILE</text>
+
+  <!-- Deux ailerons de vitesse latéraux -->
+  <path d="M96 250 L128 250 M96 262 L136 262 M96 274 L120 274"
+        stroke="url(#lEdge)" stroke-width="7" stroke-linecap="round" fill="none"/>
+  <path d="M416 250 L384 250 M416 262 L376 262 M416 274 L392 274"
+        stroke="url(#lEdge)" stroke-width="7" stroke-linecap="round" fill="none"/>
+</svg>

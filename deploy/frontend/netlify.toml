@@ -1,0 +1,92 @@
+# =============================================================================
+# C-AUTO — configuration Netlify (plateforme Next.js-compatible)
+# -----------------------------------------------------------------------------
+# Copier ce fichier à la racine de frontend/www avant de déployer sur Netlify.
+# Remplacer __BACKEND_API_ORIGIN__ par l'URL publique de l'API C-AUTO
+# (exemple : https://api.cauto.example) — c'est la SEULE valeur à renseigner.
+# Rappel : les fichiers ne contiennent aucune clé ; le reste vient de .env.
+# =============================================================================
+
+[build]
+  publish = "."
+
+# ----- API C-AUTO : proxy /api -> backend (rewrite externe, statut 200) -----
+[[redirects]]
+  from = "/api/*"
+  to = "https://__BACKEND_API_ORIGIN__/api/:splat"
+  status = 200
+
+# ----- SPA /app : repli sur le shell HTML (les fichiers réels sont servis) -----
+[[redirects]]
+  from = "/app/*"
+  to = "/app/index.html"
+  status = 200
+
+# ----- Pages marketing : repli sur index.html -----
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# =============================================================================
+# En-têtes de cache (miroir de frontend/nginx.conf)
+# =============================================================================
+
+# PWA : le service worker et son registre ne sont JAMAIS mis en cache long
+[[headers]]
+  for = "/app/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
+
+[[headers]]
+  for = "/app/pwa.js"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
+
+[[headers]]
+  for = "/app/manifest.json"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
+
+# Documents HTML de l'application : toujours frais (versions ?v= sur les assets)
+[[headers]]
+  for = "/app/index.html"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
+
+[[headers]]
+  for = "/app/offline.html"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
+
+# Assets de l'application : immuables (fichiers versionnés ?v=)
+[[headers]]
+  for = "/app/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=604800, immutable"
+
+[[headers]]
+  for = "/app/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=604800, immutable"
+
+[[headers]]
+  for = "/app/icons/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+# Pages & assets marketing : frais / cache 7 jours
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
+
+[[headers]]
+  for = "/(css|js|img)/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"

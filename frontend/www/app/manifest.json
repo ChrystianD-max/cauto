@@ -1,0 +1,23 @@
+{
+  "name": "C-AUTO Client — Maintenance automobile",
+  "short_name": "C-AUTO",
+  "description": "Suivi véhicules, diagnostics, devis et entretien — disponible hors ligne.",
+  "id": "/app/",
+  "start_url": "/app/#/app",
+  "scope": "/app/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f1420",
+  "theme_color": "#0f1420",
+  "categories": ["automotive", "productivity", "utilities"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Mes véhicules", "url": "/app/#/vehicles", "description": "Consulter mes véhicules" },
+    { "name": "Demandes de service", "url": "/app/#/service-requests", "description": "Créer ou suivre une demande" },
+    { "name": "Diagnostic", "url": "/app/#/diagnostic", "description": "Lancer un diagnostic" }
+  ]
+}

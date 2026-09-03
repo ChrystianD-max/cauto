@@ -1,0 +1,196 @@
+﻿
+> cauto-backend@1.0.0 test
+> node --test --test-concurrency=4 "tests/*.test.js"
+
+{"time":"2026-09-02T16:30:15.654Z","level":"info","pid":13076,"name":"cauto-backend","provider":"rules","kind":"rules","testMode":false}
+{
+  msg: 'ai_provider_unknown_fallback',
+  code: 'nonexistent',
+  fallback: 'rules'
+}
+(node:13076) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Ô£ö AIProvider: exposes les m├®tadonn├®es et le contrat decision/insight (2.6514ms)
+Ô£ö AIManager: le fournisseur actif est selectionne par la config (0.4527ms)
+Ô£ö AIManager: degrade toujours vers les regles (fournisseur inconnu ou demo) (1.3619ms)
+Ô£ö AIManager: en demo, meme un LLM configure bascule sur les regles (aucun appel externe) (1.9941ms)
+Ô£ö DiagnosticAI: les regles produisent une decision deterministe (0.691ms)
+Ô£ö DiagnosticAI: expose les champs expert sans casser le contrat historique (1.1546ms)
+Ô£ö QuoteAnalysisAI: analyse descriptive sans jamais decider (2.1464ms)
+Ô£ö VehicleHistoryAI: synthese de l historique sans le modifier (0.7694ms)
+Ô£ö VehicleHealthScore: score global + sous-scores explicables si donn├®es (1.8414ms)
+Ô£ö VehicleHealthScore: aucune donn├®e => Donn├®es insuffisantes (0.666ms)
+Ô£ö API Diagnostic: la decision provient des regles (ai_provider=rules) (7509.3896ms)
+Ô£ö API Maintenance: fournisseur de regles + etat de sante (5659.5342ms)
+Ô£ö API VehicleHealthScore: expose le score sant├® v├®hicule (4763.432ms)
+Ô£ö API Quote: l analyse IA est descriptive et non engageante (12538.1723ms)
+Ô£ö API Capabilities: liste les fournisseurs (rules + llm inactifs) (4.3782ms)
+(node:15680) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Ô£ö AUTH: enregistrement d un compte client recu 201 + token JWT (2844.4898ms)
+Ô£ö AUTH: enregistrement d un email deja utilise recu 409 (4112.9017ms)
+Ô£ö AUTH: connexion ok 200 + token, mauvais mot de passe 401 (5473.265ms)
+Ô£ö AUTH: rafraichissement du token 200 et /auth/me 200 (5222.2013ms)
+Ô£ö AUTH: OTP renvoie un code de d├®bogage et le valide (1831.3788ms)
+Ô£ö AUTH: logout revoke le refresh token (refresh rejete ensuite) (607.8625ms)
+Ô£ö AUTH: route protegee sans token 401 (10.0393ms)
+Ô£ö AUTH: admin.demo dispose du role ADMIN (permission backfill) (1631.3878ms)
+(node:340) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Ô£ö CERTIF: badge bleu ÔÇö admin certifie un garage, visible pour le pro et les clients (14914.1513ms)
+Ô£ö CERTIF: retrait de certification par l`admin (4392.9493ms)
+(node:12112) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Ô£ö CHAT: accus├® de lecture ÔÇö envoy├® -> d├®livr├® -> lu (pastilles) (13241.5042ms)
+Ô£ö CHAT: pi├¿ce jointe image ÔÇö partag├®e aux membres, refus├®e aux non-membres (8443.8633ms)
+Ô£ö PARTS: image de pi├¿ce ÔÇö upload public, r├®f├®rencement, nettoyage (8382.6516ms)
+(node:17268) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Ô£ö DOMAINES: les origines CORS deployeees sont acceptees (ACAO reflechie) (340.6372ms)
+Ô£ö DOMAINES: une origine inconnue est refusee (pas de ACAO) (7.2329ms)
+Ô£ö DOMAINES: requete same-origin (aucun Origin) non affectee (8.0443ms)
+Ô£ö DOMAINES: preflight OPTIONS pour une origine autorisee -> 204 + ACAO (10.8037ms)
+(node:10684) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Ô£ö ERRORS: 401 sans token ÔåÆ structur├®, sans stack (41.5555ms)
+Ô£ö ERRORS: 404 route inconnue ÔåÆ NOT_FOUND structur├® (892.8198ms)
+Ô£ö ERRORS: v├®hicule inexistant 404 ÔåÆ structur├® (1559.584ms)
+Ô£ö ERRORS: acc├¿s inter-utilisateur 403 ÔåÆ FORBIDDEN structur├® (7355.6039ms)
+Ô£ö ERRORS: validation 400 ÔåÆ VALIDATION_ERROR structur├® (3020.9287ms)
+Ô£ö ERRORS: aucune erreur 2xx ne porte success:false (2851.1178ms)
+(node:4868) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Ô£ö MAINTENANCE/unit: regle kilometrage - echeance OK / DUE_SOON / OVERDUE (1.2809ms)
+Ô£ö MAINTENANCE/unit: regle temporelle - mois ecoule = OVERDUE meme si km OK (regle OR) (0.1894ms)
+Ô£ö MAINTENANCE/unit: statut DUE_SOON si km restant <= 500 (0.2317ms)
+Ô£ö MAINTENANCE/unit: donn├®es de reference correctes (km_left/days_left) (0.1733ms)
+Ô£ö MAINTENANCE: intervalle constructeur alimente au cree (program_constructor > 0) (6696.7151ms)
+Ô£ö MAINTENANCE: enregistrement ACTUAL cree un historique et remonte le kilometrage (4242.4179ms)
+Ô£ö MAINTENANCE: propriete - client tiers interdit (403) (4341.1429ms)
+Ô£ö MAINTENANCE: professionnel habilit├® peut consulter la maintenance (garage) (2345.7888ms)
+Ô£ö MAINTENANCE: admin.demo peut consulter (droits ├®tendus) (2019.1885ms)
+(node:12140) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Ô£ö MATCHING: retourne des resultats classes par score decroissant (7009.0174ms)
+Ô£ö MATCHING: la marque exacte domine le classement (5028.0709ms)
+Ô£ö MATCHING: la selection d un pro est acceptee puis refusee en double (400) (11651.5716ms)
+Ô£ö MATCHING: urgence acceptee et n interrompt pas le matching (8291.3973ms)
+Ô£ö MATCHING: profils de matching disponibles (profil standard present) (861.8486ms)
+(node:12676) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ÔûÂ Observabilit├® ÔÇö disponibilit├® (/health)
+  Ô£ö legacy /api/health : 200, contract {status, app, db, redis} + version (1041.2755ms)
+  Ô£ö /health : 200 avec d├®tails database/redis (197.425ms)
+  Ô£ö /health/ready (disponibilit├®) : 200, startTime ISO, version (41.1628ms)
+Ô£ö Observabilit├® ÔÇö disponibilit├® (/health) (1284.0761ms)
+ÔûÂ Observabilit├® ÔÇö en-t├¬tes et tra├ºabilit├® (X-Request-Id, X-Response-Time)
+  Ô£ö chaque r├®ponse porte un X-Request-Id et un X-Response-Time (23.269ms)
+Ô£ö Observabilit├® ÔÇö en-t├¬tes et tra├ºabilit├® (X-Request-Id, X-Response-Time) (24.0733ms)
+ÔûÂ Observabilit├® ÔÇö /api/ops/info
+  Ô£ö 200 : service, version, env, uptime, m├®moire, alertes, latences (17.12ms)
+Ô£ö Observabilit├® ÔÇö /api/ops/info (18.013ms)
+ÔûÂ Observabilit├® ÔÇö export Prometheus (/api/ops/metrics)
+  Ô£ö texte Prometheus contenant compteurs, gauges et histogrammes (26.4828ms)
+  Ô£ö m├®triques incr├®ment├®es apr├¿s des requ├¬tes r├®elles (1806.0503ms)
+  Ô£ö sans token configur├® (staging), les m├®triques sont accessibles (contrat) (15.4843ms)
+Ô£ö Observabilit├® ÔÇö export Prometheus (/api/ops/metrics) (1849.3334ms)
+ÔûÂ Observabilit├® ÔÇö latences observ├®es (perf API / percentiles)
+  Ô£ö topLatenciesMs expose p50/p95/p99 non vides une fois des requ├¬tes pass├®es (24.9349ms)
+Ô£ö Observabilit├® ÔÇö latences observ├®es (perf API / percentiles) (25.6557ms)
+(node:14760) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Ô£ö PAYMENTS: intention sans Idempotency-Key rejetee (400) (17443.0394ms)
+Ô£ö PAYMENTS: succes - paiement SUCCEEDED + garantie + historique (19084.2669ms)
+Ô£ö PAYMENTS: idempotence - meme cle = meme paiement (reused) (20585.0741ms)
+Ô£ö PAYMENTS: wallet - echec = remboursement automatique, solde conserve (12558.7799ms)
+Ô£ö PAYMENTS: paiement par un tiers interdit (403) (9047.6322ms)
+Ô£ö PAYMENTS: intervention non close ou devis non valide = 409 (8510.5161ms)
+(node:14388) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Ô£ö QUOTES: devis cree par le pro avec items et total corrects (PENDING) (13581.864ms)
+Ô£ö QUOTES: refuse avec motif enregistre (REFUSED) (13106.9098ms)
+Ô£ö QUOTES: refus sans motif refuse (400) (11626.6393ms)
+Ô£ö QUOTES: remise concedee par le pro puis approbation client (14998.9097ms)
+Ô£ö QUOTES: remise sans refus prealable 409 (9050.8697ms)
+Ô£ö QUOTES: un seul devis par intervention - double creation rejetee 409 (6272.1463ms)
+Ô£ö QUOTES: travaux suppl├®mentaires - autorisation client requise (8195.8061ms)
+(node:4248) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Ô£ö HTTPS: l inscription pose un cookie de refresh httpOnly (Path=/api/auth, SameSite=Lax) (1173.3206ms)
+Ô£ö HTTPS: refresh possible via le cookie seul (sans corps) + rotation re-pos├®e (2248.5198ms)
+Ô£ö HTTPS: logout efface le cookie (Max-Age=0) et r├®voque le refresh (2239.5599ms)
+Ô£ö HTTPS: en NODE_ENV=production le cookie est Secure (httpOnly + SameSite=Lax) (2399.2196ms)
+Ô£ö HTTPS: hors production le cookie nest PAS Secure (sauf COOKIE_SECURE=true) (680.3164ms)
+(node:15288) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Ô£ö SECURITE: route protegee sans token 401 (149.9077ms)
+Ô£ö SECURITE: token invalide 401 (19.715ms)
+Ô£ö SECURITE: client sans role admin bloque sur /api/admin (403) (1627.3013ms)
+Ô£ö SECURITE: admin.demo accede au tableau de bord admin (200) (1457.5895ms)
+Ô£ö SECURITE: donnees d autrui inaccessibles (403 sur vehicule) (3017.6973ms)
+Ô£ö SECURITE: un client ne peut pas creer un devis (403 role) (8705.8487ms)
+Ô£ö SECURITE: endpoint administrateur par permission (audit-logs) reserve (1396.0497ms)
+Ô£ö SECURITE: intervention d un tiers inaccessible (403) (17360.8873ms)
+(node:16996) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Ô£ö PRO: modifier le profil ÔåÆ verification_status=PENDING + synth├¿se g├®n├®r├®e (1227.3669ms)
+Ô£ö PRO: logo_url (photo) accept├® via PATCH /me (1430.0522ms)
+Ô£ö SUPPLIER: modifier la boutique ÔåÆ verification_status=PENDING + synth├¿se (1268.3678ms)
+Ô£ö PIECE: cr├®e en brouillon (DRAFT) ÔåÆ absente du catalogue, modifiable, publication (3964.0891ms)
+Ô£ö PIECE: d├®faut = DRAFT (ne part pas directement en ligne) (3550.7557ms)
+(node:13932) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Ô£ö SA: un ADMIN standard est refus├® sur les routes super-admin (1565.2571ms)
+Ô£ö SA: sans confirmation, une mutation sensible est refus├®e (401) (764.1622ms)
+Ô£ö SA: le SUPER_ADMIN liste les administrateurs (70.5201ms)
+Ô£ö SA: le SUPER_ADMIN cr├®e un admin avec confirmation mot de passe (3469.7232ms)
+Ô£ö SA: confirmation avec mot de passe incorrect ÔåÆ 401 (754.993ms)
+Ô£ö SA: le SUPER_ADMIN suspend un admin avec confirmation OTP (3371.0497ms)
+Ô£ö SA: le SUPER_ADMIN g├¿re les permissions (grant + read + revoke) (2551.6811ms)
+Ô£ö SA: le SUPER_ADMIN g├¿re les pays (create/lire/patch/d├®sactive) (2977.6999ms)
+Ô£ö SA: le SUPER_ADMIN g├¿re les devises (1179.2786ms)
+Ô£ö SA: le SUPER_ADMIN g├¿re les int├®grations (2028.5389ms)
+Ô£ö SA: le SUPER_ADMIN modifie un param├¿tre critique (1382.3575ms)
+Ô£ö SA: le SUPER_ADMIN consulte le journal d audit enrichi (53.1034ms)
+(node:15244) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Ô£ö SUPPLIER: inscription -> boutique absente -> creation -> stats a jour (1103.9959ms)
+Ô£ö SUPPLIER: seconde boutique refusee (409) (1898.3259ms)
+Ô£ö SUPPLIER: referencer une piece puis maj du stock/prix (inventaire) (2569.9323ms)
+Ô£ö SUPPLIER: piece brouillon masquee du catalogue public, detail + compatibilite (2547.0316ms)
+Ô£ö ORDERS: client commande une piece, fournisseur traite la commande (3286.5407ms)
+Ô£ö SECURITE: un CLIENT ne doit ni creer de piece ni gerer la boutique (1140.5745ms)
+Ô£ö SECURITE: un autre SUPPLIER ne peut modifier/supprimer une piece etrangere (2357.3696ms)
+Ô£ö SUPPLIER: depots d attestations -> PENDING, admin verifie -> VERIFIED (1454.7021ms)
+Ô£ö CATALOGUE: liste publique des fournisseurs actifs avec nb de pieces (605.8184ms)
+(node:4688) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Ô£ö TENANT: GET /tenants/me renvoie le tenant GARAGE du garage demo (781.1511ms)
+Ô£ö ISOLATION GARAGE: un garage N┬░2 ne lit pas la fiche d un v├®hicule tiers (1890.1737ms)
+Ô£ö ISOLATION GARAGE: le garage auquel le client est rattach├® acc├¿de au v├®hicule (3723.4506ms)
+Ô£ö DIAGNOSTIC: un garage ne lance pas de diagnostic sur un v├®hicule externe (1743.6103ms)
+Ô£ö TENANT ENTREPRISE: la flotte est scop├®e au tenant (2 comptes = 2 tenants isol├®s) (3289.9613ms)
+Ô£ö TENANT ENTREPRISE: ajout d un membre partage la flotte (1971.3493ms)
+Ô£ö TENANT: non-membre ne voit pas le d├®tail d un tenant entreprise (1099.4937ms)
+(node:17144) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Ô£ö VEHICLES: creation 201 + duplicate plaque/VIN 409 (1268.6451ms)
+Ô£ö VEHICLES: un autre utilisateur ne peut pas modifier ni supprimer (403) (2324.5203ms)
+Ô£ö VEHICLES: modification ok 200 + historique cree (947.5679ms)
+Ô£ö VEHICLES: suppression bloquee par l historique immuable (409), liste inchangee (2056.3824ms)
+Ô£ö VEHICLES: vehicule inconnu 404 (680.1478ms)
+Ô£ö VEHICLES: historique pagine (limit/offset/total), cap 100 (1573.8424ms)
+(node:3184) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Ô£ö GARANTIE: creation bloquee si intervention non cloturee (7219.751ms)
+Ô£ö GARANTIE: creation sans paiement refuse (409) (5694.3657ms)
+Ô£ö TRACE: journal append-only cree a la cloture (QUI/QUOI/QUAND/VEHICULE/KM/PIECE/PRIX) (4365.9684ms)
+Ô£ö TRACE: endpoint GET /repairs/:id/trace accessible au client proprietaire (3418.2181ms)
+Ôä╣ tests 130
+Ôä╣ suites 5
+Ôä╣ pass 130
+Ôä╣ fail 0
+Ôä╣ cancelled 0
+Ôä╣ skipped 0
+Ôä╣ todo 0
+Ôä╣ duration_ms 132444.4682

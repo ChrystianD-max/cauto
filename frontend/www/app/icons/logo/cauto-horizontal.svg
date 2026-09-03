@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 120" width="520" height="120" role="img" aria-label="C-AUTO">
+  <defs>
+    <linearGradient id="hBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0d0f15"/>
+      <stop offset="1" stop-color="#1a1f2b"/>
+    </linearGradient>
+    <linearGradient id="hGold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe9b8"/>
+      <stop offset="0.42" stop-color="#d4af6a"/>
+      <stop offset="1" stop-color="#a8853f"/>
+    </linearGradient>
+    <linearGradient id="hBlue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4a6cc0"/>
+      <stop offset="1" stop-color="#1d2f57"/>
+    </linearGradient>
+    <radialGradient id="hGlow" cx="0.5" cy="0.3" r="0.6">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.2"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- Emblème carré à gauche -->
+  <rect x="2" y="16" width="92" height="88" rx="24" fill="url(#hBg)"/>
+  <rect x="2" y="16" width="92" height="88" rx="24" fill="none" stroke="url(#hGold)" stroke-width="2.4"/>
+  <path d="M13 29 L51 29 C35 33 22 45 18 66 Z" fill="url(#hGlow)"/>
+  <path d="M48 32 L54 44 L68 44 L57 53 L62 66 L48 58 L34 66 L39 53 L28 44 L42 44 Z"
+        fill="url(#hBlue)" stroke="url(#hGold)" stroke-width="1.8"/>
+  <text x="48" y="82" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif"
+        font-size="34" font-weight="700" fill="url(#hGold)">C·AUTO</text>
+
+  <!-- Wordmark principal, grand et dominant -->
+  <text x="118" y="72" font-family="Georgia, 'Times New Roman', serif" font-size="58"
+        font-weight="700" letter-spacing="2" fill="url(#hGold)">C·AUTO</text>
+  <!-- tagline -->
+  <text x="120" y="96" font-family="Arial, Helvetica, sans-serif" font-size="15"
+        letter-spacing="6" font-weight="600" fill="#c9c4b8">LA CONFIANCE AU CŒUR DE L'AUTOMOBILE</text>
+</svg>

@@ -1,0 +1,93 @@
+﻿# =============================================================================
+# C-AUTO ï¿½?" Dï¿½PLOIEMENT RENDER (premier essai gratuit)
+# -----------------------------------------------------------------------------
+# DÃ©ploiement d'un service web unique (nginx + node dans un conteneur) + 
+# PostgreSQL managÃ© + Redis managÃ©. TLS gÃ©rÃ© par Render (https://cauto.onrender.com).
+#
+# MÃ‰THODE D'IMPORT (simplifiÃ©e) :
+#   1. CrÃ©er un repo GitHub avec CE dÃ©pÃ´t (dÃ©jÃ  poussÃ©).
+#   2. Render > New > Blueprint, coller l'URL du repo GitHub.
+#   3. Render crÃ©e automatiquement Postgres, Redis, le web service et le Job ci-dessous.
+#   4. DÃ©finir la variable JWT_SECRET dans le Dashboard (voir note en bas).
+#   5. ExÃ©cuter une fois le Job "migrate" (On-Demand) pour crÃ©er le schÃ©ma + seed.
+# =============================================================================
+services:
+  # ----------------------- Backend + Frontend (un seul conteneur) ----------
+  - type: web
+    name: cauto
+    runtime: docker
+    repo: https://github.com/ChrystianD-max/cauto
+    plan: free
+    branch: main
+    dockerfilePath: ./Dockerfile.render
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
+      - key: DEMO_MODE
+        value: "true"
+      - key: APP_PUBLIC_URL
+        value: https://cauto.onrender.com
+      - key: CORS_ORIGINS
+        value: https://cauto.onrender.com
+      - key: TRUST_PROXY
+        value: "1"
+      - key: COOKIE_SAME_SITE
+        value: lax
+      - key: UPLOAD_DIR
+        value: /app/data/uploads
+      - key: METRICS_TOKEN
+        value: demo-metrics-token-rotate-me
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cauto-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: cauto-redis
+          property: connectionString
+
+  # ----------------------- Base de donnÃ©es PostgreSQL (plan free) ----------
+  - type: postgres
+    name: cauto-db
+    plan: free
+    databaseName: cauto
+    user: cauto
+
+  # ----------------------- Cache Redis (plan free) -------------------------
+  - type: redis
+    name: cauto-redis
+    plan: free
+    maxmemoryPolicy: noeviction
+
+  # ----------------------- Job : migrations + seed (on-demand) -------------
+  - type: worker
+    name: cauto-migrate
+    runtime: docker
+    repo: https://github.com/ChrystianD-max/cauto
+    plan: free
+    branch: main
+    dockerfilePath: ./Dockerfile.render
+    startCommand: node /app/scripts/db-migrate.js && node /app/scripts/db-seed.js && node /app/seed/seed.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DEMO_MODE
+        value: "true"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cauto-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: cauto-redis
+          property: connectionString

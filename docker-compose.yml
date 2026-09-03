@@ -1,0 +1,175 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-cauto}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cauto}
+      POSTGRES_DB: ${POSTGRES_DB:-cauto}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cauto} -d ${POSTGRES_DB:-cauto}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${APP_ENV:-staging}
+      PORT: 4000
+      DATABASE_URL: ${DATABASE_URL:-postgresql://cauto:cauto@postgres:5432/cauto}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-2h}
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      APP_PUBLIC_URL: ${APP_PUBLIC_URL:-}
+      TRUST_PROXY: ${TRUST_PROXY:-1}
+      # Origines CORS complémentaires (sous-domaines app.*, admin.*, …)
+      # au format CSV, ex : https://app.cauto.example,https://admin.cauto.example
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      UPLOAD_DIR: /data/uploads
+      DEMO_MODE: ${DEMO_MODE:-false}
+      # --- Intégrations externes (voir .env.example) — valeurs par défaut vides ---
+      # Passerelle de stockage objet S3-compatible (modules 59/60) :
+      # STORAGE_MODE=auto => S3 si endpoint+clés+bucket, sinon disque local.
+      STORAGE_MODE: ${STORAGE_MODE:-auto}
+      STORAGE_ENDPOINT: ${STORAGE_ENDPOINT:-}
+      STORAGE_REGION: ${STORAGE_REGION:-auto}
+      STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY:-}
+      STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY:-}
+      STORAGE_BUCKET: ${STORAGE_BUCKET:-}
+      STORAGE_PREFIX: ${STORAGE_PREFIX:-cauto}
+      STORAGE_FORCE_PATH_STYLE: ${STORAGE_FORCE_PATH_STYLE:-false}
+      STORAGE_KEEP_LOCAL: ${STORAGE_KEEP_LOCAL:-false}
+      STORAGE_PUBLIC_URL: ${STORAGE_PUBLIC_URL:-}
+      PAYMENT_PROVIDER: ${PAYMENT_PROVIDER:-}
+      PAYMENT_API_KEY: ${PAYMENT_API_KEY:-}
+      PAYMENT_MODE: ${PAYMENT_MODE:-sandbox}
+      PAYMENT_WEBHOOK_SECRET: ${PAYMENT_WEBHOOK_SECRET:-}
+      MTN_MOMO_API_KEY: ${MTN_MOMO_API_KEY:-}
+      MTN_MOMO_API_URL: ${MTN_MOMO_API_URL:-}
+      MOOV_MONEY_API_KEY: ${MOOV_MONEY_API_KEY:-}
+      MOOV_MONEY_API_URL: ${MOOV_MONEY_API_URL:-}
+      WAVE_API_KEY: ${WAVE_API_KEY:-}
+      WAVE_API_URL: ${WAVE_API_URL:-}
+      ORANGE_MONEY_API_KEY: ${ORANGE_MONEY_API_KEY:-}
+      ORANGE_MONEY_API_URL: ${ORANGE_MONEY_API_URL:-}
+      CARD_API_KEY: ${CARD_API_KEY:-}
+      CARD_API_URL: ${CARD_API_URL:-}
+      CARD_PROVIDER: ${CARD_PROVIDER:-}
+      MAP_PROVIDER: ${MAP_PROVIDER:-}
+      MAP_API_KEY: ${MAP_API_KEY:-}
+      ROUTING_PROVIDER: ${ROUTING_PROVIDER:-haversine}
+      ROUTING_API_URL: ${ROUTING_API_URL:-}
+      ROUTING_API_KEY: ${ROUTING_API_KEY:-}
+      SMS_PROVIDER: ${SMS_PROVIDER:-}
+      SMS_API_KEY: ${SMS_API_KEY:-}
+      SMS_API_URL: ${SMS_API_URL:-}
+      SMS_SENDER: ${SMS_SENDER:-CAUTO}
+      OTP_API_URL: ${OTP_API_URL:-}
+      OTP_API_KEY: ${OTP_API_KEY:-}
+      EMAIL_PROVIDER: ${EMAIL_PROVIDER:-}
+      EMAIL_API_KEY: ${EMAIL_API_KEY:-}
+      EMAIL_API_URL: ${EMAIL_API_URL:-}
+      WHATSAPP_API_URL: ${WHATSAPP_API_URL:-}
+      WHATSAPP_API_KEY: ${WHATSAPP_API_KEY:-}
+      WHATSAPP_TEMPLATE: ${WHATSAPP_TEMPLATE:-cauto_plain}
+      FIREBASE_SERVER_KEY: ${FIREBASE_SERVER_KEY:-}
+      FIREBASE_PROJECT: ${FIREBASE_PROJECT:-}
+      NOTIF_FALLBACK_ORDER: ${NOTIF_FALLBACK_ORDER:-push,sms,email,whatsapp}
+      AI_PROVIDER: ${AI_PROVIDER:-}
+      AI_API_KEY: ${AI_API_KEY:-}
+      AV_SCAN_CMD: ${AV_SCAN_CMD:-}
+      DOC_MAX_BYTES: ${DOC_MAX_BYTES:-5242880}
+      RATE_LIMIT_API_MAX: ${RATE_LIMIT_API_MAX:-5000}
+      RATE_LIMIT_AUTH_MAX: ${RATE_LIMIT_AUTH_MAX:-300}
+      RATE_LIMIT_OTP_MAX: ${RATE_LIMIT_OTP_MAX:-10}
+      # --- Observabilité (module 65) : logs structurés, métriques, alertes ---
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      METRICS_ENABLED: ${METRICS_ENABLED:-true}
+      METRICS_TOKEN: ${METRICS_TOKEN:-}
+      METRICS_PREFIX: ${METRICS_PREFIX:-cauto}
+      SERVICE_NAME: ${SERVICE_NAME:-cauto-backend}
+      # Watchdog disponibilité : webhook ALERT_WEBHOOK_URL notifié après
+      # ALERT_UNHEALTHY_THRESHOLD sondes dégradées consécutives.
+      ALERT_ENABLED: ${ALERT_ENABLED:-true}
+      ALERT_WEBHOOK_URL: ${ALERT_WEBHOOK_URL:-}
+      ALERT_CHECK_INTERVAL_MS: ${ALERT_CHECK_INTERVAL_MS:-30000}
+      ALERT_UNHEALTHY_THRESHOLD: ${ALERT_UNHEALTHY_THRESHOLD:-3}
+    volumes:
+      - uploads:/data/uploads
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:4000/api/health >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build: ./worker
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://cauto:cauto@postgres:5432/cauto}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:80/ >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
+    depends_on:
+      - backend
+
+  reverse-proxy:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./reverse-proxy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./reverse-proxy/certs:/etc/nginx/certs:ro
+    command: >-
+      nginx -g 'daemon off;'
+    depends_on:
+      - frontend
+      - backend
+
+volumes:
+  pgdata:
+  redisdata:
+  uploads:
+  proxy-certs:

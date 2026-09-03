@@ -1,0 +1,47 @@
+# C-AUTO — Cloudflare Pages : en-têtes de cache (miroir de frontend/nginx.conf)
+# -----------------------------------------------------------------------------
+# Copier CE fichier à la racine de frontend/www avant de déployer sur
+# Cloudflare Pages. Format : chemins (glob) suivis d'en-têtes indentés.
+
+# PWA : le service worker et son registre ne sont JAMAIS mis en cache long
+/app/sw.js
+  Cache-Control: no-cache, must-revalidate
+
+/app/pwa.js
+  Cache-Control: no-cache, must-revalidate
+
+/app/manifest.json
+  Cache-Control: no-cache, must-revalidate
+
+# Documents HTML de l'application : toujours frais (versions ?v= sur les assets)
+/app/index.html
+  Cache-Control: no-cache, must-revalidate
+
+/app/offline.html
+  Cache-Control: no-cache, must-revalidate
+
+/index.html
+  Cache-Control: no-cache, must-revalidate
+
+# Assets de l'application : immuables (fichiers versionnés ?v=)
+/app/*.js
+  Cache-Control: public, max-age=604800, immutable
+
+/app/*.css
+  Cache-Control: public, max-age=604800, immutable
+
+/app/icons/*
+  Cache-Control: public, max-age=604800
+
+# Pages & assets marketing : frais / cache 7 jours
+/*.html
+  Cache-Control: no-cache, must-revalidate
+
+/css/*
+  Cache-Control: public, max-age=604800
+
+/js/*
+  Cache-Control: public, max-age=604800
+
+/img/*
+  Cache-Control: public, max-age=604800

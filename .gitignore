@@ -1,0 +1,22 @@
+node_modules/
+# Fichiers d'environnement — ne JAMAIS versionner .env réel
+.env
+.env.*
+!.env.example
+!.env.development.example
+!.env.production.example
+*.local
+uploads/
+backups/
+reverse-proxy/certs/*.crt
+reverse-proxy/certs/*.key
+npm-debug.log*
+
+# Clés / secrets — ne jamais versionner
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+credentials.json
+serviceAccount*.json

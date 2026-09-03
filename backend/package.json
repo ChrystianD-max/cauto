@@ -1,0 +1,40 @@
+{
+  "name": "cauto-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "db:migrate": "node scripts/db-migrate.js",
+    "db:check": "node scripts/check-migrations.js",
+    "db:seed": "node scripts/db-seed.js && npm run seed",
+    "seed": "node seed/seed.js",
+    "test": "node --test --test-concurrency=4 \"tests/*.test.js\"",
+    "lint": "eslint \"src/**/*.js\" \"tests/**/*.js\" \"scripts/**/*.js\" \"seed/**/*.js\"",
+    "lint:fix": "eslint \"src/**/*.js\" \"tests/**/*.js\" \"scripts/**/*.js\" \"seed/**/*.js\" --fix",
+      "typecheck": "tsc --noEmit",
+      "check:antimock": "node scripts/check-anti-mock.js",
+      "check:nofakebuttons": "node scripts/check-no-fake-buttons.js"
+    },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1121.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "helmet": "^7.1.0",
+    "ioredis": "^5.4.1",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "pg": "^8.12.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.0",
+    "eslint": "^9.39.5",
+    "typescript": "^5.9.3"
+  }
+}

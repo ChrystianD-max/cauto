@@ -1,0 +1,34 @@
+# =============================================================================
+# C-AUTO �?" IMAGE DE PRODUCTION RENDER (service web unique : nginx + node)
+# -----------------------------------------------------------------------------
+# - nginx sert le frontend (SPA + marketing) ET proxye /api vers node
+# - node (backend) écoute sur 4000 interne
+# - db/ est inclus pour exécuter les migrations via un Job Render on-demand
+# =============================================================================
+FROM node:20-alpine
+
+# nginx pour servir le frontend + proxy
+RUN apk add --no-cache nginx
+
+WORKDIR /app
+
+# --- Backend (node) ---
+COPY backend/package.json ./
+RUN npm install --omit=dev
+COPY backend/src ./src
+COPY backend/seed ./seed
+COPY backend/scripts ./scripts
+
+# --- Frontend statique (servi par nginx) ---
+COPY frontend/www ./www
+
+# --- Migrations DB (pour le Job "migrate") ---
+COPY db /db
+
+EXPOSE 4000
+
+# Point d'entrée : nginx ($PORT) + node (:4000)
+COPY deploy/render/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+CMD ["/entrypoint.sh"]

@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "description": "C-AUTO SPA statique — configuration Vercel (plateforme Next.js-compatible). Copier dans frontend/www avant déploiement.",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://__BACKEND_API_ORIGIN__/api/$1" },
+    { "source": "/app/:path*", "destination": "/app/index.html" },
+    { "source": "/:path*", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/app/(sw.js|pwa.js|manifest.json)",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache, must-revalidate" }]
+    },
+    {
+      "source": "/app/index.html",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache, must-revalidate" }]
+    },
+    {
+      "source": "/app/:path*",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache, must-revalidate" }]
+    },
+    {
+      "source": "/index.html",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache, must-revalidate" }]
+    },
+    {
+      "source": "/(css|js|img)/:path*",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800" }]
+    },
+    {
+      "source": "/:path*",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache, must-revalidate" }]
+    }
+  ]
+}

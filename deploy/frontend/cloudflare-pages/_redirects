@@ -1,0 +1,15 @@
+# C-AUTO — Cloudflare Pages : redirections/rewrites (plateforme Next.js-compatible)
+# -----------------------------------------------------------------------------
+# Copier CE fichier à la racine de frontend/www avant de déployer sur
+# Cloudflare Pages. Remplacer __BACKEND_API_ORIGIN__ par l'URL publique de
+# l'API C-AUTO. Sémantique : les fichiers réels sont servis en priorité ;
+# « 200 » = rewrite (proxy), retour sans changement d'URL.
+
+# API C-AUTO : proxy /api -> backend (rewrite externe, statut 200)
+/api/*  https://__BACKEND_API_ORIGIN__/api/*  200
+
+# SPA /app : repli sur le shell HTML
+/app/*  /app/index.html  200
+
+# Pages marketing : repli sur index.html
+/*  /index.html  200

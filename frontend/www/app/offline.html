@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#0f1420" />
+<title>C-AUTO — Hors ligne</title>
+<style>
+  :root { --bg:#0f1420; --surface:#161d2e; --border:#22304a; --accent:#2f81f7; --text:#e8edf6; --muted:#94a3b8; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.25rem; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 2rem 1.75rem; max-width: 430px; width: 100%; text-align: center; box-shadow: 0 18px 50px rgba(0,0,0,.35); }
+  .logo { width: 64px; height: 64px; margin: 0 auto 1.1rem; display: block; }
+  h1 { font-size: 1.35rem; font-weight: 800; margin-bottom: .5rem; }
+  p { color: var(--muted); font-size: .95rem; line-height: 1.55; margin-bottom: .75rem; }
+  .hint { font-size: .8rem; color: var(--muted); opacity: .85; margin-bottom: 1.4rem; }
+  .actions { display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; }
+  .btn { appearance: none; border: none; border-radius: 12px; padding: .7rem 1.2rem; font-size: .92rem; font-weight: 700; cursor: pointer; background: var(--accent); color: #fff; }
+  .btn.secondary { background: transparent; color: var(--text); border: 1px solid var(--border); text-decoration: none; display: inline-flex; align-items: center; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; display: inline-block; margin-right: .4rem; animation: pulse 1.6s ease-in-out infinite; vertical-align: middle; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .25; } }
+  @media (prefers-color-scheme: light) {
+    :root { --bg:#eef2f8; --surface:#ffffff; --border:#dbe3ee; --text:#0f1420; --muted:#475569; }
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <svg class="logo" viewBox="0 0 100 100" aria-hidden="true">
+      <defs><linearGradient id="offL" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d0f15"/><stop offset="1" stop-color="#1a1f2b"/></linearGradient><linearGradient id="offO" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe9b8"/><stop offset=".4" stop-color="#d4af6a"/><stop offset="1" stop-color="#a8853f"/></linearGradient><linearGradient id="offB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4a6cc0"/><stop offset="1" stop-color="#1d2f57"/></linearGradient></defs>
+      <rect x="2" y="2" width="96" height="96" rx="24" fill="url(#offL)"/>
+      <rect x="2" y="2" width="96" height="96" rx="24" fill="none" stroke="url(#offO)" stroke-width="2.4"/>
+      <path d="M50 25 L58 44 L78 44 L62 56 L69 75 L50 63 L31 75 L38 56 L22 44 L42 44 Z" fill="url(#offB)" stroke="url(#offO)" stroke-width="1.8"/>
+      <path d="M29 51 C30 43 37 39 45 39 C52 39 57 42 58 47" stroke="url(#offO)" stroke-width="6" fill="none" stroke-linecap="round"/>
+    </svg>
+    <h1>Vous êtes hors ligne</h1>
+    <p>La connexion au serveur C-AUTO a été perdue. Les données déjà chargées restent visibles et vos saisies seront synchronisées automatiquement au retour de la connexion.</p>
+    <div class="hint"><span class="dot"></span>Mode hors connexion actif</div>
+    <div class="actions">
+      <button class="btn" onclick="location.reload()">Réessayer</button>
+      <a class="btn secondary" href="/app/" onclick="this.href='/app/#/app'">Retour à l'application</a>
+    </div>
+  </div>
+</body>
+</html>

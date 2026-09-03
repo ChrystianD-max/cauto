@@ -1,0 +1,53 @@
+# C-AUTO — profil PRODUCTION "déploiement simple" (modules 59/60 & 61 — domaines)
+# -----------------------------------------------------------------------------
+# Ce override COMPLÈTE docker-compose.yml :
+#   - désactive le reverse-proxy self-signed local (profil _disabled) ;
+#   - le remplace par Caddy : HTTPS public automatique (Let's Encrypt) sur
+#     l'ensemble des domaines du module 61.
+#
+# Usage sur un VPS :
+#   docker compose -f docker-compose.yml -f deploy/docker-compose.caddy.yml up -d
+#
+# Domaines (module 61) — renseignés dans .env. Le domaine réel sera posé plus
+# tard ; il suffit de changer .env, sans toucher au code ni au Caddyfile :
+#   CADDY_DOMAIN=cauto.test          (ou c-auto.com, …)
+#   CADDY_WWW_DOMAIN=www.cauto.test
+#   CADDY_APP_DOMAIN=app.cauto.test
+#   CADDY_API_DOMAIN=api.cauto.test
+#   CADDY_ADMIN_DOMAIN=admin.cauto.test
+# Chaque hôte reçoit son certificat Let's Encrypt automatiquement.
+#
+# Tout le reste (Postgres/Redis/S3) est piloté par .env — le même compose
+# tourne sur n'importe quel hôte.
+
+services:
+  reverse-proxy:
+    profiles: ["_disabled"]
+
+  caddy:
+    image: caddy:2.9-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      CADDY_DOMAIN: "${CADDY_DOMAIN:?CADDY_DOMAIN requis ex: cauto.example}"
+      # www, app, api, admin (facultatifs) : dérivés de la racine si non renseignés.
+      CADDY_WWW_DOMAIN: "${CADDY_WWW_DOMAIN:-www.${CADDY_DOMAIN}}"
+      CADDY_APP_DOMAIN: "${CADDY_APP_DOMAIN:-app.${CADDY_DOMAIN}}"
+      CADDY_API_DOMAIN: "${CADDY_API_DOMAIN:-api.${CADDY_DOMAIN}}"
+      CADDY_ADMIN_DOMAIN: "${CADDY_ADMIN_DOMAIN:-admin.${CADDY_DOMAIN}}"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      # Persistance des certificats ACME et de la configuration :
+      - caddydata:/data
+      - caddyconfig:/config
+    depends_on:
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+
+volumes:
+  caddydata:
+  caddyconfig:
