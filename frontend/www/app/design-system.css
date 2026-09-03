@@ -147,7 +147,7 @@
 /* ====== 05. FORMULAIRES ====== */
 label { font-weight: 550; }
 input, select, textarea { border-radius: var(--ds-r-md); }
-input[type="date"], input[type="time"] { color-scheme: dark; }
+input[type="date"], input[type="time"] { color-scheme: light; }
 
 /* Champ = label + aide + erreur, cohérents partout */
 .ds-field { margin-bottom: .9rem; }
