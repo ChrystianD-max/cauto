@@ -58,3 +58,4 @@ services:
     name: cauto-redis
     plan: free
     maxmemoryPolicy: noeviction
+    ipAllowList: []
