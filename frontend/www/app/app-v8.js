@@ -36,12 +36,42 @@ async function api(path, opts = {}) {
   }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
+    if (res.status === 401 && S.token && path !== '/auth/login' && path !== '/auth/refresh' && !opts._refreshed) {
+      const got = await tryRefreshToken();
+      if (got) return api(path, { ...opts, _refreshed: true });
+      forceLogout(401);
+    }
     const e = new Error(errFromHttp(data) || ('HTTP ' + res.status));
     e.status = res.status;
     e.code = (data && data.error && typeof data.error === 'object' && data.error.code) || data.code;
     throw e;
   }
   return data;
+}
+async function tryRefreshToken() {
+  try {
+    const r = await fetch('/api/auth/refresh', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok || !d.token) return false;
+    S.token = d.token;
+    localStorage.setItem('token', d.token);
+    if (d.user) {
+      S.user = { ...(S.user || {}), ...d.user };
+      localStorage.setItem('user', JSON.stringify(S.user));
+      document.body.setAttribute('data-role', d.user.role || S.user.role || 'CLIENT');
+    }
+    return true;
+  } catch (e) { return false; }
+}
+function forceLogout(status) {
+  if (status === 401 && S.user) {
+    try { fetch('/api/auth/logout', { method: 'POST', headers: { Authorization: 'Bearer ' + S.token } }).catch(() => {}); } catch (e) {}
+  }
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  S.token = null; S.user = null;
+  document.body.removeAttribute('data-role');
+  location.hash = '#/login';
 }
 function setSession(token, user) { S.token = token; S.user = user; localStorage.setItem('token', token); localStorage.setItem('user', JSON.stringify(user)); document.body.setAttribute('data-role', user.role || 'CLIENT'); }
 function logout() { localStorage.clear(); S.token = null; S.user = null; document.body.removeAttribute('data-role'); location.hash = '#/login'; }
