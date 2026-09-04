@@ -1424,10 +1424,25 @@ function route() {
 window.addEventListener('hashchange', route);
 const _hamburger = document.getElementById('hamburger');
 if (_hamburger) _hamburger.onclick = () => {
+  const _layout = document.querySelector('.app-layout');
   const _nav = document.getElementById('nav');
-  _nav.classList.toggle('open');
-  _hamburger.classList.toggle('open');
+  if (_layout && S.user) {
+    _layout.classList.toggle('sidebar-open');
+    _hamburger.classList.toggle('open');
+  } else if (_nav) {
+    _nav.classList.toggle('open');
+    _hamburger.classList.toggle('open');
+  }
 };
+document.addEventListener('click', (e) => {
+  const layout = document.querySelector('.app-layout');
+  if (!layout || !S.user || e.target.closest('.hamburger')) return;
+  if (e.target.closest('.sidebar-link') || e.target === layout) {
+    layout.classList.remove('sidebar-open');
+    const hb = document.getElementById('hamburger');
+    if (hb) hb.classList.remove('open');
+  }
+});
 document.getElementById('offline-banner').classList.add('hidden');
 window.addEventListener('online', () => document.getElementById('offline-banner').classList.add('hidden'));
 window.addEventListener('offline', () => document.getElementById('offline-banner').classList.remove('hidden'));

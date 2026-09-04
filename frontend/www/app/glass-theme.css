@@ -375,7 +375,22 @@ label { font-weight: 600; }
   .app-main { margin-left: 56px; }
 }
 @media (max-width: 600px) {
-  .sidebar { display: none; }
+  .sidebar {
+    display: flex;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 272px; max-width: 85vw;
+    transform: translateX(-106%);
+    transition: transform .32s var(--smooth, ease);
+    z-index: 1200;
+    box-shadow: var(--shadow-lg);
+  }
+  .app-layout.sidebar-open .sidebar { transform: translateX(0); }
+  .app-layout.sidebar-open::before {
+    content: ''; position: fixed; inset: 0; z-index: 1100;
+    background: rgba(15, 23, 42, 0.42);
+    -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+  }
   .app-main { margin-left: 0; }
 }
 
