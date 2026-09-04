@@ -54,7 +54,7 @@ header { background: var(--panel); border-bottom: 1px solid var(--border); posit
 nav { display: flex; align-items: center; gap: 0.2rem; margin-left: auto; }
 nav a { padding: 0.4rem 0.8rem; border-radius: var(--radius-xs); color: var(--text2); font-size: 0.85rem; font-weight: 500; transition: var(--transition); text-decoration: none; }
 nav a:hover, nav a.active { color: var(--text); background: rgba(255,255,255,0.05); }
-@media (max-width: 700px) { .hamburger { display: block; } nav { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: var(--panel); padding: 0.5rem; border-bottom: 1px solid var(--border); } nav.open { display: flex; } }
+@media (max-width: 700px) { .hamburger { display: block; } header nav { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: var(--panel); padding: 0.5rem; border-bottom: 1px solid var(--border); } header nav.open { display: flex; } }
 
 /* ====== MAIN APP ====== */
 body { display: flex; flex-direction: column; min-height: 100vh; }
