@@ -277,7 +277,7 @@ function renderSidebar() {
     </div>`;
   }).join('')}</nav>`;
   return `<aside class="sidebar">
-    <div class="sidebar-brand"><svg width="28" height="28" viewBox="0 0 100 100"><rect rx="24" width="100" height="100" fill="var(--role-1)"/><text x="50" y="68" font-size="50" font-weight="bold" text-anchor="middle" fill="white" font-family="system-ui">CA</text></svg><span>C-AUTO${isAdmin() ? ' Admin' : (isPro() ? ' Pro' : '')}</span></div>
+    <div class="sidebar-brand"><svg width="30" height="30" viewBox="0 0 100 100"><defs><linearGradient id="cl2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2563eb"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><rect x="4" y="4" width="92" height="92" rx="24" fill="url(#cl2)"/><path d="M29 62 h42 a5 5 0 0 0 4.6-3 l2.6-7.6 a10 10 0 0 0-8.6-6.9 l-7.4-.6-6.6-7.6 a7 7 0 0 0-5.4-2.6 h-9.2 a8 8 0 0 0-7 4 l-5.2 8.6 a5 5 0 0 0-1.2 3.3 v9.6 a5 5 0 0 0 5 5 z" fill="#fff"/><circle cx="34" cy="66" r="6" fill="url(#cl2)"/><circle cx="67" cy="66" r="6" fill="url(#cl2)"/><path d="M46 62 h8" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg><span>C-AUTO${isAdmin() ? ' Admin' : (isPro() ? ' Pro' : '')}</span></div>
     ${navHtml}
     <div class="sidebar-footer">
       <a href="#/profile" class="sidebar-link"><span class="avatar-sm">${initials}</span><span>${esc(S.user.name)}${S.user.is_certified ? certBadge() : ''}</span></a>

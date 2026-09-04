@@ -1,0 +1,309 @@
+/* ============================================================================
+   C-AUTO — PREMIUM MOBILE UI  (couche finale, mobile-first)
+   Design moderne, propre, minimaliste et professionnel.
+   S'applique en dernier : surcharge la mise en forme héritée sans toucher à
+   la logique métier ni supprimer de fonctionnalités.
+   ============================================================================ */
+
+/* ---------------------------------------------------------------- Tokens */
+:root {
+  --p-radius: 16px;
+  --p-radius-sm: 12px;
+  --p-radius-lg: 22px;
+  --p-space: 16px;
+  --p-header-h: 58px;
+  --p-touch: 46px;
+  --p-shadow: 0 1px 2px rgba(15,23,42,.05), 0 4px 16px rgba(15,23,42,.06);
+  --p-shadow-lg: 0 12px 40px rgba(15,23,42,.14);
+  --p-bg: #f5f7fb;
+  --p-surface: #ffffff;
+  --p-hairline: rgba(15,23,42,.07);
+  --p-text: #0b1220;
+  --p-text2: #46536b;
+  --p-muted: #7a8599;
+  --p-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+html, body { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  font-family: var(--p-font);
+  background: var(--p-bg);
+  color: var(--p-text);
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior-y: none;
+}
+
+/* --------------------------------------------------------- App main shell */
+.app-main {
+  padding: var(--p-space) !important;
+  background: var(--p-bg);
+  max-width: 100%;
+  overflow-x: hidden;
+  min-height: 100dvh;
+}
+/* header/footer marketing cachés dans l'app (déjà géré) */
+.app-main > * { max-width: 100%; }
+
+/* ------------------------------------------------------------ Typography */
+h1, h2, h3, h4 { letter-spacing: -0.02em; color: var(--p-text); }
+.section-title, .ad-title, .fl-title {
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--p-text);
+  background: none;
+  -webkit-text-fill-color: var(--p-text);
+  margin: 1.4rem 0 .7rem;
+  letter-spacing: -0.01em;
+}
+.page-top h1, .dash-header h1 {
+  color: var(--p-text);
+  background: none;
+  -webkit-text-fill-color: var(--p-text);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+.section-title i { width: 18px; height: 18px; color: var(--accent); -webkit-text-fill-color: var(--accent); background: none; }
+.hint, .muted, .page-sub { color: var(--p-muted); font-size: .8rem; }
+.page-top { margin-bottom: 1rem; }
+.page-top h1 { font-size: 1.35rem; }
+
+.page-head { display: flex; align-items: center; gap: .6rem; margin-bottom: 1rem; }
+
+/* ---------------------------------------------------------------- Cards */
+.card,
+.sidebar,
+.ds-modal,
+.auth-card,
+.fl-panel, .fl-kpi, .fl-quick-card,
+.fl-drv-card, .fl-maint-card, .fl-inc-card, .ad-pro-card,
+.ds-notif-item, .ds-table-shell, .workflow-steps, .extra,
+.compare-card, .appt-card, .pro-card, .doc-reception, .score-ring,
+.offline-box, .offline-box .extra, .sk-hero {
+  background: var(--p-surface) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  border: 1px solid var(--p-hairline) !important;
+}
+.card::before, .sidebar::before, .ds-modal::before, .auth-card::before,
+.ad-panel::before, .fl-kpi::before, .skeleton-card::before, .fl-panel::before,
+.fl-quick-card::before, .workflow-steps::before, .doc-reception::before {
+  display: none !important;
+}
+.card {
+  border-radius: var(--p-radius);
+  padding: 1rem 1.05rem;
+  box-shadow: var(--p-shadow);
+}
+a.card, .veh-card-link { transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease; }
+a.card:active, .veh-card-link:active { transform: scale(.985); }
+.card-h { border-bottom: 1px solid var(--p-hairline); }
+.dash-card-title { font-size: .8rem; font-weight: 700; }
+.dash-card { display: flex; flex-direction: column; }
+.grid-cards { gap: .85rem; }
+.grid-dash .card, .grid-cards .card { border-radius: var(--p-radius); }
+
+/* --------------------------------------------------------------- Buttons */
+.btn, button[type="submit"] {
+  font-family: var(--p-font);
+  min-height: 44px;
+  padding: .6rem 1.05rem;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: .9rem;
+  letter-spacing: .01em;
+  transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease, background .15s ease;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--role-1, var(--accent)), var(--role-2, var(--accent2)));
+  box-shadow: 0 6px 18px rgba(var(--r1, 37), .28);
+  border: none;
+  color: #fff;
+}
+.btn-primary:active { transform: translateY(0) scale(.97); box-shadow: 0 2px 8px rgba(var(--r1,37),.2); }
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--p-hairline);
+  color: var(--p-text2);
+  box-shadow: none;
+}
+.btn-ghost:active { background: rgba(15,23,42,.05); }
+.btn-sm { min-height: 36px; padding: .4rem .8rem; font-size: .8rem; border-radius: 11px; }
+.btn-block { width: 100%; }
+.btn-danger { background: linear-gradient(135deg, #ff5a5f, #e11d48); }
+.btn-ko { background: #e5484d; }
+.btn-ok { background: #12a76f; }
+
+/* --------------------------------------------------------------- Forms */
+label { font-size: .8rem; font-weight: 600; color: var(--p-text2); display: flex; flex-direction: column; gap: .35rem; }
+input, select, textarea {
+  font-family: var(--p-font);
+  font-size: 16px;              /* évite le zoom iOS */
+  color: var(--p-text);
+  background: var(--p-surface);
+  border: 1px solid var(--p-hairline);
+  border-radius: 13px;
+  padding: .75rem .9rem;
+  min-height: 50px;
+  transition: border-color .15s ease, box-shadow .15s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+select { appearance: none; -webkit-appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--p-muted) 50%), linear-gradient(135deg, var(--p-muted) 50%, transparent 50%); background-position: calc(100% - 20px) 50%, calc(100% - 15px) 50%; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 2.4rem; }
+textarea { min-height: 90px; resize: vertical; }
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--role-1, var(--accent));
+  box-shadow: 0 0 0 3px rgba(var(--r1, 59), .14);
+}
+input::placeholder, textarea::placeholder { color: var(--p-muted); }
+.form-row-2, .form-row-3 { gap: .75rem !important; }
+.form-hint { font-size: .72rem; color: var(--p-muted); }
+
+/* ---------------------------------------------------------- Page states */
+.ux-state { padding: 2.5rem 1.25rem; }
+.ux-title { font-weight: 700; font-size: 1.1rem; }
+.empty-state { padding: 2.5rem 1rem; }
+.empty-state i { width: 42px; height: 42px; opacity: .35; }
+
+/* ----------------------------------------------------------- Alerts */
+.alert {
+  border-radius: 13px;
+  padding: .8rem .95rem;
+  font-size: .85rem;
+  border: 1px solid transparent;
+}
+.alert-ok { background: rgba(18,167,111,.10); color: #0c7c52; border-color: rgba(18,167,111,.22); }
+.alert-warn { background: rgba(240,160,30,.12); color: #a45b00; border-color: rgba(240,160,30,.28); }
+.alert-ko { background: rgba(229,72,77,.10); color: #b2242a; border-color: rgba(229,72,77,.24); }
+.alert-info { background: rgba(59,130,246,.10); color: #1d4ed8; border-color: rgba(59,130,246,.24); }
+
+/* --------------------------------------------------------------- Badges */
+.badge, .status-badge, .fl-chip, .chip, .ad-badge {
+  border-radius: 999px;
+  font-weight: 600;
+  padding: .28rem .65rem;
+  font-size: .72rem;
+  letter-spacing: .01em;
+}
+.badge { background: rgba(15,23,42,.06); color: var(--p-text2); }
+.badge-accent, .ad-badge.blue { background: rgba(59,130,246,.12); color: #1d4ed8; }
+.badge-ok, .ad-badge.ok { background: rgba(18,167,111,.12); color: #0c7c52; }
+.badge-warn, .ad-badge.warn { background: rgba(240,160,30,.14); color: #a45b00; }
+.badge-ko, .ad-badge.ko { background: rgba(229,72,77,.12); color: #b2242a; }
+.badge-muted, .ad-badge.mute { background: rgba(15,23,42,.06); color: var(--p-muted); }
+.badge-info { background: rgba(99,102,241,.12); color: #4f46e5; }
+
+/* ------------------------------------------------------------- Modals */
+.modal-overlay, .ds-modal-backdrop {
+  padding: 0;
+  background: rgba(8,12,20,.45);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+.modal, .ds-modal {
+  background: var(--p-surface) !important;
+  border-radius: var(--p-radius-lg) !important;
+  box-shadow: var(--p-shadow-lg) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+@keyframes pSheetUp { from { transform: translateY(40px); opacity: .4; } to { transform: translateY(0); opacity: 1; } }
+.modal-head { padding: 1.1rem 1.2rem .6rem; }
+.modal-head h3 { font-size: 1.02rem; font-weight: 700; }
+.modal-x, .ds-modal-close { width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: rgba(15,23,42,.06); color: var(--p-text2); }
+.modal-actions, .ds-modal-footer { padding: .9rem 1.1rem calc(1rem + env(safe-area-inset-bottom)); display: flex; gap: .6rem; }
+
+/* -------------------------------------------------------------- Toasts */
+.toast {
+  border-radius: 14px;
+  padding: .8rem 1rem;
+  font-size: .85rem;
+  font-weight: 600;
+  box-shadow: var(--p-shadow-lg);
+  border: 1px solid var(--p-hairline);
+}
+
+/* ------------------------------------------------- Mobile app chrome */
+.app-menu-btn {
+  display: inline-flex;
+  position: fixed;
+  top: calc(.7rem + env(safe-area-inset-top));
+  left: calc(.7rem + env(safe-area-inset-left));
+  z-index: 900;
+  align-items: center; justify-content: center;
+  width: 44px; height: 44px;
+  border: none; border-radius: 14px;
+  cursor: pointer;
+  color: var(--p-text);
+  background: rgba(255,255,255,.86);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 16px rgba(15,23,42,.12);
+}
+
+/* Sidebar drawer -> refinement (mobile) */
+@media (max-width: 600px) {
+  .sidebar {
+    width: 280px !important;
+    max-width: 86vw;
+    border-right: none;
+    background: rgba(255,255,255,.98) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow: var(--p-shadow-lg);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .sidebar::before { display: none !important; }
+  .sidebar-brand { padding: calc(1rem + env(safe-area-inset-top)) 1rem 1rem; }
+}
+
+/* ------------------------------------------------- scrollbars & details */
+* { scrollbar-width: thin; scrollbar-color: rgba(15,23,42,.18) transparent; }
+.sidebar-nav::-webkit-scrollbar, .app-main::-webkit-scrollbar { width: 4px; height: 4px; }
+.sidebar-nav::-webkit-scrollbar-thumb, .app-main::-webkit-scrollbar-thumb { background: rgba(15,23,42,.18); border-radius: 999px; }
+
+.sidebar-nav { scrollbar-gutter: stable; }
+.sidebar-footer > div:last-child { font-size: .62rem; }
+
+/* dash hero (soft, premium) */
+.dash-hero {
+  background: linear-gradient(150deg, rgba(var(--r1),.16), rgba(var(--r2),.08)) !important;
+  border: 1px solid rgba(var(--r1),.18) !important;
+  border-radius: var(--p-radius-lg) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* -------------------------------------------------- Déclinaison mobile */
+@media (max-width: 600px) {
+  .app-main { margin-left: 0 !important; padding: .5rem .9rem 6.5rem !important; }
+  .card { padding: .95rem 1rem; border-radius: var(--p-radius-sm); }
+  .grid-cards { grid-template-columns: 1fr; gap: .7rem; }
+  .dash-veh-icon { width: 46px; height: 46px; }
+  .section-title { margin: 1.1rem 0 .6rem; }
+  .page-top { gap: .6rem; }
+  .page-top h1 { font-size: 1.25rem; }
+  .modal-actions .btn { width: auto; }
+  .modal, .ds-modal {
+    width: 100%;
+    border-radius: 22px 22px 0 0;
+    max-height: 90dvh;
+    animation: pSheetUp .32s var(--smooth, ease);
+  }
+}
+
+/* Tablette : garde la sidebar 224px + nav auto, mais assouplit les cartes */
+@media (min-width: 601px) and (max-width: 900px) {
+  .app-main { margin-left: 224px !important; padding: 1.25rem !important; }
+  .grid-cards { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: .75rem; }
+}
+
+/* Desktop : préserve l'empreinte d'origine (sidebar 268px) */
+@media (min-width: 901px) {
+  .app-main { margin-left: 268px !important; padding: 2rem 2.2rem !important; }
+  .grid-cards { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+}
