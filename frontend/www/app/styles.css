@@ -262,15 +262,8 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 .app-main { flex: 1; margin-left: 260px; padding: 1.5rem 2rem; overflow-y: auto; min-height: 100vh; }
 
 @media (max-width: 900px) {
-  .sidebar { width: 56px; }
-  .sidebar-brand span, .sidebar-link span { display: none; }
-  .sidebar-brand { justify-content: center; padding: 0.8rem 0.2rem; font-size: 0; }
-  .sidebar-nav { padding: 0.3rem; }
-  .nav-group-title { display: none; padding: 0; }
-  .sidebar-link { justify-content: center; padding: 0.5rem 0.2rem; }
-  .sidebar-link i { width: 18px; height: 18px; }
-  .sidebar-footer { padding: 0.3rem; }
-  .app-main { margin-left: 56px; padding: 1rem; }
+  .sidebar { width: 224px; }
+  .app-main { margin-left: 224px; }
 }
 @media (max-width: 600px) {
   .sidebar { display: none; }

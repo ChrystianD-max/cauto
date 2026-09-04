@@ -361,20 +361,10 @@ label { font-weight: 600; }
 }
 .app-main { margin-left: 268px; }
 
-/* Rail icônes seules (≤ 900 px) — le rail styles.css est redéfini ici, couche chargée en dernier */
+/* Tablette (601–900 px) : sidebar complet avec icônes + libellés, légèrement compacté */
 @media (max-width: 900px) {
-  .sidebar { width: 56px; }
-  .sidebar-brand { justify-content: center; padding: .8rem .2rem; font-size: 0; }
-  .sidebar-brand span, .sidebar-link span, .nav-group-title, #app-version-line { display: none !important; }
-  .sidebar-nav { padding: .35rem; }
-  .nav-group-body { grid-template-rows: 1fr !important; }
-  .nav-group-inner { background: none; border: none; padding: 0; }
-  .sidebar-link { justify-content: center; padding: .5rem .2rem; }
-  .sidebar-link i { width: 18px; height: 18px; opacity: .9; }
-  .sidebar-footer { align-items: center; padding: .3rem; }
-  .sidebar-footer .avatar-sm { display: none !important; }
-  .sidebar-footer > div:last-child { border: none; padding: 0; }
-  .app-main { margin-left: 56px; }
+  .sidebar { width: 224px; }
+  .app-main { margin-left: 224px; }
 }
 .app-menu-btn { display: none; }
 @media (max-width: 600px) {
