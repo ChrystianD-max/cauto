@@ -2,6 +2,7 @@
 'use strict';
 
 const S = { token: localStorage.getItem('token') || null, user: JSON.parse(localStorage.getItem('user') || 'null') };
+let _refreshPromise = null;
 const $app = document.getElementById('app');
 
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -49,19 +50,24 @@ async function api(path, opts = {}) {
   return data;
 }
 async function tryRefreshToken() {
-  try {
-    const r = await fetch('/api/auth/refresh', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
-    const d = await r.json().catch(() => ({}));
-    if (!r.ok || !d.token) return false;
-    S.token = d.token;
-    localStorage.setItem('token', d.token);
-    if (d.user) {
-      S.user = { ...(S.user || {}), ...d.user };
-      localStorage.setItem('user', JSON.stringify(S.user));
-      document.body.setAttribute('data-role', d.user.role || S.user.role || 'CLIENT');
-    }
-    return true;
-  } catch (e) { return false; }
+  if (_refreshPromise) return _refreshPromise;
+  _refreshPromise = (async () => {
+    try {
+      const r = await fetch('/api/auth/refresh', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || !d.token) return false;
+      S.token = d.token;
+      localStorage.setItem('token', d.token);
+      if (d.user) {
+        S.user = { ...(S.user || {}), ...d.user };
+        localStorage.setItem('user', JSON.stringify(S.user));
+        document.body.setAttribute('data-role', d.user.role || S.user.role || 'CLIENT');
+      }
+      return true;
+    } catch (e) { return false; }
+    finally { _refreshPromise = null; }
+  })();
+  return _refreshPromise;
 }
 function forceLogout(status) {
   if (status === 401 && S.user) {
