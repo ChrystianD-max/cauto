@@ -374,7 +374,24 @@ label { font-weight: 600; }
   .sidebar-footer > div:last-child { border: none; padding: 0; }
   .app-main { margin-left: 56px; }
 }
+.app-menu-btn { display: none; }
 @media (max-width: 600px) {
+  .app-menu-btn {
+    display: inline-flex;
+    position: fixed;
+    top: .7rem; left: .7rem;
+    z-index: 900;
+    align-items: center; justify-content: center;
+    width: 44px; height: 44px;
+    border: none; border-radius: 50%;
+    cursor: pointer;
+    color: var(--text);
+    background: var(--panel);
+    box-shadow: var(--shadow-lg);
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  }
+  .app-menu-btn i { pointer-events: none; }
+  .app-main { padding-top: 3.2rem; }
   .sidebar {
     display: flex;
     position: fixed;

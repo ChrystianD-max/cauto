@@ -219,6 +219,9 @@ const isPro = () => S.user && ['GARAGE','MECANICIEN','EXPERT'].includes(S.user.r
 const isSupplier = () => S.user && S.user.role === 'SUPPLIER';
 const currentNav = () => isAdmin() ? ADMIN_NAV : (isPro() ? PRO_NAV : (isSupplier() ? SUPPLIER_NAV : CLIENT_NAV));
 
+function menuBtn() {
+  return `<button id="app-menu-btn" class="app-menu-btn" aria-label="Menu">${I('menu')}<i data-lucide="menu" style="width:22px;height:22px"></i></button>`;
+}
 function renderSidebar() {
   const h = location.hash || '#/';
   const nav = currentNav();
@@ -250,7 +253,7 @@ function renderSidebar() {
 function layoutApp(html) {
   document.querySelector('header').classList.add('hidden');
   document.querySelector('footer').classList.add('hidden');
-  $app.innerHTML = `<div class="app-layout">${renderSidebar()}<main class="app-main">${html}</main></div>`;
+  $app.innerHTML = `<div class="app-layout">${renderSidebar()}<main class="app-main">${menuBtn()}${html}</main></div>`;
   document.getElementById('btn-logout').onclick = logout;
   renderIcons(); if (window.cautoI18n && window.cautoI18n.apply) window.cautoI18n.apply();
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1436,11 +1439,17 @@ if (_hamburger) _hamburger.onclick = () => {
 };
 document.addEventListener('click', (e) => {
   const layout = document.querySelector('.app-layout');
-  if (!layout || !S.user || e.target.closest('.hamburger')) return;
+  if (!layout) return;
+  const hb = document.getElementById('hamburger');
+  if (e.target.closest('#app-menu-btn')) {
+    layout.classList.toggle('sidebar-open');
+    if (hb) hb.classList.toggle('open');
+    return;
+  }
   if (e.target.closest('.sidebar-link') || e.target === layout) {
     layout.classList.remove('sidebar-open');
-    const hb = document.getElementById('hamburger');
     if (hb) hb.classList.remove('open');
+    return;
   }
 });
 document.getElementById('offline-banner').classList.add('hidden');
