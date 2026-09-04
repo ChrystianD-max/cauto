@@ -259,6 +259,7 @@ function menuBtn() {
   return `<button id="app-menu-btn" class="app-menu-btn" aria-label="Menu">${I('menu')}<i data-lucide="menu" style="width:22px;height:22px"></i></button>`;
 }
 function renderSidebar() {
+  if (!S.user) return '';
   const h = location.hash || '#/';
   const nav = currentNav();
   const collapsed = new Set(JSON.parse(localStorage.getItem('cauto-nav-collapsed') || '[]'));
@@ -287,6 +288,7 @@ function renderSidebar() {
 }
 
 function layoutApp(html) {
+  if (!S.user) { location.hash = '#/login'; return; }
   document.querySelector('header').classList.add('hidden');
   document.querySelector('footer').classList.add('hidden');
   $app.innerHTML = `<div class="app-layout">${renderSidebar()}<main class="app-main">${menuBtn()}${html}</main></div>`;
