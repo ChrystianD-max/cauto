@@ -477,6 +477,30 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 .qb-options label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.75rem; color: var(--muted); }
 .qb-options input { width: 76px; }
 
+/* Mobile : chaque ligne de devis devient une carte — désignation sur toute la largeur,
+   champs réorganisés sur 3 colonnes, bouton suppression sur toute la hauteur. */
+@media (max-width: 640px) {
+  .quote-lines-head { display: none; }
+  .quote-line {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 78px 34px;
+    gap: 0.45rem 0.5rem;
+    padding: 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg2);
+  }
+  .quote-line .ql-label { grid-row: 1; grid-column: 1 / span 3; }
+  .quote-line .ql-del { grid-row: 1 / span 2; grid-column: 4; width: 34px; height: 100%; min-height: 40px; align-self: center; }
+  .quote-line .ql-kind { grid-row: 2; grid-column: 1; }
+  .quote-line .ql-qty { grid-row: 2; grid-column: 2; }
+  .quote-line .ql-price { grid-row: 2; grid-column: 3; }
+  .quote-line input, .quote-line select { font-size: 16px; padding: 0.55rem 0.6rem; min-height: 42px; }
+  .quote-line input[type="number"] { text-align: left; }
+  .qb-options { gap: 0.5rem; }
+  .qb-options label { flex: 1 1 130px; }
+  .qb-options input { width: 100%; }
+}
+
 /* ====== COMPLEMENTARY QUOTE OPTION ====== */
 .comp-option { margin-top: 0.9rem; border: 1px solid var(--border); border-radius: 12px; padding: 0.9rem 1rem; background: var(--bg2); }
 .comp-option.comp-on { border-color: var(--warn); background: var(--warn-bg); }

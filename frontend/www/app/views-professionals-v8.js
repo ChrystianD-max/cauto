@@ -1013,8 +1013,8 @@ function quoteLineRow() {
     <div class="quote-line">
       <input class="ql-label" placeholder="Désignation de la prestation / pièce" value="">
       <select class="ql-kind"><option value="PARTS">Pièce</option><option value="LABOR">Main d'oeuvre</option></select>
-      <input class="ql-qty" type="number" min="1" value="1" title="Quantité">
-      <input class="ql-price" type="number" min="0" placeholder="0,00" title="Prix unitaire en euros">
+      <input class="ql-qty" type="number" min="1" value="1" placeholder="Qté" title="Quantité">
+      <input class="ql-price" type="number" min="0" placeholder="P.U. (FCFA)" title="Prix unitaire">
       <button type="button" class="ql-del" title="Retirer la ligne">${I('x')}</button>
     </div>`;
 }
