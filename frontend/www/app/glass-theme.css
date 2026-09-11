@@ -447,6 +447,9 @@ label { font-weight: 600; }
     transition: transform .32s var(--smooth, ease);
     z-index: 1200;
     box-shadow: var(--shadow-lg);
+    /* pageIn (définie dans styles.css) finit en transform:none -> ferait
+       clignoter le tiroir à chaque navigation ; on coupe l'animation ici. */
+    animation: none;
   }
   .app-layout.sidebar-open .sidebar { transform: translateX(0); }
   .app-layout.sidebar-open::before {

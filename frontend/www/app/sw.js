@@ -5,7 +5,7 @@
    reconnexion (event 'sync' -> 'cauto-flush'). */
 'use strict';
 
-const VERSION = 'cauto-pwa-v30';
+const VERSION = 'cauto-pwa-v31';
 const CORE = [
   './',
   './index.html',
@@ -17,7 +17,7 @@ const CORE = [
   './vendor/lucide.min.js?v=1.0',
   './styles.css?v=10.22',
   './design-system.css?v=1.1',
-  './glass-theme.css?v=2.5',
+  './glass-theme.css?v=2.6',
   './premium.css?v=1.1',
   './admin-theme.css?v=1.0',
   './app-i18n.js?v=1.1',
