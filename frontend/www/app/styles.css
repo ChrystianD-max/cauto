@@ -1159,6 +1159,16 @@ table.table, .ad-table { width: 100%; border-collapse: collapse; font-size: 0.85
 .pp-shoplink:hover { border-color: var(--accent); background: rgba(47,129,247,0.06); transform: translateX(4px); }
 .pp-shoplink i:last-child { margin-left: auto; }
 .pp-hint { margin-top: 0.7rem; }
+.pp-synth-card { margin-bottom: 1rem; border-left: 3px solid var(--accent); }
+.pp-synth-head { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.6rem; }
+.pp-synth-head h3 { margin: 0; font-size: 1rem; display: flex; align-items: center; gap: 0.4rem; }
+.pp-synthesis { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem 1rem; font-size: 0.86rem; }
+.pp-srow { display: flex; justify-content: space-between; gap: 0.7rem; padding: 0.42rem 0; border-bottom: 1px dashed var(--border); }
+.pp-srow span { color: var(--text2); flex: 0 0 46%; }
+.pp-srow b { text-align: right; word-break: break-word; }
+.pp-submit-zone { margin-top: 0.8rem; padding-top: 0.7rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 0.7rem; flex-wrap: wrap; }
+.pp-submit-zone .hint { margin: 0; }
+@media (max-width: 620px) { .pp-synthesis { grid-template-columns: 1fr; } }
 .sp-hero { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; background: radial-gradient(120% 160% at 100% 0%, rgba(109, 91, 255, 0.2), transparent 50%), var(--card); }
 .sp-hero-logo { width: 54px; height: 54px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: #fff; background: linear-gradient(135deg, #6d5bff, var(--accent)); box-shadow: 0 8px 22px rgba(109,91,255,0.35); }
 .sp-hero-logo i { width: 26px; height: 26px; }

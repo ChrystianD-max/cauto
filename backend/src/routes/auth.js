@@ -211,16 +211,25 @@ router.post('/register', authLimiter, wrap(async (req, res) => {
         [data.garage_name, u.rows[0].id]
       );
       // Modules 61/62 : un garage dispose aussi d'un profil pro (attestations,
-      // vérification par l'admin, notation) — en attente de vérification.
+      // vérification par l'admin, notation) — en attente de validation.
+      const synthBase = {
+        name: data.name.trim(), email: data.email.toLowerCase(), phone: data.phone,
+        garage_name: data.garage_name.trim(), city: '', specialty: 'MECANIQUE',
+        is_available: false, attestation_count: 0, updated_at: new Date().toISOString()
+      };
       await c.query(
-        'INSERT INTO professionals (user_id, garage_id, specialty, city, verification_status) VALUES ($1,$2,$3,$4,$5)',
-        [u.rows[0].id, g.rows[0].id, 'MECANIQUE', '', 'PENDING']
+        'INSERT INTO professionals (user_id, garage_id, specialty, city, verification_status, synthesis) VALUES ($1,$2,$3,$4,$5,$6)',
+        [u.rows[0].id, g.rows[0].id, 'MECANIQUE', '', 'PENDING', JSON.stringify(synthBase)]
       );
     }
     if (data.role === 'MECANICIEN') {
       await c.query(
-        'INSERT INTO professionals (user_id, specialty, city, verification_status) VALUES ($1,$2,$3,$4)',
-        [u.rows[0].id, 'MECANIQUE', '', 'PENDING']
+        'INSERT INTO professionals (user_id, specialty, city, verification_status, synthesis) VALUES ($1,$2,$3,$4,$5)',
+        [u.rows[0].id, 'MECANIQUE', '', 'PENDING', JSON.stringify({
+          name: data.name.trim(), email: data.email.toLowerCase(), phone: data.phone,
+          city: '', specialty: 'MECANIQUE', is_available: false, attestation_count: 0,
+          updated_at: new Date().toISOString()
+        })]
       );
     }
     // Module 75 — MULTI-TENANT : chaque compte pro/entreprise/fournisseur

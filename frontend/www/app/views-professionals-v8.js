@@ -137,8 +137,15 @@ function openCompletionRating({ interventionId, professionalId, serviceRequestId
 }
 
 /* ====== 0B. ATTESTATIONS : widget réutilisable (pro & fournisseur) ====== */
-const VERIF_STATUS = { PENDING: { label: 'En attente de vérification', cls: 'warn', icon: 'clock' }, UNVERIFIED: { label: 'Non vérifié', cls: 'muted', icon: 'shield-off' }, VERIFIED: { label: 'Vérifié par C-AUTO', cls: 'ok', icon: 'badge-check' }, REJECTED: { label: 'Rejeté', cls: 'ko', icon: 'shield-x' } };
+const VERIF_STATUS = { PENDING: { label: 'En attente de validation', cls: 'warn', icon: 'clock' }, UNVERIFIED: { label: 'Non soumis', cls: 'muted', icon: 'shield-off' }, VERIFIED: { label: 'Vérifié par C-AUTO', cls: 'ok', icon: 'badge-check' }, REJECTED: { label: 'Rejeté', cls: 'ko', icon: 'shield-x' } };
 function verifBadge(status) { const s = VERIF_STATUS[status] || VERIF_STATUS.UNVERIFIED; return `<span class="badge badge-${s.cls}">${I(s.icon)} ${s.label}</span>`; }
+
+function proVerifBanner(status) {
+  if (status === 'VERIFIED') return `<div class="alert alert-ok">${I('badge-check')} <div><b>Profil vérifié par C-AUTO</b><p style="margin:.2rem 0 0">Votre dossier est validé : vous pouvez intervenir normalement sur la plateforme.</p></div></div>`;
+  if (status === 'PENDING') return `<div class="alert alert-warn">${I('clock')} <div><b>Dossier envoyé — en attente de validation</b><p style="margin:.2rem 0 0">Votre synthèse a été transmise à l'équipe C-AUTO. Vous serez notifié dès la décision de validation.</p></div></div>`;
+  if (status === 'REJECTED') return `<div class="alert alert-ko">${I('shield-x')} <div><b>Dossier rejeté</b><p style="margin:.2rem 0 0">Corrigez vos informations puis soumettez à nouveau votre dossier.</p></div></div>`;
+  return `<div class="alert alert-info">${I('shield')} <div><b>Profil non soumis</b><p style="margin:.2rem 0 0">Complétez vos informations puis soumettez votre dossier pour validation par l'équipe C-AUTO.</p></div></div>`;
+}
 
 function attestationPanelHtml({ stored, readOnly }) {
   const chips = (stored || []).map(d => `
@@ -2498,18 +2505,33 @@ async function viewProProfile() {
     const synth = pro && pro.synthesis
       ? (typeof pro.synthesis === 'string' ? (() => { try { return JSON.parse(pro.synthesis); } catch (_e) { return null; } })() : pro.synthesis)
       : null;
-    const synthHtml = synth ? (() => {
-      const rows = [];
-      if (synth.name) rows.push(['Nom', synth.name]);
-      if (synth.email) rows.push(['Email', synth.email]);
-      if (synth.phone) rows.push(['Téléphone', synth.phone]);
-      if (synth.city) rows.push(['Ville', synth.city]);
-      if (synth.specialty) rows.push(['Spécialité', synth.specialty]);
-      if (synth.is_available != null) rows.push(['Disponibilité', synth.is_available ? 'Oui' : 'Non']);
-      if (synth.attestation_count != null) rows.push(['Attestations fournies', String(synth.attestation_count)]);
-      if (synth.updated_at) rows.push(['Dernière mise à jour', new Date(synth.updated_at).toLocaleString('fr')]);
-      return `<div class="card" style="border-left:3px solid var(--accent);margin:1rem 0 0"><h3 style="margin:0 0 .4rem">${I('file-text')} Synthèse du profil</h3><div class="pp-synthesis" style="font-size:.9rem">${rows.map(r => `<div class="pp-srow" style="display:flex;justify-content:space-between;gap:.8rem;padding:.35rem 0;border-bottom:1px dashed var(--border)"><span class="hint" style="flex:0 0 45%">${esc(r[0])}</span><b style="text-align:right">${esc(String(r[1]))}</b></div>`).join('')}</div></div>`;
-    })() : '';
+    /* Synthèse du profil : toujours affichée après soumission (fallback si absente) */
+    const synthRows = [];
+    const pushRow = (label, value) => { if (value != null && value !== '') synthRows.push([label, String(value)]); };
+    pushRow('Nom', (synth && synth.name) || user.name);
+    pushRow('Email', (synth && synth.email) || user.email);
+    pushRow('Téléphone', (synth && synth.phone) || user.phone);
+    pushRow('Garage / Atelier', (synth && synth.garage_name) || (pro && pro.garage_name) || '');
+    pushRow('Ville', (synth && synth.city) || (pro && pro.city) || '');
+    pushRow('Spécialité', (synth && synth.specialty) || (pro && pro.specialty) || '');
+    if (pro) pushRow('Disponibilité', (synth && synth.is_available != null ? synth.is_available : pro.is_available) ? 'Oui — ouvert aux demandes' : 'Non');
+    pushRow('Attestations fournies', (synth && synth.attestation_count != null) ? String(synth.attestation_count) : (pro ? String((pro.attestation_doc_ids || []).length) : '0'));
+    pushRow('Dernière mise à jour', synth && synth.updated_at ? new Date(synth.updated_at).toLocaleString('fr') : (pro && pro.updated_at ? new Date(pro.updated_at).toLocaleString('fr') : '—'));
+    const synthHtml = `
+      <div class="card pp-synth-card">
+        <div class="pp-synth-head">
+          <h3>${I('file-text')} Synthèse du dossier soumis à l'admin</h3>
+          ${pro ? verifBadge(pro.verification_status) : ''}
+        </div>
+        <div class="pp-synthesis" role="list">
+          ${synthRows.length ? synthRows.map(r => `<div class="pp-srow" role="listitem"><span>${esc(r[0])}</span><b>${esc(r[1])}</b></div>`).join('') : '<p class="hint">Complétez votre profil pour générer la synthèse.</p>'}
+        </div>
+        ${pro && pro.verification_status !== 'VERIFIED' ? `
+          <div class="pp-submit-zone">
+            <p class="hint">📤 Envoyez votre dossier : l'équipe C-AUTO le contrôle (identité, attestations) puis valide votre compte.</p>
+            <button type="button" class="btn btn-primary" id="btn-pro-submit">${I('send')} Soumettre mon dossier pour validation</button>
+          </div>` : (pro ? `<div class="pp-submit-zone"><span class="fl-chip ok">${I('check-circle')} Compte validé</span></div>` : '')}
+      </div>`;
     layoutApp(`
       <div class="pro-profile">
         <div class="pro-profile-hero card">
@@ -2526,6 +2548,8 @@ async function viewProProfile() {
             <b>${Number(pro && pro.rating || 0).toFixed(1)}</b><span class="hint">${pro ? pro.rating_count + ' avis' : '—'}</span>
           </div>
         </div>
+
+        ${pro ? proVerifBanner(pro.verification_status) : ''}
 
         <div class="pp-two">
           <div class="card">
@@ -2568,6 +2592,14 @@ async function viewProProfile() {
         </div>
       </div>
     `);
+    const submitBtn = document.getElementById('btn-pro-submit');
+    if (submitBtn) submitBtn.onclick = async () => {
+      try {
+        await api('/professionals/me/submit', { method: 'POST' });
+        toast('Dossier soumis — en attente de validation', 'success');
+        viewProProfile();
+      } catch (e) { toast(e.message || 'Soumission impossible', 'error'); }
+    };
     let logoDocIdState = logoDocId || null;
     const logoFile = document.getElementById('pp-logo-file');
     if (logoFile) logoFile.onchange = async () => {

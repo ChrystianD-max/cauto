@@ -157,8 +157,10 @@ router.patch(
     }
     if (changed) {
       const u = await db.one('SELECT name, email, phone FROM users WHERE id=$1', [req.user.sub]);
+      const garage = pro.garage_id ? await db.one('SELECT name FROM garages WHERE id=$1', [pro.garage_id]).catch(() => null) : null;
       const synthesis = {
         name: u.name, email: u.email, phone: u.phone,
+        garage_name: garage ? garage.name : null,
         city: city || pro.city, specialty: specialty || pro.specialty,
         is_available: typeof is_available === 'boolean' ? is_available : pro.is_available,
         logo_url: logo_url !== undefined ? logo_url : pro.logo_url,
@@ -169,6 +171,32 @@ router.patch(
     }
     if (sets.length) await db.query(`UPDATE professionals SET ${sets.join(', ')} WHERE id=$1`, params);
     const updated = await db.one('SELECT * FROM professionals WHERE id=$1', [pro.id]);
+    res.json({ professional: updated });
+  })
+);
+
+router.post(
+  '/me/submit',
+  requireRole('GARAGE', 'MECANICIEN'),
+  wrap(async (req, res) => {
+    // Soumission explicite du dossier pro à l'admin : force le statut
+    // "en attente de validation" et régénère la synthèse du profil.
+    const pro = await db.one('SELECT * FROM professionals WHERE user_id=$1', [req.user.sub]).catch(() => null);
+    if (!pro) throw new HttpError(404, 'Profil professionnel introuvable');
+    const u = await db.one('SELECT name, email, phone FROM users WHERE id=$1', [req.user.sub]);
+    const garage = pro.garage_id ? await db.one('SELECT name FROM garages WHERE id=$1', [pro.garage_id]).catch(() => null) : null;
+    const synthesis = {
+      name: u.name, email: u.email, phone: u.phone,
+      garage_name: garage ? garage.name : null,
+      city: pro.city || null, specialty: pro.specialty || null,
+      is_available: pro.is_available, logo_url: pro.logo_url || null,
+      attestation_count: (pro.attestation_doc_ids || []).length,
+      updated_at: new Date().toISOString()
+    };
+    const updated = await db.one(
+      `UPDATE professionals SET verification_status='PENDING', synthesis=$2 WHERE id=$1 RETURNING *`,
+      [pro.id, JSON.stringify(synthesis)]
+    );
     res.json({ professional: updated });
   })
 );

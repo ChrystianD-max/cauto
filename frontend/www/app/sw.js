@@ -5,7 +5,7 @@
    reconnexion (event 'sync' -> 'cauto-flush'). */
 'use strict';
 
-const VERSION = 'cauto-pwa-v27';
+const VERSION = 'cauto-pwa-v28';
 const CORE = [
   './',
   './index.html',
@@ -15,7 +15,7 @@ const CORE = [
   './icons/icon-512.png',
   './icons/maskable-512.png',
   './vendor/lucide.min.js?v=1.0',
-  './styles.css?v=10.20',
+  './styles.css?v=10.21',
   './design-system.css?v=1.1',
   './glass-theme.css?v=2.4',
   './premium.css?v=1.1',
@@ -24,7 +24,7 @@ const CORE = [
   './ux-states.js?v=1.0',
   './app-v8.js?v=12.3',
   './views-admin.js?v=2.4',
-  './views-professionals-v8.js?v=1.15',
+  './views-professionals-v8.js?v=1.16',
   './views-modules-v2.js?v=1.6',
   './views-chat.js?v=2.1',
   './views-innovations.js?v=1.0',
