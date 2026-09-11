@@ -1159,6 +1159,12 @@ table.table, .ad-table { width: 100%; border-collapse: collapse; font-size: 0.85
 .pp-shoplink:hover { border-color: var(--accent); background: rgba(47,129,247,0.06); transform: translateX(4px); }
 .pp-shoplink i:last-child { margin-left: auto; }
 .pp-hint { margin-top: 0.7rem; }
+.pp-profile { max-width: 640px; margin: 0 auto; }
+.pp-avatar-text { font-size: 1.05rem; font-weight: 800; letter-spacing: .02em; }
+.pp-pass { border-top: 1px dashed var(--border); padding-top: .6rem; }
+.pp-pass summary { cursor: pointer; font-size: .82rem; font-weight: 600; color: var(--text2); display: flex; align-items: center; gap: .4rem; }
+.pp-pass summary i { width: 15px; height: 15px; }
+.pp-pass[open] { padding-bottom: .4rem; }
 .pp-synth-card { margin-bottom: 1rem; border-left: 3px solid var(--accent); }
 .pp-synth-head { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.6rem; }
 .pp-synth-head h3 { margin: 0; font-size: 1rem; display: flex; align-items: center; gap: 0.4rem; }

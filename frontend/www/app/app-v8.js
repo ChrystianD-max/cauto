@@ -1064,23 +1064,79 @@ async function viewProfile() {
   showLoading();
   try {
     const { user } = await api('/auth/me');
+    const ROLE_LABELS = { CLIENT: 'Client', GARAGE: 'Garage', MECANICIEN: 'Mécanicien', EXPERT: 'Expert', SUPPLIER: 'Fournisseur', ADMIN: 'Administrateur', SUPER_ADMIN: 'Super Admin' };
+    const roleLabel = ROLE_LABELS[user.role] || user.role;
+    const joined = new Date(user.created_at).toLocaleDateString('fr');
+    const initials = (user.name || 'U').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
     layoutApp(`
-    <div class="section-title" style="margin-bottom:1rem">${I('user')} Mon profil</div>
-    <div class="card" style="max-width:600px">
-      <form id="f-profile">
-        <label>Nom <input name="name" value="${esc(user.name)}" required></label>
-        <label>Email <input name="email" type="email" value="${esc(user.email)}" required></label>
-        <label>Téléphone <input name="phone" value="${esc(user.phone)}" required></label>
-        <p class="hint">Rôle: <b>${esc(user.role)}</b> · Inscrit le ${new Date(user.created_at).toLocaleDateString('fr')}</p>
-        <button type="submit">${I('save')} Enregistrer</button>
-      </form>
+    <div class="pp-profile">
+      <div class="pro-profile-hero card">
+        <div class="pp-avatar"><span class="pp-avatar-text">${esc(initials)}</span></div>
+        <div class="pp-ident">
+          <h1>${esc(user.name)}</h1>
+          <div class="pp-badges"><span class="badge badge-accent">${esc(roleLabel)}</span></div>
+          <p class="hint">${esc(user.email)}${user.country ? ' · ' + esc(user.country) : ''}</p>
+        </div>
+        <div class="pp-rating">
+          <span class="badge badge-accent">${esc(roleLabel)}</span>
+          <p class="hint" style="margin:.35rem 0 0">Membre depuis le ${joined}</p>
+        </div>
+      </div>
+
+      <div class="card pp-synth-card">
+        <div class="pp-synth-head">
+          <h3>${I('file-text')} Synthèse du profil</h3>
+          <span class="badge badge-ok">${I('check-circle')} Dossier à jour</span>
+        </div>
+        <div class="pp-synthesis">
+          <div class="pp-srow"><span>${I('user')} Nom complet</span><b>${esc(user.name)}</b></div>
+          <div class="pp-srow"><span>${I('mail')} Email</span><b>${esc(user.email)}</b></div>
+          <div class="pp-srow"><span>${I('phone')} Téléphone</span><b>${esc(user.phone || '—')}</b></div>
+          <div class="pp-srow"><span>${I('shield')} Rôle</span><b>${esc(roleLabel)}</b></div>
+          <div class="pp-srow"><span>${I('globe')} Pays</span><b>${esc(user.country || '—')}</b></div>
+          <div class="pp-srow"><span>${I('calendar')} Membre depuis</span><b>${joined}</b></div>
+        </div>
+        <div class="pp-submit-zone">
+          <p class="hint">${I('info')} Vos coordonnées servent à sécuriser vos échanges sur C-AUTO.</p>
+          <button type="button" class="btn btn-primary" id="btn-toggle-edit" aria-expanded="false">${I('settings-2')} Modifier mes informations</button>
+        </div>
+      </div>
+
+      <div class="card hidden" id="profile-edit-card">
+        <h3 style="margin:0 0 .8rem">${I('settings-2')} Modifier mes informations</h3>
+        <form id="f-profile" class="pp-form">
+          <label>Nom complet <input name="name" value="${esc(user.name)}" minlength="2" required></label>
+          <label>Email <input name="email" type="email" value="${esc(user.email)}" required></label>
+          <label>Téléphone <input name="phone" type="tel" value="${esc(user.phone || '')}" pattern="\\+[0-9]{8,15}" placeholder="+22990000000" required></label>
+          <details class="pp-pass">
+            <summary>${I('lock')} Changer le mot de passe (optionnel)</summary>
+            <label>Mot de passe actuel <input name="current_password" type="password" autocomplete="current-password" placeholder="Votre mot de passe actuel"></label>
+            <label>Nouveau mot de passe <input name="new_password" type="password" minlength="8" autocomplete="new-password" placeholder="Min. 8 caractères"></label>
+          </details>
+          <button type="submit" class="btn btn-primary">${I('save')} Enregistrer les modifications</button>
+        </form>
+      </div>
     </div>
     `);
+    const toggle = document.getElementById('btn-toggle-edit');
+    const editCard = document.getElementById('profile-edit-card');
+    if (toggle && editCard) toggle.onclick = () => {
+      const hidden = editCard.classList.toggle('hidden');
+      toggle.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+      if (!hidden) editCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
     document.getElementById('f-profile').onsubmit = async (ev) => {
       ev.preventDefault();
       const o = Object.fromEntries(new FormData(ev.target));
-      try { await api('/auth/me',{method:'PATCH',body:o}); toast('Profil mis à jour','success'); S.user.name=o.name; localStorage.setItem('user',JSON.stringify(S.user)); }
-      catch(e) { toast(e.message,'error'); }
+      if (!o.current_password && !o.new_password) { delete o.current_password; delete o.new_password; }
+      else if (!o.current_password || !o.new_password) { toast('Renseignez le mot de passe actuel ET le nouveau mot de passe', 'error'); return; }
+      try {
+        const d = await api('/auth/me', { method: 'PATCH', body: o });
+        toast('Profil mis à jour', 'success');
+        if (d.user) S.user = { ...S.user, ...d.user };
+        localStorage.setItem('user', JSON.stringify(S.user));
+        viewProfile();
+      } catch (e) { toast(e.message, 'error'); }
     };
   } catch(e) { layoutApp(err(e)); }
   hideLoading(); renderIcons();
