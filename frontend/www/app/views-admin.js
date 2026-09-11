@@ -20,19 +20,46 @@ function adBadges(p) {
   return b.join('');
 }
 
-function adminShell(active, title, icon, contentHtml, rightHtml = '') {
+function adminShell(_active, title, icon, contentHtml, rightHtml = '') {
+  const today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   return `
     <div class="ad-shell">
-      <div class="ad-top">
-        <div>
-          <div class="ad-eyebrow">${I('shield-check')} ESPACE ADMINISTRATEUR</div>
+      <header class="ad-top">
+        <div class="ad-top-l">
+          <div class="ad-eyebrow">${I('shield-check')} Administration · Espace privé</div>
           <h1 class="ad-title">${I(icon)} ${esc(title)}</h1>
+          <div class="ad-sub">${esc(today)} — Vue d'ensemble de la plateforme C-AUTO</div>
         </div>
-        <div class="ad-top-right">${rightHtml}</div>
-      </div>
+        <div class="ad-top-right">
+          ${rightHtml}
+          <span class="ad-pill ad-pill-secure">${I('lock')} Session sécurisée</span>
+        </div>
+      </header>
       <div class="ad-body">${contentHtml}</div>
     </div>`;
 }
+
+/* Conversion automatique des tableaux admin en cartes sur mobile :
+   on propage le libellé de chaque colonne dans les cellules (data-ad-col),
+   ce que le CSS .ad-table exploite pour l'affichage mobile. */
+(function enhanceAdminTables() {
+  try {
+    function applyCols(table) {
+      if (table.dataset.adColsApplied) return;
+      const ths = Array.from(table.querySelectorAll('thead th'));
+      if (!ths.length) return;
+      table.querySelectorAll('tbody tr').forEach((tr) => {
+        Array.from(tr.children).forEach((td, i) => {
+          if (ths[i]) td.setAttribute('data-ad-col', ths[i].textContent.trim());
+        });
+      });
+      table.dataset.adColsApplied = '1';
+    }
+    function scan() { document.querySelectorAll('.ad-shell table.ad-table').forEach(applyCols); }
+    if (window.MutationObserver) new MutationObserver(scan).observe(document.body, { childList: true, subtree: true });
+    scan();
+  } catch (e) { /* silencieux en environnement dégradé */ }
+})();
 
 function adTable(cols, rowsHtml) {
   return `<div class="card ad-panel"><div class="ad-table-scroll"><table class="table ad-table"><thead><tr>${cols}</tr></thead><tbody>${rowsHtml || `<tr><td colspan="${(cols.match(/<th/g) || []).length}" class="hint" style="text-align:center">Aucune donnée</td></tr>`}</tbody></table></div></div>`;
@@ -50,23 +77,36 @@ async function viewAdminDashboard() {
   showLoading();
   try {
     const d = await api('/admin/dashboard');
-    const k = (label, value, icon, tone = 'accent', sub = '') => flKpi(label, value, sub, icon, tone);
+    const kpi = (label, value, icon, tone = 'accent', sub = '') => `
+      <div class="ad-kpi ${tone ? 'is-' + tone : ''}">
+        <div class="ad-kpi-top"><span class="ad-kpi-label">${esc(label)}</span><span class="ad-kpi-icon">${I(icon)}</span></div>
+        <div class="ad-kpi-value">${value}</div>
+        ${sub ? `<div class="ad-kpi-sub">${sub}</div>` : ''}
+      </div>`;
+    const me = (S && S.user && S.user.name) || 'Administrateur';
+    const first = String(me).trim().split(/\s+/)[0];
     layoutApp(adminShell('dashboard', 'Tableau de bord', 'layout-dashboard', `
-      <div class="fl-kpi-grid">
-        ${k('Utilisateurs', d.users.total, 'users', 'accent', d.users.clients + ' clients')}
-        ${k('Véhicules', d.vehicles.total, 'car', 'neutral', 'immobilier du parc client')}
-        ${k('Professionnels', d.professionals.total, 'building', 'ok', d.professionals.verified + ' vérifiés')}
-        ${k('Vérifs. en attente', d.professionals.unverified, 'badge-check', 'warn', 'à traiter')}
-        ${k('Fournisseurs', d.suppliers.total, 'truck', 'neutral', d.suppliers.verified + ' vérifiés')}
-        ${k('Demandes', d.service_requests.total, 'clipboard-list', 'neutral', '')}
-        ${k('Interventions', d.interventions.total, 'settings', 'neutral', d.interventions.closed + ' clôturées')}
-        ${k('Chiffre d\'affaire', money(Number(d.payments.revenue_cents)), 'wallet', 'ok', 'paiements réussis')}
-        ${k('Ventes pièces', money(Number(d.part_orders.revenue_cents)), 'shopping-cart', 'ok', 'commandes traitées')}
-        ${k('Litiges ouverts', d.disputes.open, 'alert-triangle', d.disputes.open ? 'ko' : 'ok', '')}
-        ${k('Programmes', d.programs.total, 'file-cog', 'neutral', d.programs.published + ' publiés')}
-        ${k('Codes défaut', d.fault_codes.total, 'hash', 'neutral', '')}
-      </div>
-      <div class="fl-grid-main" style="margin-top:1rem">
+      <section class="ad-hero">
+        <div>
+          <h2>Bonjour, ${esc(first)}</h2>
+          <p class="hint">Voici l'état de la plateforme C-AUTO aujourd'hui.</p>
+        </div>
+        <div class="fl-stats-line">
+          <span class="fl-chip mute">${d.service_requests.total} demandes</span>
+          <span class="fl-chip accent">${money(Number(d.payments.revenue_cents || 0))} encaissés</span>
+        </div>
+      </section>
+      <section class="ad-kpi-grid">
+        ${kpi('Utilisateurs', d.users.total, 'users', 'accent', d.users.clients + ' clients · ' + d.users.garages + ' garages')}
+        ${kpi('Véhicules', d.vehicles.total, 'car', 'neutral', 'parc des clients')}
+        ${kpi('Professionnels', d.professionals.total, 'badge-check', 'ok', d.professionals.verified + ' vérifiés · ' + d.professionals.unverified + ' en attente')}
+        ${kpi('Demandes', d.service_requests.total, 'clipboard-list', 'warn', d.interventions.closed + ' interventions clôturées')}
+        ${kpi('Chiffre d\'affaires', money(Number(d.payments.revenue_cents || 0)), 'wallet', 'ok', 'paiements réussis')}
+        ${kpi('Ventes pièces', money(Number(d.part_orders.revenue_cents || 0)), 'shopping-cart', 'ok', 'commandes traitées')}
+        ${kpi('Litiges ouverts', d.disputes.open, 'alert-triangle', d.disputes.open ? 'ko' : 'ok', '')}
+        ${kpi('Programmes', d.programs.total, 'file-cog', 'neutral', d.programs.published + ' publiés · ' + d.fault_codes.total + ' codes défaut')}
+      </section>
+      <div class="fl-grid-main">
         <div class="card fl-panel">
           <div class="fl-panel-h">${I('badge-check')} Vérifications de professionnels à traiter</div>
           ${(d.pending_verifications && d.pending_verifications.length) ? d.pending_verifications.map(p => `
@@ -84,13 +124,26 @@ async function viewAdminDashboard() {
             </div>`).join('') || `<div class="fl-empty">—</div>`}
         </div>
       </div>
-      <div class="card fl-panel" style="margin-top:1rem">
-        <div class="fl-panel-h">${I('scroll-text')} Activité récente (traçabilité)</div>
-        ${(d.recent_audit && d.recent_audit.length) ? d.recent_audit.map(a => `
-          <div class="fl-row">
-            <div class="fl-veh">${I('shield')} <b>${esc(a.action)}</b> <span class="hint">· ${esc(a.entity)}${a.actor ? ' · par ' + esc(a.actor) : ''}</span></div>
-            <span class="hint fl-row-label">${adDate(a.created_at)}</span>
-          </div>`).join('') : `<div class="fl-empty">Aucun audit</div>`}
+      <div class="fl-grid-main">
+        <div class="card fl-panel">
+          <div class="fl-panel-h">${I('scroll-text')} Activité récente (traçabilité)</div>
+          ${(d.recent_audit && d.recent_audit.length) ? d.recent_audit.map(a => `
+            <div class="fl-row">
+              <div class="fl-veh">${I('shield')} <b>${esc(a.action)}</b> <span class="hint">· ${esc(a.entity)}${a.actor ? ' · par ' + esc(a.actor) : ''}</span></div>
+              <span class="hint fl-row-label">${adDate(a.created_at)}</span>
+            </div>`).join('') : `<div class="fl-empty">Aucun audit</div>`}
+        </div>
+        <div class="card fl-panel">
+          <div class="fl-panel-h">${I('zap')} Accès rapide</div>
+          <div class="ad-quick-grid">
+            <a class="ad-quick" href="#/admin/users">${I('users')}<b>Utilisateurs</b><span>Comptes & rôles</span></a>
+            <a class="ad-quick" href="#/admin/professionals">${I('badge-check')}<b>Professionnels</b><span>Vérifications</span></a>
+            <a class="ad-quick" href="#/admin/service-requests">${I('clipboard-list')}<b>Demandes</b><span>Flux service</span></a>
+            <a class="ad-quick" href="#/admin/payments">${I('wallet')}<b>Finances</b><span>Paiements</span></a>
+            <a class="ad-quick" href="#/admin/maintenance-programs">${I('file-cog')}<b>Référentiels</b><span>Programmes & codes</span></a>
+            <a class="ad-quick" href="#/admin/audit-logs">${I('scroll-text')}<b>Journal d'audit</b><span>Sécurité</span></a>
+          </div>
+        </div>
       </div>`));
     renderIcons();
   } catch (e) { layoutApp(err(e)); } finally { hideLoading(); }

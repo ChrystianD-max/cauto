@@ -5,7 +5,7 @@
    reconnexion (event 'sync' -> 'cauto-flush'). */
 'use strict';
 
-const VERSION = 'cauto-pwa-v26';
+const VERSION = 'cauto-pwa-v27';
 const CORE = [
   './',
   './index.html',
@@ -19,10 +19,11 @@ const CORE = [
   './design-system.css?v=1.1',
   './glass-theme.css?v=2.4',
   './premium.css?v=1.1',
+  './admin-theme.css?v=1.0',
   './app-i18n.js?v=1.1',
   './ux-states.js?v=1.0',
   './app-v8.js?v=12.3',
-  './views-admin.js?v=2.3',
+  './views-admin.js?v=2.4',
   './views-professionals-v8.js?v=1.15',
   './views-modules-v2.js?v=1.6',
   './views-chat.js?v=2.1',
