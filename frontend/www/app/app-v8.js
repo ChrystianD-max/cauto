@@ -250,6 +250,60 @@ const ADMIN_NAV = [
   ]},
 ];
 
+/* Barre de navigation mobile (téléphone uniquement) : 5 raccourcis fixes
+   dont une action centrale « Menu » qui ouvre le tiroir de navigation complet. */
+const PRO_TABS = [
+  { hash: '#/pro/dashboard', icon: 'layout-dashboard', label: 'Accueil' },
+  { hash: '#/pro/service-requests', icon: 'clipboard-list', label: 'Demandes' },
+  null,
+  { hash: '#/pro/quotes', icon: 'file-text', label: 'Devis' },
+  { hash: '#/pro/profile', icon: 'building', label: 'Atelier' },
+];
+const MOBILE_TABS = {
+  CLIENT: [
+    { hash: '#/app', icon: 'layout-dashboard', label: 'Accueil' },
+    { hash: '#/vehicles', icon: 'car', label: 'Véhicules' },
+    null,
+    { hash: '#/maintenance', icon: 'wrench', label: 'Entretien' },
+    { hash: '#/profile', icon: 'user', label: 'Profil' },
+  ],
+  GARAGE: PRO_TABS,
+  MECANICIEN: PRO_TABS,
+  EXPERT: PRO_TABS,
+  SUPPLIER: [
+    { hash: '#/supplier/dashboard', icon: 'layout-dashboard', label: 'Accueil' },
+    { hash: '#/supplier/products', icon: 'package', label: 'Produits' },
+    null,
+    { hash: '#/supplier/orders', icon: 'shopping-cart', label: 'Commandes' },
+    { hash: '#/profile', icon: 'user', label: 'Profil' },
+  ],
+  ADMIN: [
+    { hash: '#/admin/dashboard', icon: 'layout-dashboard', label: 'Accueil' },
+    { hash: '#/admin/users', icon: 'users', label: 'Utilisateurs' },
+    null,
+    { hash: '#/admin/professionals', icon: 'badge-check', label: 'Pros' },
+    { hash: '#/profile', icon: 'user', label: 'Profil' },
+  ],
+  SUPER_ADMIN: [
+    { hash: '#/admin/dashboard', icon: 'layout-dashboard', label: 'Accueil' },
+    { hash: '#/admin/users', icon: 'users', label: 'Utilisateurs' },
+    null,
+    { hash: '#/admin/professionals', icon: 'badge-check', label: 'Pros' },
+    { hash: '#/profile', icon: 'user', label: 'Profil' },
+  ],
+};
+
+function renderTabbar() {
+  if (!S.user) return '';
+  const h = location.hash || '#/';
+  const tabs = MOBILE_TABS[S.user.role] || MOBILE_TABS.CLIENT;
+  const isActive = (hash) => h === hash || h.startsWith(hash + '/');
+  const item = (t) => (t === null || t === undefined)
+    ? `<button type="button" class="tabbar-btn tabbar-menu" id="tabbar-menu" aria-label="Ouvrir le menu complet">${I('menu')}<span>Menu</span></button>`
+    : `<a href="${t.hash}" class="tabbar-btn ${isActive(t.hash) ? 'active' : ''}" aria-current="${isActive(t.hash) ? 'page' : ''}">${I(t.icon)}<span>${esc(t.label)}</span></a>`;
+  return `<nav class="tabbar" aria-label="Navigation principale">${tabs.map(item).join('')}</nav>`;
+}
+
 const isAdmin = () => S.user && ['ADMIN','SUPER_ADMIN'].includes(S.user.role);
 const isPro = () => S.user && ['GARAGE','MECANICIEN','EXPERT'].includes(S.user.role);
 const isSupplier = () => S.user && S.user.role === 'SUPPLIER';
@@ -299,9 +353,11 @@ function layoutApp(html) {
   if (!S.user) { location.hash = '#/login'; return; }
   document.querySelector('header').classList.add('hidden');
   document.querySelector('footer').classList.add('hidden');
-  $app.innerHTML = `<div class="app-layout">${renderSidebar()}<main class="app-main">${menuBtn()}${html}</main></div>`;
+  $app.innerHTML = `<div class="app-layout">${renderSidebar()}<main class="app-main">${menuBtn()}${html}</main>${renderTabbar()}</div>`;
   if (_sidebarOpen) document.querySelector('.app-layout')?.classList.add('sidebar-open');
   document.getElementById('btn-logout').onclick = logout;
+  const tabbarMenu = document.getElementById('tabbar-menu');
+  if (tabbarMenu) tabbarMenu.onclick = () => setSidebar(true);
   renderIcons(); if (window.cautoI18n && window.cautoI18n.apply) window.cautoI18n.apply();
   window.scrollTo({ top: 0, behavior: 'smooth' });
   Array.from($app.querySelector('.app-main').children).forEach((c, i) => {
