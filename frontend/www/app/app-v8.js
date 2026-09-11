@@ -378,22 +378,45 @@ function layoutApp(html) {
 function viewLogin(msg='') {
   document.querySelector('header').classList.remove('hidden');
   document.querySelector('footer').classList.remove('hidden');
-  $app.innerHTML = `<div class="auth-page login-bg"><div class="auth-card card">
-    <div class="logo-big"><svg width="36" height="36" viewBox="0 0 100 100"><rect rx="18" width="100" height="100" fill="var(--accent)"/><text x="50" y="68" font-size="50" font-weight="bold" text-anchor="middle" fill="white" font-family="system-ui">CA</text></svg> C-AUTO</div>
-    <p class="subtitle">La confiance au coeur de l'automobile</p>
-    ${msg ? `<div class="alert alert-ok">${I('check-circle')}<span>${esc(msg)}</span></div>` : ''}
-    <form id="f-login">
-      <label>${I('mail')} Email <input name="email" type="email" required placeholder="vous@email.com"></label>
-      <label>${I('lock')} Mot de passe <input name="password" type="password" required placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"></label>
-      <button type="submit">${I('log-in')} Se connecter</button>
-    </form>
-    <p class="auth-footer">Pas de compte ? <a href="#/register">S'inscrire</a></p>
-  </div></div>`;
+  $app.innerHTML = `<div class="auth-page login-bg">
+    <div class="auth-card card login-card">
+      <div class="logo-big"><svg width="40" height="40" viewBox="0 0 100 100"><rect rx="24" width="100" height="100" fill="url(#cl1)"/><path d="M29 62 h42 a5 5 0 0 0 4.6-3 l2.6-7.6 a10 10 0 0 0-8.6-6.9 l-7.4-.6-6.6-7.6 a7 7 0 0 0-5.4-2.6 h-9.2 a8 8 0 0 0-7 4 l-5.2 8.6 a5 5 0 0 0-1.2 3.3 v9.6 a5 5 0 0 0 5 5 z" fill="#fff"/><circle cx="34" cy="66" r="6" fill="url(#cl1)"/><circle cx="67" cy="66" r="6" fill="url(#cl1)"/><path d="M46 62 h8" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg> C-AUTO</div>
+      <p class="login-welcome">Heureux de vous revoir</p>
+      <p class="subtitle">Suivez vos véhicules, demandez vos devis, pilotez vos réparations.</p>
+      ${msg ? `<div class="alert alert-ok">${I('check-circle')}<span>${esc(msg)}</span></div>` : ''}
+      <form id="f-login">
+        <label class="login-field">${I('mail')}<span>Adresse email</span>
+          <input name="email" type="email" autocomplete="email" required placeholder="vous@email.com">
+        </label>
+        <label class="login-field">${I('lock')}<span>Mot de passe</span>
+          <span class="pw-wrap">
+            <input name="password" id="login-password" type="password" autocomplete="current-password" required placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022">
+            <button type="button" class="pw-peek" id="login-peek" aria-label="Afficher ou masquer le mot de passe">${I('eye')}</button>
+          </span>
+        </label>
+        <button type="submit" class="login-submit">${I('log-in')} Se connecter</button>
+      </form>
+      <div class="login-feats">
+        <span>${I('shield-check')} Données sécurisées</span>
+        <span>${I('zap')} Devis en ligne</span>
+        <span>${I('heart-handshake')} Confiance</span>
+      </div>
+      <p class="auth-footer">Pas de compte ? <a href="#/register">S'inscrire</a></p>
+    </div>
+  </div>`;
   document.getElementById('f-login').onsubmit = async (ev) => {
     ev.preventDefault();
     try { const d = await api('/auth/login',{method:'POST',body:Object.fromEntries(new FormData(ev.target))}); setSession(d.token,d.user); toast('Connexion réussie','success'); location.hash = S.user.role==='SUPPLIER'?'#/supplier/dashboard':(isPro()?'#/pro/dashboard':(isAdmin()?'#/admin/dashboard':'#/app')); }
     catch(e) { viewLogin(err(e)); }
-  }; renderIcons();
+  };
+  const pk = document.getElementById('login-peek');
+  if (pk) pk.onclick = () => {
+    const p = document.getElementById('login-password');
+    const on = p.type === 'password';
+    p.type = on ? 'text' : 'password';
+    pk.innerHTML = on ? I('eye-off') : I('eye');
+  };
+  renderIcons();
 }
 
 function viewRegister() {
