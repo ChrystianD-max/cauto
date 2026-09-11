@@ -719,7 +719,7 @@ async function viewServiceRequestDetail(id) {
     const cancelBtn = document.getElementById('btn-cancel-sr');
     if (cancelBtn) {
       cancelBtn.onclick = async () => {
-        if (!confirm('Annuler cette demande ?')) return;
+        if (!(await UX.confirm('Annuler cette demande ?'))) return;
         try {
           await api('/service-requests/' + id + '/cancel', { method: 'POST', body: { reason: 'Annulé par le client' } });
           toast('Demande annulée', 'success');
@@ -730,7 +730,7 @@ async function viewServiceRequestDetail(id) {
     const validateRec = document.getElementById('btn-validate-reception');
     if (validateRec) {
       validateRec.onclick = async () => {
-        if (!confirm('Confirmez-vous que la fiche de réception correspond à l\'état de votre véhicule ?')) return;
+        if (!(await UX.confirm('Confirmez-vous que la fiche de réception correspond à l\'état de votre véhicule ?'))) return;
         try {
           await api('/service-requests/' + id + '/validate-reception', { method: 'POST', body: {} });
           toast('Réception validée. Le diagnostic peut commencer.', 'success');
@@ -741,7 +741,7 @@ async function viewServiceRequestDetail(id) {
     const disputeRec = document.getElementById('btn-dispute-reception');
     if (disputeRec) {
       disputeRec.onclick = async () => {
-        const msg = prompt('Décrivez l\'écart constaté :');
+        const msg = await UX.prompt('Décrivez l\'écart constaté :');
         if (msg === null) return;
         try {
           await api('/disputes', { method: 'POST', body: { subject: 'Écart sur réception de ' + (sr.plate || 'véhicule'), description: msg, service_request_id: id } });
@@ -752,7 +752,7 @@ async function viewServiceRequestDetail(id) {
     const confirmPickupSr = document.getElementById('btn-confirm-pickup-sr');
     if (confirmPickupSr) {
       confirmPickupSr.onclick = async () => {
-        if (!confirm('Confirmez-vous avoir récupéré votre véhicule en bon état ? Cette action clôturera le dossier.')) return;
+        if (!(await UX.confirm('Confirmez-vous avoir récupéré votre véhicule en bon état ? Cette action clôturera le dossier.'))) return;
         try {
           await api('/repairs/' + sr.intervention_id + '/client-confirm', { method: 'POST', body: { received_ok: true } });
           await viewServiceRequestDetail(id);
@@ -769,7 +769,7 @@ async function viewServiceRequestDetail(id) {
     const disputePickupSr = document.getElementById('btn-dispute-pickup-sr');
     if (disputePickupSr) {
       disputePickupSr.onclick = async () => {
-        const msg = prompt('Décrivez le problème constaté à la réception :');
+        const msg = await UX.prompt('Décrivez le problème constaté à la réception :');
         if (msg === null || !msg.trim()) return;
         try {
           await api('/disputes', { method: 'POST', body: { subject: 'Problème à la réception du véhicule ' + (sr.plate || ''), description: msg.trim(), intervention_id: sr.intervention_id } });
@@ -792,7 +792,7 @@ async function viewServiceRequestDetail(id) {
     if (refuseQuoteSr) {
       refuseQuoteSr.onclick = async () => {
         if (!quoteSrId) return toast('Devis introuvable — recharger la page', 'error');
-        const motif = prompt('Motif du refus :');
+        const motif = await UX.prompt('Motif du refus :');
         if (motif === null || !motif.trim()) return;
         try {
           await api('/quotes/' + quoteSrId + '/refuse', { method: 'POST', body: { reason: motif.trim() } });
@@ -1430,7 +1430,7 @@ async function viewRepairDetail(id) {
     const approveBtn = document.getElementById('btn-approve-quote');
     if (approveBtn) {
       approveBtn.onclick = async () => {
-        if (!confirm('Valider votre décision sur ce devis ?')) return;
+        if (!(await UX.confirm('Valider votre décision sur ce devis ?'))) return;
         try {
           await api('/quotes/' + quote.id + '/approve', { method: 'POST', body: {} });
           toast('Devis approuvé', 'success');
@@ -1482,7 +1482,7 @@ async function viewRepairDetail(id) {
     const remiseKeep = document.getElementById('btn-remise-keep');
     if (remiseKeep) {
       remiseKeep.onclick = async () => {
-        if (!confirm('Maintenir le prix ? Le client sera informé.')) return;
+        if (!(await UX.confirm('Maintenir le prix ? Le client sera informé.'))) return;
         const comment = (document.getElementById('q-remise-comment').value || '').trim();
         try {
           await api('/quotes/' + quote.id + '/remise', { method: 'POST', body: { grant: false, comment: comment || 'Prix maintenu' } });
@@ -1495,7 +1495,7 @@ async function viewRepairDetail(id) {
     const startWork = document.getElementById('btn-start-work');
     if (startWork) {
       startWork.onclick = async () => {
-        if (!confirm('Démarrer les travaux ? Le client sera notifié.')) return;
+        if (!(await UX.confirm('Démarrer les travaux ? Le client sera notifié.'))) return;
         try {
           await api('/repairs/' + id + '/status', { method: 'POST', body: { status: 'REPAIRING' } });
           toast('Travaux démarrés', 'success');
@@ -1506,7 +1506,7 @@ async function viewRepairDetail(id) {
     const workDone = document.getElementById('btn-work-done');
     if (workDone) {
       workDone.onclick = async () => {
-        if (!confirm('Signaler la fin des travaux et lancer le contrôle qualité ?')) return;
+        if (!(await UX.confirm('Signaler la fin des travaux et lancer le contrôle qualité ?'))) return;
         try {
           await api('/repairs/' + id + '/status', { method: 'POST', body: { status: 'QUALITY_CHECK' } });
           toast('Travaux terminés — contrôle qualité lancé', 'success');
@@ -1529,7 +1529,7 @@ async function viewRepairDetail(id) {
     const confirmPickup = document.getElementById('btn-confirm-pickup');
     if (confirmPickup) {
       confirmPickup.onclick = async () => {
-        if (!confirm('Confirmez-vous avoir récupéré votre véhicule en bon état ? Cette action clôturera le dossier.')) return;
+        if (!(await UX.confirm('Confirmez-vous avoir récupéré votre véhicule en bon état ? Cette action clôturera le dossier.'))) return;
         try {
           await api('/repairs/' + id + '/client-confirm', { method: 'POST', body: { received_ok: true } });
           await viewRepairDetail(id);
@@ -1546,7 +1546,7 @@ async function viewRepairDetail(id) {
     const disputePickup = document.getElementById('btn-dispute-pickup');
     if (disputePickup) {
       disputePickup.onclick = async () => {
-        const msg = prompt('Décrivez le problème constaté à la réception :');
+        const msg = await UX.prompt('Décrivez le problème constaté à la réception :');
         if (msg === null || !msg.trim()) return;
         try {
           await api('/disputes', { method: 'POST', body: { subject: 'Problème à la réception du véhicule ' + (r.vehicle_plate || ''), description: msg.trim(), intervention_id: id } });
@@ -2288,7 +2288,7 @@ async function viewProServiceRequestDetail(id) {
     const refuseBtn = document.getElementById('btn-refuse-sr');
     if (refuseBtn) {
       refuseBtn.onclick = async () => {
-        const reason = prompt('Motif du refus (optionnel) :');
+        const reason = await UX.prompt('Motif du refus (optionnel) :');
         if (reason === null) return;
         try {
           await api('/service-requests/' + id + '/refuse', { method: 'POST', body: { reason: reason || 'Indisponible' } });
@@ -2313,7 +2313,7 @@ async function viewProServiceRequestDetail(id) {
           interior: document.getElementById('rec-interior').value,
           observations: document.getElementById('rec-obs').value
         };
-        if (!confirm('Soumettre cette fiche de réception au client pour validation ?')) return;
+        if (!(await UX.confirm('Soumettre cette fiche de réception au client pour validation ?', { title: 'Fiche de réception', okLabel: 'Soumettre la fiche', icon: 'send' }))) return;
         try {
           await api('/service-requests/' + id + '/reception', { method: 'POST', body });
           toast('Fiche transmise au client', 'success');
