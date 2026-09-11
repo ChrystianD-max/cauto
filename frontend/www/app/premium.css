@@ -229,7 +229,7 @@ input::placeholder, textarea::placeholder { color: var(--p-muted); }
 
 /* ------------------------------------------------- Mobile app chrome */
 .app-menu-btn {
-  display: inline-flex;
+  display: none;
   position: fixed;
   top: calc(.7rem + env(safe-area-inset-top));
   left: calc(.7rem + env(safe-area-inset-left));
@@ -247,6 +247,7 @@ input::placeholder, textarea::placeholder { color: var(--p-muted); }
 
 /* Sidebar drawer -> refinement (mobile) */
 @media (max-width: 600px) {
+  .app-menu-btn { display: inline-flex; }
   .sidebar {
     width: 280px !important;
     max-width: 86vw;

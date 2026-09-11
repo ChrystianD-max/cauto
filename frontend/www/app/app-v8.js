@@ -109,7 +109,7 @@ const TRANS_LABELS = { TWD:'Traction', FWD:'Traction avant', RWD:'Propulsion', A
 const CAT_ICONS = { moteur:'settings', boite:'cog', embrayage:'disc', freinage:'octagon-alert', direction:'compass', suspension:'move-vertical', climatisation:'thermometer-snowflake', batterie:'battery', electricite:'zap', pneus:'circle-dot', voyant:'triangle-alert', bruit:'volume-2', autre:'help-circle' };
 
 /* ====== SIDEBAR NAV ====== */
-const APP_VERSION = 'v10.8';
+const APP_VERSION = 'v10.9';
 const CLIENT_NAV = [
   { label: 'Pilotage', items: [
     { hash:'#/app', icon:'layout-dashboard', label:'Accueil' },
@@ -255,8 +255,16 @@ const isPro = () => S.user && ['GARAGE','MECANICIEN','EXPERT'].includes(S.user.r
 const isSupplier = () => S.user && S.user.role === 'SUPPLIER';
 const currentNav = () => isAdmin() ? ADMIN_NAV : (isPro() ? PRO_NAV : (isSupplier() ? SUPPLIER_NAV : CLIENT_NAV));
 
+let _sidebarOpen = false;
+let _sidebarLastTap = 0;
 function menuBtn() {
-  return `<button id="app-menu-btn" class="app-menu-btn" aria-label="Menu">${I('menu')}<i data-lucide="menu" style="width:22px;height:22px"></i></button>`;
+  return `<button type="button" id="app-menu-btn" class="app-menu-btn" aria-label="Menu">${I('menu')}</button>`;
+}
+function setSidebar(state) {
+  _sidebarOpen = !!state;
+  document.querySelector('.app-layout')?.classList.toggle('sidebar-open', _sidebarOpen);
+  const hb = document.getElementById('hamburger');
+  if (hb) hb.classList.toggle('open', _sidebarOpen);
 }
 function renderSidebar() {
   if (!S.user) return '';
@@ -292,6 +300,7 @@ function layoutApp(html) {
   document.querySelector('header').classList.add('hidden');
   document.querySelector('footer').classList.add('hidden');
   $app.innerHTML = `<div class="app-layout">${renderSidebar()}<main class="app-main">${menuBtn()}${html}</main></div>`;
+  if (_sidebarOpen) document.querySelector('.app-layout')?.classList.add('sidebar-open');
   document.getElementById('btn-logout').onclick = logout;
   renderIcons(); if (window.cautoI18n && window.cautoI18n.apply) window.cautoI18n.apply();
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1478,15 +1487,15 @@ if (_hamburger) _hamburger.onclick = () => {
 document.addEventListener('click', (e) => {
   const layout = document.querySelector('.app-layout');
   if (!layout) return;
-  const hb = document.getElementById('hamburger');
   if (e.target.closest('#app-menu-btn')) {
-    layout.classList.toggle('sidebar-open');
-    if (hb) hb.classList.toggle('open');
+    const now = Date.now();
+    if (now - _sidebarLastTap < 400) return;
+    _sidebarLastTap = now;
+    setSidebar(!_sidebarOpen);
     return;
   }
   if (e.target.closest('.sidebar-link') || e.target === layout) {
-    layout.classList.remove('sidebar-open');
-    if (hb) hb.classList.remove('open');
+    setSidebar(false);
     return;
   }
 });

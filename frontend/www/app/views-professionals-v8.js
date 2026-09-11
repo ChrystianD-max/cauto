@@ -2495,6 +2495,21 @@ async function viewProProfile() {
     }));
     const cert = pro && pro.is_certified ? `<span class="badge badge-accent">${I('award')} Certifié C-AUTO</span>` : '';
     const logoDocId = pro && pro.logo_url;
+    const synth = pro && pro.synthesis
+      ? (typeof pro.synthesis === 'string' ? (() => { try { return JSON.parse(pro.synthesis); } catch (_e) { return null; } })() : pro.synthesis)
+      : null;
+    const synthHtml = synth ? (() => {
+      const rows = [];
+      if (synth.name) rows.push(['Nom', synth.name]);
+      if (synth.email) rows.push(['Email', synth.email]);
+      if (synth.phone) rows.push(['Téléphone', synth.phone]);
+      if (synth.city) rows.push(['Ville', synth.city]);
+      if (synth.specialty) rows.push(['Spécialité', synth.specialty]);
+      if (synth.is_available != null) rows.push(['Disponibilité', synth.is_available ? 'Oui' : 'Non']);
+      if (synth.attestation_count != null) rows.push(['Attestations fournies', String(synth.attestation_count)]);
+      if (synth.updated_at) rows.push(['Dernière mise à jour', new Date(synth.updated_at).toLocaleString('fr')]);
+      return `<div class="card" style="border-left:3px solid var(--accent);margin:1rem 0 0"><h3 style="margin:0 0 .4rem">${I('file-text')} Synthèse du profil</h3><div class="pp-synthesis" style="font-size:.9rem">${rows.map(r => `<div class="pp-srow" style="display:flex;justify-content:space-between;gap:.8rem;padding:.35rem 0;border-bottom:1px dashed var(--border)"><span class="hint" style="flex:0 0 45%">${esc(r[0])}</span><b style="text-align:right">${esc(String(r[1]))}</b></div>`).join('')}</div></div>`;
+    })() : '';
     layoutApp(`
       <div class="pro-profile">
         <div class="pro-profile-hero card">
@@ -2541,7 +2556,7 @@ async function viewProProfile() {
           </div>
         </div>
 
-        ${pro && pro.synthesis ? `<div class="card" style="border-left:3px solid var(--accent)"><h3>${I('file-text')} Synthèse du profil</h3><div class="pp-synthesis"><pre style="white-space:pre-wrap;font-size:0.85rem">${esc(JSON.stringify(pro.synthesis, null, 2))}</pre></div></div>` : ''}
+        ${synthHtml}
 
         <div class="card att-card">
           <div class="att-head">

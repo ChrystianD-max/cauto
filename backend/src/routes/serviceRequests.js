@@ -427,7 +427,7 @@ router.post('/:id/validate-reception', wrap(async (req, res) => {
     if (sr.status !== 'VEHICLE_RECEIVED') {
         throw new HttpError(400, 'En attente de reception du vehicule');
     }
-    if (!sr.reception_vin) {
+    if (!sr.reception_submitted_at) {
         throw new HttpError(400, 'Aucune reception soumise');
     }
     const updated = await db.one(
