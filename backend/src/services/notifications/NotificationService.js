@@ -2,6 +2,7 @@ const db = require('../../db');
 const crypto = require('crypto');
 const config = require('../../config');
 const { buildChannels, CHANNELS } = require('./channels');
+const WebPushService = require('./WebPushService');
 
 // NotificationService : multicanal avec FALLBACK.
 // Ordre par défaut (env) : push,sms,email,whatsapp — le canal CHAT C-AUTO
@@ -17,10 +18,14 @@ class NotificationService {
   }
 
   defaultOrder() {
-    // MODE DÉMONSTRATION : seul le canal interne CHAT C-AUTO est utilisé.
-    if (config.demoMode) return [CHANNELS.CHAT];
-    return (process.env.NOTIF_FALLBACK_ORDER || 'push,sms,email,whatsapp')
+    const fromEnv = (process.env.NOTIF_FALLBACK_ORDER || '')
       .split(',').map((s) => s.trim().toUpperCase()).filter(Boolean);
+    if (fromEnv.length) return fromEnv;
+    // MODE DÉMONSTRATION : seul le canal interne CHAT C-AUTO est utilisé,
+    // sauf quand le Web Push (VAPID) est réellement configuré (il ne dépend pas
+    // d'une passerelle externe) — dans ce cas les presses partent vraiment.
+    if (config.demoMode) return WebPushService.isConfigured() ? [CHANNELS.CHAT, CHANNELS.PUSH] : [CHANNELS.CHAT];
+    return ['PUSH', 'SMS', 'EMAIL', 'WHATSAPP'];
   }
 
   async _prefs(userId) {

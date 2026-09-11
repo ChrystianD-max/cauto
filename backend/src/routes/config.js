@@ -2,6 +2,7 @@ const express = require('express');
 const config = require('../config');
 const pkg = require('../../package.json');
 const { status } = require('../services/mode/integrationStatus');
+const WebPushService = require('../services/notifications/WebPushService');
 
 // Module 50 : GET /api/config — état public du mode d'exécution.
 // Aucune donnée sensible (clés, URLs internes) : uniquement des drapeaux et libellés
@@ -18,7 +19,7 @@ router.get('/', (_req, res) => {
     disclaimer: config.demoMode
       ? 'Mode démonstration : le paiement réel, le SMS, le WhatsApp, le GPS temps réel et l\'IA externe sont simulés. Aucune opération réelle n\'est émise vers l\'extérieur.'
       : null,
-    integrations: status()
+    integrations: Object.assign(status(), { pushVapidPublicKey: WebPushService.publicKey() })
   });
 });
 

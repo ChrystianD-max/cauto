@@ -92,10 +92,141 @@
       navigator.serviceWorker.register(SW_PATH).then(function (reg) {
         reg.update().catch(function () {});
         if (pendingQueue().length) registerBackgroundSync();
+        resyncPush();
       }).catch(function () {});
     });
     navigator.serviceWorker.addEventListener('message', function (event) {
       if (event.data && event.data.type === 'cauto-flush') flushQueue();
     });
   }
+
+  /* --- Notifications push (module 67) --- */
+  var PUSH_KEY = 'push.vapid';
+  var PUSH_ENDPOINT_KEY = 'push.active';
+
+  function urlBase64ToUint8Array(base64) {
+    var pad = base64.replace(/=+$/, '');
+    var raw = atob(pad);
+    var bytes = new Uint8Array(raw.length);
+    for (var i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+    return bytes;
+  }
+
+  function binaryKey(ab) {
+    var bytes = new Uint8Array(ab);
+    var s = '';
+    for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+    return btoa(s);
+  }
+
+  function pushVapidPublic() {
+    try { return JSON.parse(localStorage.getItem(PUSH_KEY) || 'null'); } catch (e) { return null; }
+  }
+
+  async function fetchVapidPublic() {
+    var cached = pushVapidPublic();
+    if (cached && cached.k) return cached.k;
+    try {
+      var res = await fetch(location.origin + '/api/config');
+      if (!res.ok) return cached ? cached.k : null;
+      var j = await res.json();
+      var pk = j && j.integrations && j.integrations.pushVapidPublicKey;
+      if (pk) {
+        try { localStorage.setItem(PUSH_KEY, JSON.stringify({ k: pk, t: Date.now() })); } catch (e) {}
+        return pk;
+      }
+    } catch (e) {}
+    return cached ? cached.k : null;
+  }
+
+  function authToken() {
+    return (window.S && window.S.token) || localStorage.getItem('token') || '';
+  }
+
+  async function sendSubscriptionToServer(sub) {
+    var token = authToken();
+    if (!token) return false;
+    try {
+      var res = await fetch(location.origin + '/api/push/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify({
+          endpoint: sub.endpoint,
+          keys: { p256dh: binaryKey(sub.getKey('p256dh')), auth: binaryKey(sub.getKey('auth')) },
+          userAgent: (navigator.userAgent || '').slice(0, 400)
+        })
+      });
+      if (res.ok) {
+        try { localStorage.setItem(PUSH_ENDPOINT_KEY, sub.endpoint); } catch (e) {}
+        return true;
+      }
+    } catch (e) {}
+    return false;
+  }
+
+  window.cautoPush = {
+    enabled: false,
+    async enable() {
+      if (!('Notification' in window) || !('PushManager' in window)) return { ok: false, reason: 'unsupported' };
+      if (Notification.permission === 'denied') return { ok: false, reason: 'denied' };
+      if (!authToken()) return { ok: false, reason: 'auth' };
+      var reg = await navigator.serviceWorker.ready;
+      var key = await fetchVapidPublic();
+      if (!key) return { ok: false, reason: 'vapid' };
+      try {
+        if (window.Notification && Notification.requestPermission) await Notification.requestPermission();
+      } catch (e) {}
+      if (Notification.permission !== 'granted') return { ok: false, reason: 'permission' };
+      var sub = await reg.pushManager.getSubscription();
+      if (!sub) {
+        sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(key)
+        });
+      }
+      var ok = await sendSubscriptionToServer(sub);
+      window.cautoPush.enabled = ok;
+      return { ok: ok };
+    },
+    async disable() {
+      try {
+        var reg = await navigator.serviceWorker.ready;
+        var sub = await reg.pushManager.getSubscription();
+        var token = authToken();
+        if (sub) {
+          if (token) {
+            try { await fetch(location.origin + '/api/push/unsubscribe', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ endpoint: sub.endpoint }) }); } catch (e) {}
+          }
+          await sub.unsubscribe().catch(function () {});
+        }
+      } catch (e) {}
+      try { localStorage.removeItem(PUSH_ENDPOINT_KEY); } catch (e) {}
+      window.cautoPush.enabled = false;
+      return { ok: true };
+    }
+  };
+
+  /* Reconnexion à chaque login ; reprise automatique si la permission est déjà
+     accordée et l'appareil de la même origine (endpoint identique = pas de spam). */
+  var resyncPush = async function () {
+    if (!('serviceWorker' in navigator)) return;
+    if (!('Notification' in window) || !('PushManager' in window)) return;
+    if (Notification.permission !== 'granted') return;
+    if (!authToken()) return;
+    try {
+      var reg = await navigator.serviceWorker.ready;
+      var sub = await reg.pushManager.getSubscription();
+      if (!sub) {
+        var key = await fetchVapidPublic();
+        if (!key) return;
+        sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(key) });
+      }
+      try {
+        if (localStorage.getItem(PUSH_ENDPOINT_KEY) === sub.endpoint) return;
+      } catch (e) {}
+      var ok = await sendSubscriptionToServer(sub);
+      window.cautoPush.enabled = ok;
+    } catch (e) {}
+  };
+  window.cautoResyncPush = resyncPush;
 })();

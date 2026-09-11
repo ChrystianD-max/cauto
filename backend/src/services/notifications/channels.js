@@ -1,10 +1,12 @@
 const PaymentProvider = require('../payment/PaymentProvider');
 const config = require('../../config');
+const WebPushService = require('./WebPushService');
 
 // Banque d'adaptateurs de canaux. Chaque canal déclare sa disponibilité
 // (clés API en environnement) ; ISend échoue => fallback vers le canal suivant.
-// MODE DÉMONSTRATION : les canaux externes (push, SMS, e-mail, WhatsApp) ne sont
-// jamais disponibles — tout passe par le canal interne CHAT C-AUTO (simulation).
+// MODE DÉMONSTRATION : les canaux externes (SMS, e-mail, WhatsApp) ne sont
+// jamais disponibles — tout passe par le canal interne CHAT C-AUTO. Le canal
+// PUSH (Web Push navigateur) fonctionne lui partout (il dépend de VAPID).
 
 class NotificationChannel {
   constructor(id, label) {
@@ -25,14 +27,14 @@ class ChatChannel extends NotificationChannel {
 
 class PushChannel extends NotificationChannel {
   constructor() { super('PUSH', 'Notification push'); }
-  configured() { return !config.demoMode && !!PaymentProvider.key('FIREBASE_SERVER_KEY'); }
-  async send({ message, title = 'C-AUTO', userId, meta }) {
-    if (!this.configured()) throw new Error('Push non configuré (FIREBASE_SERVER_KEY manquant)');
-    return PaymentProvider.httpPost(
-      'https://fcm.googleapis.com/v1/projects/' + (PaymentProvider.key('FIREBASE_PROJECT') || '-') + '/messages:send',
-      { message: { token: meta || null, notification: { title, body: message } } },
-      { Authorization: 'Bearer ' + PaymentProvider.key('FIREBASE_SERVER_KEY') }
-    );
+  configured() { return WebPushService.isConfigured(); }
+  async send({ message, title = 'C-AUTO', userId, url }) {
+    if (!this.configured()) throw new Error('Push non configuré (VAPID_PRIVATE_KEY manquant)');
+    const r = await WebPushService.sendToUser(userId, { title, body: message, url: url || '/app' });
+    // Sans abonnement actif on fait échouer le canal pour poursuivre la chaîne
+    // de fallback vers les autres canaux configurés.
+    if (!r.sent) throw new Error('Aucun abonnement push actif');
+    return { delivered: true, sent: r.sent, removed: r.removed, synthetic: false };
   }
 }
 

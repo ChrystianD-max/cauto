@@ -5,7 +5,7 @@
    reconnexion (event 'sync' -> 'cauto-flush'). */
 'use strict';
 
-const VERSION = 'cauto-pwa-v32';
+const VERSION = 'cauto-pwa-v33';
 const CORE = [
   './',
   './index.html',
@@ -15,20 +15,20 @@ const CORE = [
   './icons/icon-512.png',
   './icons/maskable-512.png',
   './vendor/lucide.min.js?v=1.0',
-  './styles.css?v=10.22',
+  './styles.css?v=10.24',
   './design-system.css?v=1.1',
   './glass-theme.css?v=2.6',
   './premium.css?v=1.1',
   './admin-theme.css?v=1.0',
   './app-i18n.js?v=1.1',
   './ux-states.js?v=1.0',
-  './app-v8.js?v=12.5',
+  './app-v8.js?v=12.7',
   './views-admin.js?v=2.4',
   './views-professionals-v8.js?v=1.16',
   './views-modules-v2.js?v=1.6',
   './views-chat.js?v=2.1',
   './views-innovations.js?v=1.0',
-  './pwa.js?v=1.0',
+  './pwa.js?v=1.1',
   './assets/auth-bg.jpg'
 ];
 
@@ -122,4 +122,39 @@ self.addEventListener('message', (event) => {
       clients.forEach((client) => client.postMessage({ type: 'cauto-flush' }))
     );
   }
+});
+
+/* --- Notifications push (module 67) --- */
+self.addEventListener('push', (event) => {
+  let data = { title: 'C-AUTO', body: '', url: '/app' };
+  if (event.data) {
+    try { data = Object.assign(data, event.data.json()); } catch (_) { data.body = event.data.text(); }
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'C-AUTO', {
+      body: data.body || '',
+      icon: './icons/icon-192.png',
+      badge: './icons/icon-192.png',
+      vibrate: [120, 60, 120],
+      data: { url: data.url || '/app' }
+    })
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = event.notification.data && event.notification.data.url
+    ? event.notification.data.url
+    : '/app';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+      for (const client of list) {
+        if ('focus' in client) {
+          try { client.navigate(url); } catch (_) { /* déjà sur une autre page */ }
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(url).catch(() => undefined);
+    })
+  );
 });

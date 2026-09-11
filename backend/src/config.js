@@ -47,6 +47,15 @@ module.exports = {
     // si vide, ils sont servis via l'API (/api/documents/:id/download).
     publicUrl: process.env.STORAGE_PUBLIC_URL || ''
   },
+  // Module 67 — NOTIFICATIONS PUSH (Web Push, protocole VAPID).
+  // La clé PUBLIQUE est publique par nature (elle identifie le serveur pour les
+  // abonnements navigateur). La clé PRIVÉE vit uniquement dans l'environnement
+  // (VAPID_PRIVATE_KEY, jamais commitée) ; sans elle le push est désactivé.
+  push: {
+    vapidPublicKey: (process.env.VAPID_PUBLIC_KEY || 'BJF9pZvKR7dstY1Nmq7pV9YVkYPdvPJ7vCOydQAuPRbMOPb_pbCFN1Z0E-k4hL44R5tPfgJgya7oKOlSQHZAfa0').trim(),
+    vapidPrivateKey: (process.env.VAPID_PRIVATE_KEY || '').trim(),
+    vapidSubject: (process.env.VAPID_SUBJECT || 'mailto:admin@cauto.local').trim()
+  },
   // Module 50 : MODE DÉMONSTRATION.
   // DEMO_MODE=true fige toutes les intégrations externes (paiement réel, SMS,
   // WhatsApp, GPS temps réel, IA externe) en mode simulé : la plateforme reste

@@ -74,6 +74,7 @@ app.use('/api/tenants', require('./routes/tenants'));
 app.use('/api/gps', require('./routes/gps'));
 app.use('/api/matching', require('./routes/matching'));
 app.use('/api/notifications', require('./routes/notifications'));
+  app.use('/api/push', require('./routes/push'));
 app.use('/api/chat', require('./routes/chat'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/super-admin', require('./routes/superAdmin'));
@@ -113,6 +114,16 @@ app.use((err, req, res, _next) => {
 const server = app.listen(config.port, () => {
   logger.info(`C-AUTO backend listening on :${config.port} (${config.env})`);
   startAlerts();
+
+  // Module 67 — PUSH : drain de la file outbox (notifications envoyées par
+  // trigger SQL sur la table notifications) dès le démarrage puis périodiquement.
+  if (require('./services/notifications/WebPushService').isConfigured()) {
+    logger.info('Web Push (VAPID) configuré — drain outbox actif');
+    setInterval(() => {
+      require('./services/notifications/WebPushService').drainOutbox().catch(() => {});
+    }, 30000);
+    require('./services/notifications/WebPushService').drainOutbox().catch(() => {});
+  }
 });
 
 process.on('SIGTERM', () => {

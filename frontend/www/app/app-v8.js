@@ -79,7 +79,7 @@ function forceLogout(status) {
   document.body.removeAttribute('data-role');
   location.hash = '#/login';
 }
-function setSession(token, user) { S.token = token; S.user = user; localStorage.setItem('token', token); localStorage.setItem('user', JSON.stringify(user)); document.body.setAttribute('data-role', user.role || 'CLIENT'); }
+function setSession(token, user) { S.token = token; S.user = user; localStorage.setItem('token', token); localStorage.setItem('user', JSON.stringify(user)); document.body.setAttribute('data-role', user.role || 'CLIENT'); if (window.cautoResyncPush) window.cautoResyncPush(); }
 function logout() { localStorage.clear(); S.token = null; S.user = null; document.body.removeAttribute('data-role'); location.hash = '#/login'; }
 
 /* ====== HELPERS ====== */
@@ -1139,6 +1139,19 @@ async function viewProfile() {
           <button type="submit" class="btn btn-primary">${I('save')} Enregistrer les modifications</button>
         </form>
       </div>
+
+      <div class="card pp-synth-card" id="push-card">
+        <div class="pp-synth-head">
+          <h3>${I('bell-ring')} Notifications push</h3>
+          <span class="badge" id="push-state">…</span>
+        </div>
+        <p class="pp-push-desc">Recevez une alerte sur votre téléphone pour les nouveaux devis, rendez-vous, messages et changements de statut.</p>
+        <div class="pp-submit-zone">
+          <button type="button" class="btn btn-primary" id="btn-push-enable">${I('bell-plus')} Activer les notifications</button>
+          <button type="button" class="btn btn-outline hidden" id="btn-push-disable">${I('bell-off')} Désactiver</button>
+          <button type="button" class="btn btn-outline hidden" id="btn-push-test">${I('send')} Envoyer un test</button>
+        </div>
+      </div>
     </div>
     `);
     const toggle = document.getElementById('btn-toggle-edit');
@@ -1161,6 +1174,50 @@ async function viewProfile() {
         viewProfile();
       } catch (e) { toast(e.message, 'error'); }
     };
+    /* Notifications push : état + actions */
+    const pushEnabled = () => (window.cautoPush && window.cautoPush.enabled) ||
+      (typeof Notification !== 'undefined' && Notification.permission === 'granted' && 'PushManager' in window);
+    const pushSupported = () => (typeof Notification !== 'undefined' && 'PushManager' in window && navigator.serviceWorker);
+    const refreshPushState = () => {
+      const state = document.getElementById('push-state');
+      const en = document.getElementById('btn-push-enable');
+      const dis = document.getElementById('btn-push-disable');
+      const test = document.getElementById('btn-push-test');
+      if (!state) return;
+      if (!pushSupported()) { state.textContent = 'Non supporté'; state.className = 'badge'; return; }
+      if (Notification.permission === 'denied') { state.textContent = 'Bloqué dans le navigateur'; state.className = 'badge badge-ko'; return; }
+      const on = pushEnabled();
+      state.textContent = on ? 'Activées' : 'Désactivées';
+      state.className = 'badge ' + (on ? 'badge-ok' : '');
+      en.classList.toggle('hidden', on);
+      dis.classList.toggle('hidden', !on);
+      test.classList.toggle('hidden', !on);
+    };
+    const en = document.getElementById('btn-push-enable');
+    const dis = document.getElementById('btn-push-disable');
+    const test = document.getElementById('btn-push-test');
+    if (en) en.onclick = async () => {
+      const r = await window.cautoPush.enable();
+      if (r && r.ok) { toast('Notifications activées', 'success'); }
+      else if (r && r.reason === 'denied') { toast('Notification bloquée dans le navigateur', 'error'); }
+      else if (r && r.reason === 'permission') { toast('Autorisation refusée — activez-la dans votre navigateur', 'warn'); }
+      else { toast('Push non disponible pour le moment', 'warn'); }
+      refreshPushState();
+    };
+    if (dis) dis.onclick = async () => {
+      await window.cautoPush.disable();
+      toast('Notifications désactivées', 'success');
+      refreshPushState();
+    };
+    if (test) test.onclick = async () => {
+      toast('Envoi du test en cours…', 'info');
+      try {
+        const r = await api('/push/test', { method: 'POST' });
+        if (r.sent > 0) toast('Test envoyé sur votre appareil', 'success');
+        else toast(r.removed ? 'Ancien abonnement invalide — réassociez votre appareil' : 'Aucun appareil abonné — activez puis vérifiez le navigateur', 'warn');
+      } catch (e) { toast(e.message, 'error'); }
+    };
+    refreshPushState();
   } catch(e) { layoutApp(err(e)); }
   hideLoading(); renderIcons();
 }

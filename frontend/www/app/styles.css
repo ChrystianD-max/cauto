@@ -1256,6 +1256,9 @@ table.table, .ad-table { width: 100%; border-collapse: collapse; font-size: 0.85
 .pp-srow b { text-align: right; word-break: break-word; }
 .pp-submit-zone { margin-top: 0.8rem; padding-top: 0.7rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 0.7rem; flex-wrap: wrap; }
 .pp-submit-zone .hint { margin: 0; }
+.pp-push-desc { color: var(--text2); font-size: 0.85rem; line-height: 1.5; margin: 0.45rem 0 0; }
+#push-card .pp-submit-zone { justify-content: flex-start; }
+#push-card .pp-submit-zone .btn { margin: 0 0.15rem; }
 @media (max-width: 620px) { .pp-synthesis { grid-template-columns: 1fr; } }
 .sp-hero { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; background: radial-gradient(120% 160% at 100% 0%, rgba(109, 91, 255, 0.2), transparent 50%), var(--card); }
 .sp-hero-logo { width: 54px; height: 54px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: #fff; background: linear-gradient(135deg, #6d5bff, var(--accent)); box-shadow: 0 8px 22px rgba(109,91,255,0.35); }
