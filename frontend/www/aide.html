@@ -4,26 +4,40 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Centre d'aide — C-AUTO</title>
-  <link rel="icon" type="image/png" href="app/icons/favicon-32.png" />
-  <link rel="stylesheet" href="css/public.css?v=1.1">
+  <meta name="description" content="Centre d'aide C-AUTO : véhicules, interventions, paiements et questions fréquentes.">
+  <meta name="theme-color" content="#0b1220">
+  <link rel="icon" type="image/png" href="app/icons/favicon-32.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="css/public.css?v=2.0">
 </head>
 <body>
 
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="display:none" aria-hidden="true">
+  <defs>
+    <symbol id="i-car" viewBox="0 0 24 24"><path d="M5 16l-1.5-5.5A2 2 0 0 1 5.4 8h13.2a2 2 0 0 1 1.9 2.5L19 16"/><path d="M19 16h-14"/><path d="M4 16H3a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1h1.5"/><path d="M20 16h1a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1h-1.5"/><circle cx="7.4" cy="19.5" r="1.4"/><circle cx="16.6" cy="19.5" r="1.4"/></symbol>
+    <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94z"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></symbol>
+  </defs>
+</svg>
+
 <nav class="nav">
   <div class="container nav-inner">
-    <a href="index.html" class="nav-logo"><svg width="36" height="36" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d0f15"/><stop offset="1" stop-color="#1a1f2b"/></linearGradient><linearGradient id="go" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe9b8"/><stop offset=".4" stop-color="#d4af6a"/><stop offset="1" stop-color="#a8853f"/></linearGradient><linearGradient id="bl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4a6cc0"/><stop offset="1" stop-color="#1d2f57"/></linearGradient></defs><rect x="2" y="2" width="96" height="96" rx="24" fill="url(#lg)"/><rect x="2" y="2" width="96" height="96" rx="24" fill="none" stroke="url(#go)" stroke-width="2.4"/><path d="M50 25 L58 44 L78 44 L62 56 L69 75 L50 63 L31 75 L38 56 L22 44 L42 44 Z" fill="url(#bl)" stroke="url(#go)" stroke-width="1.8"/><path d="M29 51 C30 43 37 39 45 39 C52 39 57 42 58 47" stroke="url(#go)" stroke-width="6" fill="none" stroke-linecap="round"/></svg> <span class="wordmark">C-AUTO</span></a>
-    <div class="nav-links">
-      <a href="comment-ca-marche.html">Comment ça marche</a>
-      <a href="professionnels.html">Professionnels</a>
-      <a href="entreprises.html">Entreprises</a>
-      <a href="pieces.html">Pièces</a>
-      <a href="aide.html" class="active">Aide</a>
+    <a href="index.html" class="nav-logo" aria-label="C-AUTO — accueil"><svg viewBox="0 0 100 100" aria-hidden="true"><rect width="96" height="96" x="2" y="2" rx="24" fill="#0d0f15"/><rect width="96" height="96" x="2" y="2" rx="24" fill="none" stroke="#b89248" stroke-width="2.4"/><path d="M50 25 58 44 78 44 62 56 69 75 50 63 31 75 38 56 22 44 42 44Z" fill="#1d2f57" stroke="#d4af6a" stroke-width="1.8"/><path d="M29 51c1-8 8-12 16-12 7 0 12 3 13 8" stroke="#d4af6a" stroke-width="6" fill="none" stroke-linecap="round"/></svg> <span class="wordmark">C-AUTO</span></a>
+    <div class="nav-menu" id="navMenu">
+      <div class="nav-links">
+        <a href="index.html#produit">Solutions</a>
+        <a href="comment-ca-marche.html">Comment ça marche</a>
+        <a href="professionnels.html">Professionnels</a>
+        <a href="pieces.html">Pièces</a>
+        <a href="aide.html" class="active">Aide</a>
+      </div>
+      <div class="nav-cta">
+        <a href="app/#/login" class="btn btn-outline btn-sm">Se connecter</a>
+        <a href="app/#/register" class="btn btn-primary btn-sm">Commencer</a>
+      </div>
     </div>
-    <div class="nav-cta">
-      <a href="app/#/login" class="btn btn-outline btn-sm">Se connecter</a>
-      <a href="app/#/register" class="btn btn-primary btn-sm">S'inscrire</a>
-    </div>
-    <button class="hamburger" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <button class="hamburger" id="navToggle" aria-label="Menu" aria-expanded="false" aria-controls="navMenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg></button>
   </div>
 </nav>
 
@@ -39,68 +53,95 @@
   <div class="container" style="max-width:800px">
 
     <div class="grid-3" style="margin-bottom:3rem">
-      <div class="card animate" style="text-align:center">
-        <div style="font-size:2rem;margin-bottom:0.5rem">🚗</div>
+      <div class="card anim" style="text-align:center">
+        <div class="card-icon blue" style="margin:0 auto 0.8rem"><svg aria-hidden="true"><use href="#i-car"/></svg></div>
         <h3>Véhicules</h3>
         <p>Ajout, modification, maintenance</p>
       </div>
-      <div class="card animate" style="text-align:center">
-        <div style="font-size:2rem;margin-bottom:0.5rem">🔧</div>
+      <div class="card anim" style="text-align:center">
+        <div class="card-icon green" style="margin:0 auto 0.8rem"><svg aria-hidden="true"><use href="#i-wrench"/></svg></div>
         <h3>Interventions</h3>
         <p>Devis, réparation, garantie</p>
       </div>
-      <div class="card animate" style="text-align:center">
-        <div style="font-size:2rem;margin-bottom:0.5rem">💳</div>
+      <div class="card anim" style="text-align:center">
+        <div class="card-icon orange" style="margin:0 auto 0.8rem"><svg aria-hidden="true"><use href="#i-card"/></svg></div>
         <h3>Paiements</h3>
-        <p>Paiement sécurisé, remboursement</p>
+        <p>Suivi, remboursement</p>
       </div>
     </div>
 
-    <h2 class="section-title animate">Questions fréquentes</h2>
+    <h2 class="section-title anim">Questions fréquentes</h2>
 
     <div style="margin-top:1.5rem">
-      <div class="faq-item animate">
-        <div class="faq-q">Comment ajouter un véhicule ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
-        <div class="faq-a">Connectez-vous à votre compte, allez dans "Mes véhicules" et cliquez sur "Ajouter un véhicule". Renseignez la marque, le modèle, l'année, l'immatriculation et le VIN. Le programme d'entretien est automatiquement chargé.</div>
+      <div class="faq-item anim">
+        <div class="faq-q">Comment ajouter un véhicule ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">Connectez-vous à votre compte, allez dans « Mes véhicules » et cliquez sur « Ajouter un véhicule ». Renseignez la marque, le modèle, l'année, l'immatriculation et le VIN. Le programme d'entretien est automatiquement chargé.</div>
       </div>
-      <div class="faq-item animate">
-        <div class="faq-q">Comment fonctionne le pré-diagnostic ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
-        <div class="faq-a">Décrivez votre problème dans la fiche véhicule. Le moteur analyse les mots-clés et identifie les causes probables, la sévérité et les recommandations. C'est un outil d'aide à la décision, pas un diagnostic médical.</div>
+      <div class="faq-item anim">
+        <div class="faq-q">Comment fonctionne le pré-diagnostic ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">Décrivez votre problème dans la fiche véhicule. Le moteur analyse les mots-clés et identifie des causes probables, un niveau de sévérité et des recommandations. C'est un outil d'aide à la décision, pas un diagnostic mécanique.</div>
       </div>
-      <div class="faq-item animate">
-        <div class="faq-q">Puis-je refuser un devis ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
-        <div class="faq-a">Oui, absolument. Vous pouvez refuser un devis sans engagement. Le professionnel sera notifié et vous pourrez en demander un autre à un autre professionnel.</div>
+      <div class="faq-item anim">
+        <div class="faq-q">Puis-je refuser un devis ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">Oui, absolument. Vous pouvez refuser un devis sans engagement. Le professionnel sera notifié et vous pourrez en demander un autre.</div>
       </div>
-      <div class="faq-item animate">
-        <div class="faq-q">Comment demander un remboursement ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
-        <div class="faq-a">Contactez-nous via la page Contact en indiquant votre numéro de paiement. Si le paiement a échoué ou a été annulé, le remboursement est automatique sous 3-5 jours ouvrés.</div>
+      <div class="faq-item anim">
+        <div class="faq-q">Comment demander un remboursement ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">Contactez-nous via la page Contact en indiquant votre référence de paiement. Si un paiement a échoué ou a été annulé, le remboursement suit.</div>
       </div>
-      <div class="faq-item animate">
-        <div class="faq-q">Comment devenir professionnel sur C-AUTO ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
-        <div class="faq-a">Inscrivez-vous avec le rôle "Garage" ou "Mécanicien". Votre profil sera analysé puis validé par notre équipe. Vous aurez ensuite accès au tableau de bord professionnel.</div>
+      <div class="faq-item anim">
+        <div class="faq-q">Comment devenir professionnel sur C-AUTO ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">Inscrivez-vous avec le rôle « Garage » ou « Mécanicien ». Votre profil est analysé puis validé par notre équipe. Vous accédez ensuite au tableau de bord professionnel.</div>
       </div>
-      <div class="faq-item animate">
-        <div class="faq-q">L'historique est-il transférable ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+      <div class="faq-item anim">
+        <div class="faq-q">L'historique est-il transférable ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
         <div class="faq-a">Oui. Vous pouvez exporter l'historique complet en PDF ou JSON. Lors de la vente du véhicule, vous pouvez transférer la fiche complète au nouvel propriétaire.</div>
       </div>
     </div>
 
-    <div class="card animate" style="margin-top:3rem;text-align:center">
+    <div class="card anim" style="margin-top:3rem;text-align:center">
       <h3>Vous n'avez pas trouvé votre réponse ?</h3>
-      <p style="color:var(--muted);margin:0.5rem 0 1rem">Notre équipe vous répond sous 24h.</p>
-      <a href="contact.html" class="btn btn-primary">Nous contacter →</a>
+      <p style="color:var(--muted);margin:0.5rem 0 1rem">Notre équipe vous répond rapidement.</p>
+      <a href="contact.html" class="btn btn-primary">Nous contacter <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
     </div>
   </div>
 </section>
 
 <footer class="footer">
   <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="nav-logo" aria-label="C-AUTO — accueil"><svg viewBox="0 0 100 100" aria-hidden="true"><rect width="96" height="96" x="2" y="2" rx="24" fill="#0d0f15"/><rect width="96" height="96" x="2" y="2" rx="24" fill="none" stroke="#b89248" stroke-width="2.4"/><path d="M50 25 58 44 78 44 62 56 69 75 50 63 31 75 38 56 22 44 42 44Z" fill="#1d2f57" stroke="#d4af6a" stroke-width="1.8"/><path d="M29 51c1-8 8-12 16-12 7 0 12 3 13 8" stroke="#d4af6a" stroke-width="6" fill="none" stroke-linecap="round"/></svg> <span class="wordmark">C-AUTO</span></a>
+        <p>La confiance au cœur de l'automobile. Historique, diagnostics, devis, pièces et professionnels, réunis dans le dossier de votre véhicule.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Produit</h4>
+        <a href="index.html#produit">Solutions</a>
+        <a href="comment-ca-marche.html">Comment ça marche</a>
+        <a href="professionnels.html">Professionnels</a>
+        <a href="pieces.html">Pièces</a>
+        <a href="entreprises.html">Flotte &amp; entreprises</a>
+      </div>
+      <div class="footer-col">
+        <h4>Accès</h4>
+        <a href="app/#/register">Commencer</a>
+        <a href="app/#/login">Se connecter</a>
+        <a href="aide.html">Aide</a>
+        <a href="contact.html">Contact</a>
+      </div>
+      <div class="footer-col">
+        <h4>Légal</h4>
+        <a href="conditions.html">Conditions</a>
+        <a href="confidentialite.html">Confidentialité</a>
+      </div>
+    </div>
     <div class="footer-bottom">
-      <p>&copy; 2026 C-AUTO. Tous droits réservés.</p>
-      <div style="display:flex;gap:1rem"><a href="conditions.html">Conditions</a><a href="confidentialite.html">Confidentialité</a><a href="contact.html">Contact</a></div>
+      <p>&copy; 2026 C-AUTO. Cotonou, Bénin.</p>
+      <span class="legal"><a href="conditions.html">Conditions</a><a href="confidentialite.html">Confidentialité</a><a href="contact.html">Contact</a></span>
     </div>
   </div>
 </footer>
+
 <script src="js/public.js"></script>
 </body>
 </html>

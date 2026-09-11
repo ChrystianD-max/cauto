@@ -4,26 +4,32 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Comment ça marche — C-AUTO</title>
-  <link rel="icon" type="image/png" href="app/icons/favicon-32.png" />
-  <link rel="stylesheet" href="css/public.css?v=1.1">
+  <meta name="description" content="Du premier symptôme à la garantie post-réparation : 8 étapes simples et transparentes avec C-AUTO.">
+  <meta name="theme-color" content="#0b1220">
+  <link rel="icon" type="image/png" href="app/icons/favicon-32.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="css/public.css?v=2.0">
 </head>
 <body>
 
 <nav class="nav">
   <div class="container nav-inner">
-    <a href="index.html" class="nav-logo"><svg width="36" height="36" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d0f15"/><stop offset="1" stop-color="#1a1f2b"/></linearGradient><linearGradient id="go" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe9b8"/><stop offset=".4" stop-color="#d4af6a"/><stop offset="1" stop-color="#a8853f"/></linearGradient><linearGradient id="bl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4a6cc0"/><stop offset="1" stop-color="#1d2f57"/></linearGradient></defs><rect x="2" y="2" width="96" height="96" rx="24" fill="url(#lg)"/><rect x="2" y="2" width="96" height="96" rx="24" fill="none" stroke="url(#go)" stroke-width="2.4"/><path d="M50 25 L58 44 L78 44 L62 56 L69 75 L50 63 L31 75 L38 56 L22 44 L42 44 Z" fill="url(#bl)" stroke="url(#go)" stroke-width="1.8"/><path d="M29 51 C30 43 37 39 45 39 C52 39 57 42 58 47" stroke="url(#go)" stroke-width="6" fill="none" stroke-linecap="round"/></svg> <span class="wordmark">C-AUTO</span></a>
-    <div class="nav-links">
-      <a href="comment-ca-marche.html" class="active">Comment ça marche</a>
-      <a href="professionnels.html">Professionnels</a>
-      <a href="entreprises.html">Entreprises</a>
-      <a href="pieces.html">Pièces</a>
-      <a href="aide.html">Aide</a>
+    <a href="index.html" class="nav-logo" aria-label="C-AUTO — accueil"><svg viewBox="0 0 100 100" aria-hidden="true"><rect width="96" height="96" x="2" y="2" rx="24" fill="#0d0f15"/><rect width="96" height="96" x="2" y="2" rx="24" fill="none" stroke="#b89248" stroke-width="2.4"/><path d="M50 25 58 44 78 44 62 56 69 75 50 63 31 75 38 56 22 44 42 44Z" fill="#1d2f57" stroke="#d4af6a" stroke-width="1.8"/><path d="M29 51c1-8 8-12 16-12 7 0 12 3 13 8" stroke="#d4af6a" stroke-width="6" fill="none" stroke-linecap="round"/></svg> <span class="wordmark">C-AUTO</span></a>
+    <div class="nav-menu" id="navMenu">
+      <div class="nav-links">
+        <a href="index.html#produit">Solutions</a>
+        <a href="comment-ca-marche.html" class="active">Comment ça marche</a>
+        <a href="professionnels.html">Professionnels</a>
+        <a href="pieces.html">Pièces</a>
+        <a href="aide.html">Aide</a>
+      </div>
+      <div class="nav-cta">
+        <a href="app/#/login" class="btn btn-outline btn-sm">Se connecter</a>
+        <a href="app/#/register" class="btn btn-primary btn-sm">Commencer</a>
+      </div>
     </div>
-    <div class="nav-cta">
-      <a href="app/#/login" class="btn btn-outline btn-sm">Se connecter</a>
-      <a href="app/#/register" class="btn btn-primary btn-sm">S'inscrire</a>
-    </div>
-    <button class="hamburger" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <button class="hamburger" id="navToggle" aria-label="Menu" aria-expanded="false" aria-controls="navMenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg></button>
   </div>
 </nav>
 
@@ -39,65 +45,58 @@
   <div class="container" style="max-width:800px">
 
     <div class="steps">
-      <div class="step animate">
+      <div class="step anim">
         <div class="step-content">
           <h3>Ajoutez votre véhicule</h3>
-          <p>Renseignez la marque, le modèle, l'année, l'immatriculation et le VIN. En 30 secondes, votre fiche véhicule est créée avec son programme d'entretien personnalisé.</p>
+          <p>Renseignez la marque, le modèle, l'année, l'immatriculation et le VIN. En quelques secondes, votre fiche véhicule est créée avec son programme d'entretien.</p>
         </div>
       </div>
-
-      <div class="step animate">
+      <div class="step anim">
         <div class="step-content">
           <h3>Décrivez votre problème</h3>
-          <p>Un bruit suspect ? Un voyant allumé ? Décrivez les symptômes en quelques mots ou joignez des photos. Notre moteur d'analyse traite votre demande instantanément.</p>
+          <p>Un bruit suspect, un voyant allumé ? Décrivez les symptômes en quelques mots ou joignez des photos.</p>
         </div>
       </div>
-
-      <div class="step animate">
+      <div class="step anim">
         <div class="step-content">
           <h3>C-AUTO vous oriente</h3>
-          <p>Un pré-diagnostic automatique identifie la sévérité (HAUTE / MOYENNE / BASSE), les causes probables et les recommandations d'action — avant même de consulter un professionnel.</p>
+          <p>Un pré-diagnostic identifie un niveau de sévérité (HAUTE / MOYENNE / BASSE) et des causes probables, avant même de consulter un professionnel.</p>
         </div>
       </div>
-
-      <div class="step animate">
+      <div class="step anim">
         <div class="step-content">
           <h3>Trouvez le bon professionnel</h3>
-          <p>Notre algorithme de matching compare spécialité, proximité, notes et disponibilité. Vous recevez une liste classée de professionnels certifiés, avec un score sur 100.</p>
+          <p>La mise en relation compare spécialité, proximité, évaluations et disponibilité. Vous recevez une liste classée de professionnels.</p>
         </div>
       </div>
-
-      <div class="step animate">
+      <div class="step anim">
         <div class="step-content">
           <h3>Validez le devis</h3>
-          <p>Le professionnel envoie un devis détaillé : pièces, main-d'œuvre, délais. Tout est transparent. Vous approuvez en un clic, ou vous refusez sans engagement.</p>
+          <p>Le professionnel envoie un devis détaillé : pièces, main-d'œuvre, délais. Vous approuvez en un clic, ou vous refusez sans engagement.</p>
         </div>
       </div>
-
-      <div class="step animate">
+      <div class="step anim">
         <div class="step-content">
           <h3>Suivez la réparation</h3>
-          <p>Ordre de réparation généré, tâches cochées en temps réel, preuves photos televersées. Vous savez exactement où en est votre véhicule, à tout moment.</p>
+          <p>Un ordre de réparation est généré, les tâches sont cochées et les preuves photo ajoutées au fil de l'intervention.</p>
         </div>
       </div>
-
-      <div class="step animate">
+      <div class="step anim">
         <div class="step-content">
           <h3>Vérifiez le résultat</h3>
-          <p>Un contrôle qualité systématique est effectué avant restitution. Vous validez le travail, puis récupérez votre véhicule en toute confiance.</p>
+          <p>Un contrôle qualité est effectué avant restitution. Vous validez le travail, puis récupérez votre véhicule.</p>
         </div>
       </div>
-
-      <div class="step animate">
+      <div class="step anim">
         <div class="step-content">
           <h3>Conservez l'historique</h3>
-          <p>Tout est archivé de façon immuable : interventions, paiements, garanties, notes. Votre historique vous suit, même en cas de revente du véhicule.</p>
+          <p>Tout est archivé : interventions, paiements, garanties, évaluations. Votre historique vous suit, même en cas de revente du véhicule.</p>
         </div>
       </div>
     </div>
 
-    <div style="text-align:center;margin-top:3rem" class="animate">
-      <a href="app/#/register" class="btn btn-primary btn-lg">Commencer maintenant →</a>
+    <div style="text-align:center;margin-top:3rem" class="anim">
+      <a href="app/#/register" class="btn btn-primary btn-lg">Commencer maintenant <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
     </div>
   </div>
 </section>
@@ -105,21 +104,48 @@
 <section class="cta-section">
   <div class="container">
     <h2>Prêt à essayer ?</h2>
-    <p>Inscrivez-vous gratuitement et ajoutez votre premier véhicule.</p>
+    <p>Créez votre compte et ajoutez votre premier véhicule.</p>
     <div class="cta-actions">
-      <a href="app/#/register" class="btn btn-white btn-lg">S'inscrire gratuitement</a>
+      <a href="app/#/register" class="btn btn-primary btn-lg">Créer mon compte</a>
     </div>
   </div>
 </section>
 
 <footer class="footer">
   <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="nav-logo" aria-label="C-AUTO — accueil"><svg viewBox="0 0 100 100" aria-hidden="true"><rect width="96" height="96" x="2" y="2" rx="24" fill="#0d0f15"/><rect width="96" height="96" x="2" y="2" rx="24" fill="none" stroke="#b89248" stroke-width="2.4"/><path d="M50 25 58 44 78 44 62 56 69 75 50 63 31 75 38 56 22 44 42 44Z" fill="#1d2f57" stroke="#d4af6a" stroke-width="1.8"/><path d="M29 51c1-8 8-12 16-12 7 0 12 3 13 8" stroke="#d4af6a" stroke-width="6" fill="none" stroke-linecap="round"/></svg> <span class="wordmark">C-AUTO</span></a>
+        <p>La confiance au cœur de l'automobile. Historique, diagnostics, devis, pièces et professionnels, réunis dans le dossier de votre véhicule.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Produit</h4>
+        <a href="index.html#produit">Solutions</a>
+        <a href="comment-ca-marche.html">Comment ça marche</a>
+        <a href="professionnels.html">Professionnels</a>
+        <a href="pieces.html">Pièces</a>
+        <a href="entreprises.html">Flotte &amp; entreprises</a>
+      </div>
+      <div class="footer-col">
+        <h4>Accès</h4>
+        <a href="app/#/register">Commencer</a>
+        <a href="app/#/login">Se connecter</a>
+        <a href="aide.html">Aide</a>
+        <a href="contact.html">Contact</a>
+      </div>
+      <div class="footer-col">
+        <h4>Légal</h4>
+        <a href="conditions.html">Conditions</a>
+        <a href="confidentialite.html">Confidentialité</a>
+      </div>
+    </div>
     <div class="footer-bottom">
-      <p>&copy; 2026 C-AUTO. Tous droits réservés.</p>
-      <div style="display:flex;gap:1rem"><a href="conditions.html">Conditions</a><a href="confidentialite.html">Confidentialité</a><a href="contact.html">Contact</a></div>
+      <p>&copy; 2026 C-AUTO. Cotonou, Bénin.</p>
+      <span class="legal"><a href="conditions.html">Conditions</a><a href="confidentialite.html">Confidentialité</a><a href="contact.html">Contact</a></span>
     </div>
   </div>
 </footer>
+
 <script src="js/public.js"></script>
 </body>
 </html>

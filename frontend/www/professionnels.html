@@ -4,26 +4,44 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>C-AUTO PRO — Professionnels automobiles</title>
-  <link rel="icon" type="image/png" href="app/icons/favicon-32.png" />
-  <link rel="stylesheet" href="css/public.css?v=1.1">
+  <meta name="description" content="C-AUTO PRO : gestion des devis, ordres de réparation, preuves photo et réputation en ligne pour les garages et mécaniciens.">
+  <meta name="theme-color" content="#0b1220">
+  <link rel="icon" type="image/png" href="app/icons/favicon-32.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="css/public.css?v=2.0">
 </head>
 <body>
 
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="display:none" aria-hidden="true">
+  <defs>
+    <symbol id="i-check-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m7 13 3-3 3 3 5-5"/><path d="M15 8h3v3"/></symbol>
+    <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94z"/></symbol>
+    <symbol id="i-cam" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
+  </defs>
+</svg>
+
 <nav class="nav">
   <div class="container nav-inner">
-    <a href="index.html" class="nav-logo"><svg width="36" height="36" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d0f15"/><stop offset="1" stop-color="#1a1f2b"/></linearGradient><linearGradient id="go" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe9b8"/><stop offset=".4" stop-color="#d4af6a"/><stop offset="1" stop-color="#a8853f"/></linearGradient><linearGradient id="bl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4a6cc0"/><stop offset="1" stop-color="#1d2f57"/></linearGradient></defs><rect x="2" y="2" width="96" height="96" rx="24" fill="url(#lg)"/><rect x="2" y="2" width="96" height="96" rx="24" fill="none" stroke="url(#go)" stroke-width="2.4"/><path d="M50 25 L58 44 L78 44 L62 56 L69 75 L50 63 L31 75 L38 56 L22 44 L42 44 Z" fill="url(#bl)" stroke="url(#go)" stroke-width="1.8"/><path d="M29 51 C30 43 37 39 45 39 C52 39 57 42 58 47" stroke="url(#go)" stroke-width="6" fill="none" stroke-linecap="round"/></svg> <span class="wordmark">C-AUTO</span></a>
-    <div class="nav-links">
-      <a href="comment-ca-marche.html">Comment ça marche</a>
-      <a href="professionnels.html" class="active">Professionnels</a>
-      <a href="entreprises.html">Entreprises</a>
-      <a href="pieces.html">Pièces</a>
-      <a href="aide.html">Aide</a>
+    <a href="index.html" class="nav-logo" aria-label="C-AUTO — accueil"><svg viewBox="0 0 100 100" aria-hidden="true"><rect width="96" height="96" x="2" y="2" rx="24" fill="#0d0f15"/><rect width="96" height="96" x="2" y="2" rx="24" fill="none" stroke="#b89248" stroke-width="2.4"/><path d="M50 25 58 44 78 44 62 56 69 75 50 63 31 75 38 56 22 44 42 44Z" fill="#1d2f57" stroke="#d4af6a" stroke-width="1.8"/><path d="M29 51c1-8 8-12 16-12 7 0 12 3 13 8" stroke="#d4af6a" stroke-width="6" fill="none" stroke-linecap="round"/></svg> <span class="wordmark">C-AUTO</span></a>
+    <div class="nav-menu" id="navMenu">
+      <div class="nav-links">
+        <a href="index.html#produit">Solutions</a>
+        <a href="comment-ca-marche.html">Comment ça marche</a>
+        <a href="professionnels.html" class="active">Professionnels</a>
+        <a href="pieces.html">Pièces</a>
+        <a href="aide.html">Aide</a>
+      </div>
+      <div class="nav-cta">
+        <a href="app/#/login" class="btn btn-outline btn-sm">Se connecter</a>
+        <a href="app/#/register" class="btn btn-primary btn-sm">Commencer</a>
+      </div>
     </div>
-    <div class="nav-cta">
-      <a href="app/#/login" class="btn btn-outline btn-sm">Se connecter</a>
-      <a href="app/#/register" class="btn btn-primary btn-sm">S'inscrire</a>
-    </div>
-    <button class="hamburger" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <button class="hamburger" id="navToggle" aria-label="Menu" aria-expanded="false" aria-controls="navMenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg></button>
   </div>
 </nav>
 
@@ -31,66 +49,66 @@
   <div class="container">
     <span class="section-label">C-AUTO PRO</span>
     <h1>L'outil des meilleurs professionnels.</h1>
-    <p>Gestion intelligente, matching qualifié, réputation en ligne — tout ce qu'il faut pour développer votre activité.</p>
+    <p>Gestion des devis, ordres de réparation et réputation en ligne — tout ce qu'il faut pour développer votre activité.</p>
   </div>
 </section>
 
 <section class="section">
   <div class="container">
-    <div class="grid-2 animate">
+    <div class="grid-2 anim">
       <div>
         <span class="section-label">Pourquoi rejoindre ?</span>
-        <h2>C-AUTO PRO transforme votre atelier.</h2>
-        <p style="color:var(--muted);margin-bottom:1.5rem">Finis les devis sur papier, les appels téléphoniques sans fin, et les clients qui ne reviennent pas. C-AUTO PRO est votre partner digital complet.</p>
+        <h2>C-AUTO PRO organise votre atelier.</h2>
+        <p style="color:var(--muted);margin-bottom:1.5rem">Fini les devis sur papier et les comptes rendus perdus. C-AUTO PRO centralise vos interventions, vos pièces et votre relation client.</p>
         <ul class="feature-list">
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Clients qualifiés par matching intelligent</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Devis numériques avec suivi en temps réel</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Gestion des ordres de réparation dématérialisés</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Tableau de bord et statistiques de performance</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Système de notation transparent</li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check-sm"/></svg> Clients orientés selon votre spécialité et votre zone</li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check-sm"/></svg> Devis numériques avec suivi en temps réel</li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check-sm"/></svg> Ordres de réparation dématérialisés</li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check-sm"/></svg> Tableau de bord et suivi de performance</li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check-sm"/></svg> Évaluations publiques, basées sur le travail réel</li>
         </ul>
       </div>
-      <div class="feature-img"><img src="img/garage.jpg" alt="Atelier professionnel C-AUTO PRO"></div>
+      <div class="feature-img"><img src="img/garage.jpg" alt="Atelier professionnel C-AUTO PRO" loading="lazy"></div>
     </div>
   </div>
 </section>
 
 <section class="section section-alt">
   <div class="container">
-    <div style="text-align:center" class="animate">
+    <div style="text-align:center" class="anim">
       <span class="section-label">Fonctionnalités</span>
       <h2 class="section-title">Tout est pensé pour vous.</h2>
     </div>
     <div class="grid-3" style="margin-top:2rem">
-      <div class="card animate">
-        <div class="card-icon blue">📋</div>
+      <div class="card anim">
+        <div class="card-icon blue"><svg aria-hidden="true"><use href="#i-file"/></svg></div>
         <h3>Devis intelligents</h3>
-        <p>Créez des devis détaillés en quelques clics. Pièces, main-d'œuvre, délais — tout est structuré et professionnel.</p>
+        <p>Créez des devis détaillés : pièces, main-d'œuvre, délais. Tout est structuré et conservé.</p>
       </div>
-      <div class="card animate">
-        <div class="card-icon green">🔍</div>
-        <h3>Matching ciblé</h3>
-        <p>Recevez des demandes de clients compatibles avec votre spécialité et votre zone géographique.</p>
+      <div class="card anim">
+        <div class="card-icon green"><svg aria-hidden="true"><use href="#i-search"/></svg></div>
+        <h3>Mise en relation ciblée</h3>
+        <p>Recevez des demandes de clients compatibles avec votre spécialité et votre zone.</p>
       </div>
-      <div class="card animate">
-        <div class="card-icon orange">📊</div>
-        <h3>Analytics</h3>
-        <p>Suivez votre chiffre d'affaires, vos temps d'intervention, et la satisfaction client.</p>
+      <div class="card anim">
+        <div class="card-icon orange"><svg aria-hidden="true"><use href="#i-chart"/></svg></div>
+        <h3>Suivi d'activité</h3>
+        <p>Mesurez vos interventions, vos devis et la satisfaction de vos clients.</p>
       </div>
-      <div class="card animate">
-        <div class="card-icon purple">🔧</div>
+      <div class="card anim">
+        <div class="card-icon purple"><svg aria-hidden="true"><use href="#i-wrench"/></svg></div>
         <h3>Ordres de réparation</h3>
-        <p>Générez des ordres de réparation numériques. Les tâches sont cochées en temps réel par vos équipes.</p>
+        <p>Générez des ordres de réparation numériques, tâches cochées au fil de l'intervention.</p>
       </div>
-      <div class="card animate">
-        <div class="card-icon blue">📸</div>
-        <h3>Preuves photos</h3>
-        <p>Joignez des photos aux interventions pour justifier les réparations et rassurer vos clients.</p>
+      <div class="card anim">
+        <div class="card-icon cyan"><svg aria-hidden="true"><use href="#i-cam"/></svg></div>
+        <h3>Preuves photo</h3>
+        <p>Joignez des photos aux interventions pour justifier les réparations et rassurer.</p>
       </div>
-      <div class="card animate">
-        <div class="card-icon green">⭐</div>
+      <div class="card anim">
+        <div class="card-icon blue"><svg aria-hidden="true"><use href="#i-star"/></svg></div>
         <h3>Réputation</h3>
-        <p>Les avis clients construisent votre réputation. Un bon score attire plus de demandes.</p>
+        <p>Les évaluations de vos clients construisent votre réputation sur le long terme.</p>
       </div>
     </div>
   </div>
@@ -98,22 +116,49 @@
 
 <section class="section">
   <div class="container" style="text-align:center">
-    <h2 class="section-title animate">Rejoignez le réseau C-AUTO PRO</h2>
-    <p class="section-desc center animate">Inscription gratuite. Pas de commission sur vos premières interventions.</p>
-    <div class="animate" style="margin-top:1rem">
-      <a href="app/#/register" class="btn btn-primary btn-lg">Créer mon compte professionnel →</a>
+    <h2 class="section-title anim">Rejoignez C-AUTO PRO</h2>
+    <p class="section-desc center anim">Inscription gratuite. Aucune carte requise pour commencer.</p>
+    <div class="anim" style="margin-top:1rem">
+      <a href="app/#/register" class="btn btn-primary btn-lg">Créer mon compte professionnel <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
     </div>
   </div>
 </section>
 
 <footer class="footer">
   <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="nav-logo" aria-label="C-AUTO — accueil"><svg viewBox="0 0 100 100" aria-hidden="true"><rect width="96" height="96" x="2" y="2" rx="24" fill="#0d0f15"/><rect width="96" height="96" x="2" y="2" rx="24" fill="none" stroke="#b89248" stroke-width="2.4"/><path d="M50 25 58 44 78 44 62 56 69 75 50 63 31 75 38 56 22 44 42 44Z" fill="#1d2f57" stroke="#d4af6a" stroke-width="1.8"/><path d="M29 51c1-8 8-12 16-12 7 0 12 3 13 8" stroke="#d4af6a" stroke-width="6" fill="none" stroke-linecap="round"/></svg> <span class="wordmark">C-AUTO</span></a>
+        <p>La confiance au cœur de l'automobile. Historique, diagnostics, devis, pièces et professionnels, réunis dans le dossier de votre véhicule.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Produit</h4>
+        <a href="index.html#produit">Solutions</a>
+        <a href="comment-ca-marche.html">Comment ça marche</a>
+        <a href="professionnels.html">Professionnels</a>
+        <a href="pieces.html">Pièces</a>
+        <a href="entreprises.html">Flotte &amp; entreprises</a>
+      </div>
+      <div class="footer-col">
+        <h4>Accès</h4>
+        <a href="app/#/register">Commencer</a>
+        <a href="app/#/login">Se connecter</a>
+        <a href="aide.html">Aide</a>
+        <a href="contact.html">Contact</a>
+      </div>
+      <div class="footer-col">
+        <h4>Légal</h4>
+        <a href="conditions.html">Conditions</a>
+        <a href="confidentialite.html">Confidentialité</a>
+      </div>
+    </div>
     <div class="footer-bottom">
-      <p>&copy; 2026 C-AUTO. Tous droits réservés.</p>
-      <div style="display:flex;gap:1rem"><a href="conditions.html">Conditions</a><a href="confidentialite.html">Confidentialité</a><a href="contact.html">Contact</a></div>
+      <p>&copy; 2026 C-AUTO. Cotonou, Bénin.</p>
+      <span class="legal"><a href="conditions.html">Conditions</a><a href="confidentialite.html">Confidentialité</a><a href="contact.html">Contact</a></span>
     </div>
   </div>
 </footer>
+
 <script src="js/public.js"></script>
 </body>
 </html>

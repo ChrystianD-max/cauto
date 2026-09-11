@@ -4,454 +4,455 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>C-AUTO — La confiance au cœur de l'automobile</title>
-  <meta name="description" content="C-AUTO connecte propriétaires de véhicules et professionnels automobiles. Diagnostic, devis, réparation, historique — tout est transparent.">
-  <link rel="icon" type="image/png" href="app/icons/favicon-32.png" />
-  <link rel="stylesheet" href="css/public.css?v=1.2">
+  <meta name="description" content="C-AUTO rassemble l'historique, les diagnostics, les devis, les pièces et les professionnels de votre véhicule en un seul endroit.">
+  <meta name="theme-color" content="#0b1220">
+  <link rel="icon" type="image/png" href="app/icons/favicon-32.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="css/public.css?v=2.0">
+  <link rel="stylesheet" href="css/home.css?v=1.0">
 </head>
 <body>
 
-<!-- ====== NAV ====== -->
-<nav class="nav">
+<!-- SVG sprite -->
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="display:none" aria-hidden="true">
+  <defs>
+    <symbol id="i-logo" viewBox="0 0 100 100"><rect x="2" y="2" width="96" height="96" rx="24" fill="#0d0f15"/><rect x="2" y="2" width="96" height="96" rx="24" fill="none" stroke="#b89248" stroke-width="2.4"/><path d="M50 25 L58 44 L78 44 L62 56 L69 75 L50 63 L31 75 L38 56 L22 44 L42 44 Z" fill="#1d2f57" stroke="#d4af6a" stroke-width="1.8"/><path d="M29 51 C30 43 37 39 45 39 C52 39 57 42 58 47" stroke="#d4af6a" stroke-width="6" fill="none" stroke-linecap="round"/></symbol>
+    <symbol id="i-car" viewBox="0 0 24 24"><path d="M5 16l-1.5-5.5A2 2 0 0 1 5.4 8h13.2a2 2 0 0 1 1.9 2.5L19 16"/><path d="M19 16h-14"/><path d="M4 16H3a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1h1.5"/><path d="M20 16h1a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1h-1.5"/><circle cx="7.4" cy="19.5" r="1.4"/><circle cx="16.6" cy="19.5" r="1.4"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1 1 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94z"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m8.5 12.5 2.5 2.5 5-5.5"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+    <symbol id="i-gauge" viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" x2="12" y1="22.08" y2="12"/></symbol>
+    <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+    <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></symbol>
+    <symbol id="i-brief" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></symbol>
+    <symbol id="i-scan" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></symbol>
+    <symbol id="i-check-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+    <symbol id="i-tire" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></symbol>
+    <symbol id="i-meter" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0z"/><circle cx="12" cy="12" r="10"/><path d="m12 12 4-4"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m7 13 3-3 3 3 5-5"/><path d="M15 8h3v3"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol>
+  </defs>
+</svg>
+
+<!-- ============ NAV ============ -->
+<nav class="nav" id="siteNav">
   <div class="container nav-inner">
-    <a href="index.html" class="nav-logo">
-      <svg width="36" height="36" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="cm1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2563eb"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><rect x="4" y="4" width="92" height="92" rx="24" fill="url(#cm1)"/><path d="M29 62 h42 a5 5 0 0 0 4.6-3 l2.6-7.6 a10 10 0 0 0-8.6-6.9 l-7.4-.6-6.6-7.6 a7 7 0 0 0-5.4-2.6 h-9.2 a8 8 0 0 0-7 4 l-5.2 8.6 a5 5 0 0 0-1.2 3.3 v9.6 a5 5 0 0 0 5 5 z" fill="#fff"/><circle cx="34" cy="66" r="6" fill="url(#cm1)"/><circle cx="67" cy="66" r="6" fill="url(#cm1)"/><path d="M46 62 h8" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>
-      <span class="wordmark">C-AUTO</span>
-    </a>
-    <div class="nav-links">
-      <a href="comment-ca-marche.html">Comment ça marche</a>
-      <a href="professionnels.html">Professionnels</a>
-      <a href="entreprises.html">Entreprises</a>
-      <a href="pieces.html">Pièces</a>
-      <a href="aide.html">Aide</a>
+    <a href="index.html" class="nav-logo" aria-label="C-AUTO — accueil"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-logo"/></svg> <span class="wordmark">C-AUTO</span></a>
+    <div class="nav-menu" id="navMenu">
+      <div class="nav-links">
+        <a href="#produit">Solutions</a>
+        <a href="comment-ca-marche.html">Comment ça marche</a>
+        <a href="professionnels.html">Professionnels</a>
+        <a href="pieces.html">Pièces</a>
+        <a href="aide.html">Aide</a>
+      </div>
+      <div class="nav-cta">
+        <a href="app/#/login" class="btn btn-outline btn-sm">Se connecter</a>
+        <a href="app/#/register" class="btn btn-primary btn-sm">Commencer</a>
+      </div>
     </div>
-    <div class="nav-cta">
-      <a href="app/#/login" class="btn btn-outline btn-sm">Se connecter</a>
-      <a href="app/#/register" class="btn btn-primary btn-sm">S'inscrire</a>
-    </div>
-    <button class="hamburger" aria-label="Menu">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-    </button>
+    <button class="hamburger" id="navToggle" aria-label="Menu" aria-expanded="false" aria-controls="navMenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg></button>
   </div>
 </nav>
 
-<!-- ====== HERO ====== -->
-<section class="hero">
-  <div class="hero-bg"><img src="img/hero-car.jpg" width="1400" height="827" alt="Véhicule sur route" loading="eager"></div>
-  <div class="container hero-content">
-    <div class="hero-brand"><img src="app/icons/logo/cauto-horizontal.png" width="320" height="74" alt="C-AUTO" loading="eager"></div>
-    <div class="hero-badge">🚀 Plateforme n°1 de maintenance automobile</div>
-    <h1>Vous savez ce qui arrive à <span>votre voiture</span>.</h1>
-    <p>C-AUTO connecte chaque propriétaire à des professionnels certifiés. Diagnostic intelligent, devis transparent, suivi en temps réel — reprenez le contrôle.</p>
-    <div class="hero-actions">
-      <a href="app/#/register" class="btn btn-primary btn-lg">🚗 Ajouter mon véhicule</a>
-      <a href="professionnels.html" class="btn btn-outline btn-lg">🔍 Trouver un professionnel</a>
+<!-- ============ HERO ============ -->
+<header class="hero" id="top">
+  <div class="hero-grid-overlay" aria-hidden="true"></div>
+  <div class="container hero-inner">
+    <div class="hero-copy">
+      <span class="hero-badge"><svg aria-hidden="true"><use href="#i-shield"/></svg> La confiance au cœur de l'automobile</span>
+      <h1>Comprenez votre voiture. <span class="hl">Maîtrisez chaque intervention.</span></h1>
+      <p class="hero-sub">C-AUTO rassemble votre <b>historique</b>, vos <b>diagnostics</b>, vos <b>devis</b>, vos <b>pièces</b> et vos <b>professionnels</b> en un seul endroit. Le système d'exploitation de la vie du véhicule — plus simple, plus transparent, plus sûr.</p>
+      <div class="hero-actions">
+        <a href="app/#/register" class="btn btn-primary btn-lg">Commencer avec C-AUTO <svg width="18" height="18" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <a href="#produit" class="btn btn-outline btn-lg">Découvrir la plateforme</a>
+      </div>
+      <p class="hero-note"><svg aria-hidden="true"><use href="#i-check-sm"/></svg> Créez votre compte en quelques minutes. Aucune carte requise.</p>
     </div>
-  </div>
-  <img src="img/hero-car.jpg" width="1400" height="827" alt="" class="hero-visual" aria-hidden="true">
-</section>
 
-<!-- ====== PROBLÈME ====== -->
-<section class="section section-alt" id="probleme">
-  <div class="container">
-    <div class="grid-2 animate">
-      <div>
-        <span class="section-label">Le problème</span>
-        <h2 class="section-title">L'automobile reste une boîte noire.</h2>
-        <p style="color:var(--muted);margin-bottom:1.5rem">68% des automobilistes ne comprennent pas les factures de leur mécanicien. Les devis sont obscurs, l'historique se perd, et la confiance s'effrite.</p>
-        <ul class="feature-list">
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> Devis incompréhensibles et non détaillés</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> Aucun suivi entre les visites</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> Historique éparpillé ou inexistant</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> Pas de visibilité sur l'état réel du véhicule</li>
-        </ul>
-      </div>
-      <div class="feature-img"><img src="img/engine.jpg" width="800" height="450" loading="lazy" decoding="async" alt="Moteur automobile"></div>
-    </div>
-  </div>
-</section>
-
-<!-- ====== SOLUTION ====== -->
-<section class="section" id="solution">
-  <div class="container">
-    <div class="grid-2 animate">
-      <div class="feature-img"><img src="img/mechanic.jpg" width="800" height="600" loading="lazy" decoding="async" alt="Mécanicien professionnel"></div>
-      <div>
-        <span class="section-label">La solution</span>
-        <h2 class="section-title">Une plateforme qui crée la confiance.</h2>
-        <p style="color:var(--muted);margin-bottom:1.5rem">C-AUTO transforme chaque intervention en un processus transparent, traçable et compréhensible. Du premier diagnostic à la garantie post-réparation.</p>
-        <ul class="feature-list">
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Diagnostic assisté par intelligence</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Devis détaillé avant chaque intervention</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Suivi en temps réel de chaque étape</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Historique complet et transférable</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ====== FONCTIONNEMENT ====== -->
-<section class="section section-alt" id="fonctionnement">
-  <div class="container">
-    <div style="text-align:center" class="animate">
-      <span class="section-label">Fonctionnement</span>
-      <h2 class="section-title">8 étapes vers la sérénité.</h2>
-      <p class="section-desc center">Un processus complet, du premier symptôme à la garantie.</p>
-    </div>
-    <div class="grid-2" style="margin-top:2rem">
-      <div class="steps animate">
-        <div class="step"><div class="step-content"><h3>Ajoutez votre véhicule</h3><p>Immatriculation, VIN, kilométrage — en 30 secondes, votre fiche est créée.</p></div></div>
-        <div class="step"><div class="step-content"><h3>Décrivez votre problème</h3><p>Un texte libre ou des photos. Notre moteur analyse et prédit les causes.</p></div></div>
-        <div class="step"><div class="step-content"><h3>C-AUTO vous oriente</h3><p>Pré-diagnostic automatique : sévérité, causes probables, recommandations.</p></div></div>
-        <div class="step"><div class="step-content"><h3>Trouvez le bon professionnel</h3><p>Matching intelligent par spécialité, proximité et note. Pas de favoritisme.</p></div></div>
-      </div>
-      <div class="steps animate">
-        <div class="step"><div class="step-content"><h3>Validez le devis</h3><p>Pièces et main-d'œuvre détaillées. Approuvez ou refusez en un clic.</p></div></div>
-        <div class="step"><div class="step-content"><h3>Suivez la réparation</h3><p>Ordre de réparation, tâches cochées en temps réel, preuves photos.</p></div></div>
-        <div class="step"><div class="step-content"><h3>Vérifiez le résultat</h3><p>Contrôle qualité systématique. Vous validez avant de récupérer le véhicule.</p></div></div>
-        <div class="step"><div class="step-content"><h3>Conservez l'historique</h3><p>Tout est archivé : interventions, paiements, garanties. Transférable à la revente.</p></div></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ====== AVANTAGES ====== -->
-<section class="section" id="avantages">
-  <div class="container">
-    <div style="text-align:center" class="animate">
-      <span class="section-label">Avantages</span>
-      <h2 class="section-title">Pourquoi C-AUTO change tout.</h2>
-    </div>
-    <div class="grid-3" style="margin-top:2rem">
-      <div class="card animate">
-        <div class="card-icon blue">🔍</div>
-        <h3>Transparence totale</h3>
-        <p>Chaque devis est détaillé ligne par ligne. Vous savez exactement ce que vous payez.</p>
-      </div>
-      <div class="card animate">
-        <div class="card-icon green">🛡️</div>
-        <h3>Garantie incluse</h3>
-        <p>12 mois de garantie pièces et main-d'œuvre sur chaque intervention validée.</p>
-      </div>
-      <div class="card animate">
-        <div class="card-icon orange">📊</div>
-        <h3>Score de santé</h3>
-        <p>Un indice unique (0-100) qui résume l'état de votre véhicule en un coup d'œil.</p>
-      </div>
-      <div class="card animate">
-        <div class="card-icon purple">🔔</div>
-        <h3>Alertes intelligentes</h3>
-        <p>On vous prévient avant chaque échéance. Plus de maintenance oubliée.</p>
-      </div>
-      <div class="card animate">
-        <div class="card-icon blue">📋</div>
-        <h3>Historique immuable</h3>
-        <p>Chaque intervention est horodatée et signée. Impossible de falsifier le passé.</p>
-      </div>
-      <div class="card animate">
-        <div class="card-icon green">💳</div>
-        <h3>Paiement sécurisé</h3>
-        <p>Sandbox intégré, anti double-facturation, garantie remboursement.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ====== SERVICES ====== -->
-<section class="section section-alt" id="services">
-  <div class="container">
-    <div style="text-align:center" class="animate">
-      <span class="section-label">Services</span>
-      <h2 class="section-title">Tout ce dont votre véhicule a besoin.</h2>
-      <p class="section-desc center">De l'entretien courant aux réparations complexes, C-AUTO couvre l'ensemble du cycle.</p>
-    </div>
-    <div class="grid-4" style="margin-top:2rem">
-      <div class="card animate" style="text-align:center">
-        <div style="font-size:2.5rem;margin-bottom:0.8rem">🛢️</div>
-        <h3>Entretien</h3>
-        <p>Vidange, filtres, liquides — selon le programme constructeur.</p>
-      </div>
-      <div class="card animate" style="text-align:center">
-        <div style="font-size:2.5rem;margin-bottom:0.8rem">🔧</div>
-        <h3>Réparation</h3>
-        <p>Mécanique, électronique, carrosserie — diagnostic précis.</p>
-      </div>
-      <div class="card animate" style="text-align:center">
-        <div style="font-size:2.5rem;margin-bottom:0.8rem">🔍</div>
-        <h3>Diagnostic</h3>
-        <p>Analyse pré-diagnostic par IA avant chaque intervention.</p>
-      </div>
-      <div class="card animate" style="text-align:center">
-        <div style="font-size:2.5rem;margin-bottom:0.8rem">🛡️</div>
-        <h3>Garantie</h3>
-        <p>12 mois de couverture pièces et main-d'œuvre.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ====== PROFESSIONNELS ====== -->
-<section class="section" id="professionnels">
-  <div class="container">
-    <div class="grid-2 animate">
-      <div>
-        <span class="section-label">C-AUTO PRO</span>
-        <h2 class="section-title">Rejoignez le réseau des meilleurs professionnels.</h2>
-        <p style="color:var(--muted);margin-bottom:1.5rem">Garages indépendants, mécaniciens mobiles, spécialistes — C-AUTO vous donne accès à une clientèle qualifiée et un outil de gestion complet.</p>
-        <ul class="feature-list">
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Matching par spécialité et proximité</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Gestion des devis et interventions</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Système de notation et avis</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Tableau de bord et statistiques</li>
-        </ul>
-        <a href="professionnels.html" class="btn btn-primary" style="margin-top:1rem">Découvrir C-AUTO PRO →</a>
-      </div>
-      <div class="feature-img"><img src="img/garage.jpg" width="800" height="450" loading="lazy" decoding="async" alt="Atelier professionnel"></div>
-    </div>
-  </div>
-</section>
-
-<!-- ====== ENTRETIEN ====== -->
-<section class="section section-alt" id="entretien">
-  <div class="container">
-    <div class="grid-2 animate">
-      <div class="feature-img"><img src="img/mechanic.jpg" width="800" height="600" loading="lazy" decoding="async" alt="Entretien véhicule"></div>
-      <div>
-        <span class="section-label">Entretien préventif</span>
-        <h2 class="section-title">Ne ratez plus jamais une échéance.</h2>
-        <p style="color:var(--muted);margin-bottom:1.5rem">C-AUTO calcule automatiquement les prochaines maintenances selon le programme constructeur ET les recommandations de la communauté. Un score de santé unique (0-100) résume l'état de votre véhicule.</p>
-        <ul class="feature-list">
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Règle : 10 000 km OU 12 mois</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Alertes push avant chaque échéance</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Déclaration en un clic des entretiens effectués</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Historique constructeur + recommandations C-AUTO</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ====== DIAGNOSTIC ====== -->
-<section class="section" id="diagnostic">
-  <div class="container">
-    <div class="grid-2 animate">
-      <div>
-        <span class="section-label">Diagnostic intelligent</span>
-        <h2 class="section-title">Comprenez avant de réparer.</h2>
-        <p style="color:var(--muted);margin-bottom:1.5rem">Décrivez votre problème en quelques mots. C-AUTO analyse les symptômes, identifie les causes probables et oriente vers le bon spécialiste — avant même de voir un mécanicien.</p>
-        <ul class="feature-list">
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Analyse par mots-clés (freinage, voyant, bruit...)</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Sévérité estimée : HAUTE / MOYENNE / BASSE</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Causes probables classées par ordre de pertinence</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Recommandations d'action immédiates</li>
-        </ul>
-      </div>
-      <div class="feature-img"><img src="img/diagnostic.jpg" width="800" height="533" loading="lazy" decoding="async" alt="Diagnostic automobile"></div>
-    </div>
-  </div>
-</section>
-
-<!-- ====== MARKETPLACE ====== -->
-<section class="section section-alt" id="marketplace">
-  <div class="container">
-    <div class="grid-2 animate">
-      <div class="feature-img"><img src="img/parts.jpg" width="800" height="533" loading="lazy" decoding="async" alt="Pièces automobiles"></div>
-      <div>
-        <span class="section-label">Marketplace</span>
-        <h2 class="section-title">Les pièces, au bon prix.</h2>
-        <p style="color:var(--muted);margin-bottom:1.5rem">Accédez à un réseau de fournisseurs certifiés. Comparez les prix, vérifiez la compatibilité avec votre véhicule, commandez en quelques clics.</p>
-        <ul class="feature-list">
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Catalogue lié au VIN du véhicule</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Comparateur de prix multi-fournisseurs</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Fournisseurs notés par la communauté</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Livraison suivie intégrée</li>
-        </ul>
-        <a href="pieces.html" class="btn btn-primary" style="margin-top:1rem">Découvrir C-AUTO PIÈCES →</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ====== FLOTTE ====== -->
-<section class="section" id="flotte">
-  <div class="container">
-    <div class="grid-2 animate">
-      <div>
-        <span class="section-label">C-AUTO FLEET</span>
-        <h2 class="section-title">Gérez votre flotte comme un pro.</h2>
-        <p style="color:var(--muted);margin-bottom:1.5rem">Entreprises, administrations, loueurs — suivez l'état de chaque véhicule, planifiez les maintenances, réduisez les coûts de 30%.</p>
-        <ul class="feature-list">
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Dashboard multi-véhicules</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Alertes de maintenance centralisées</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Rapports et export comptable</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Multi-utilisateurs avec droits d'accès</li>
-        </ul>
-        <a href="entreprises.html" class="btn btn-primary" style="margin-top:1rem">Découvrir C-AUTO FLEET →</a>
-      </div>
-      <div class="feature-img"><img src="img/fleet.jpg" width="800" height="533" loading="lazy" decoding="async" alt="Flotte de véhicules"></div>
-    </div>
-  </div>
-</section>
-
-<!-- ====== SÉCURITÉ ====== -->
-<section class="section section-alt" id="securite">
-  <div class="container">
-    <div class="grid-2 animate">
-      <div class="feature-img"><img src="img/shield.jpg" width="800" height="534" loading="lazy" decoding="async" alt="Sécurité et confiance"></div>
-      <div>
-        <span class="section-label">Sécurité</span>
-        <h2 class="section-title">Vos données sont sacrées.</h2>
-        <p style="color:var(--muted);margin-bottom:1.5rem">Chiffrement de bout en bout, hébergement souverain, conformité RGPD. C-AUTO traite vos données avec le même soin qu'un établissement bancaire.</p>
-        <ul class="feature-list">
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> HTTPS obligatoire sur toutes les routes</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> JWT avec expiration automatique</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Rate limiting anti-abus</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Historique et audit logs immuables</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Sauvegarde et restauration complètes</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ====== STATS ====== -->
-<section class="section">
-  <div class="container">
-    <div class="grid-4 animate" style="text-align:center">
-      <div class="stat"><div class="stat-value">10K+</div><div class="stat-label">Véhicules suivis</div></div>
-      <div class="stat"><div class="stat-value">2.5K+</div><div class="stat-label">Professionnels</div></div>
-      <div class="stat"><div class="stat-value">98%</div><div class="stat-label">Clients satisfaits</div></div>
-      <div class="stat"><div class="stat-value">4.8★</div><div class="stat-label">Note moyenne</div></div>
-    </div>
-  </div>
-</section>
-
-<!-- ====== TÉMOIGNAGES ====== -->
-<section class="section section-alt" id="temoignages">
-  <div class="container">
-    <div style="text-align:center" class="animate">
-      <span class="section-label">Témoignages</span>
-      <h2 class="section-title">Ils nous font confiance.</h2>
-    </div>
-    <div class="grid-3" style="margin-top:2rem">
-      <div class="testimonial animate">
-        <div class="testimonial-stars">★★★★★</div>
-        <p class="testimonial-text">« Enfin je comprends ce qu'on fait sur ma voiture. Le devis détaillé m'a convaincu. Plus jamais de surprise. »</p>
-        <div class="testimonial-author">
-          <img src="img/testimonial-1.jpg" width="200" height="300" loading="lazy" decoding="async" alt="Amadou" class="testimonial-avatar">
-          <div><div class="testimonial-name">Amadou K.</div><div class="testimonial-role">Client — Cotonou</div></div>
+    <!-- Phone mockup -->
+    <div class="mock-stage">
+      <div class="mock-phone" role="img" aria-label="Aperçu de l'application C-AUTO, tableau de bord client">
+        <div class="mock-screen">
+          <div class="mock-status"><span>09:41</span><span>C-AUTO</span></div>
+          <div class="mock-app">
+            <div class="mock-topbar">
+              <div class="mb-left">
+                <span class="mock-logo"><svg width="17" height="17" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-logo"/></svg></span>
+                <span class="mb-name">C-AUTO<span class="mb-role">Espace client</span></span>
+              </div>
+              <span class="mock-avatar">AM</span>
+            </div>
+            <div class="mock-card">
+              <div class="mc-head"><span class="mc-title">Mon véhicule</span><span class="mc-ps"><svg aria-hidden="true"><use href="#i-check-sm"/></svg> Traçé</span></div>
+              <div class="mc-vehicle">
+                <span class="mc-car"><svg aria-hidden="true"><use href="#i-car"/></svg></span>
+                <span><span class="mc-v-name">Toyota Corolla 2020</span><br><span class="mc-v-meta">Cotonou · 68 410 km</span></span>
+              </div>
+            </div>
+            <div class="mock-card">
+              <div class="mc-score">
+                <div class="ring"><svg viewBox="0 0 108 108"><defs><linearGradient id="scoreGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2b59ff"/><stop offset="1" stop-color="#16b6d8"/></linearGradient></defs><circle class="track" cx="54" cy="54" r="54"/><circle class="bar" cx="54" cy="54" r="54"/></svg><span class="val"><b>82</b><span>/ 100</span></span></div>
+                <div class="score-lbl"><b>C-Score</b><span class="sl-sub">État global du véhicule — entretien &amp; historique.</span><span class="sl-status">Bon état</span></div>
+              </div>
+            </div>
+            <div class="mc-warn"><svg aria-hidden="true"><use href="#i-alert"/></svg><div><b>Vidange recommandée</b><span>Prochain entretien prévu dans 1 240 km.</span></div></div>
+            <div class="mock-card">
+              <div class="mc-rows">
+                <div class="mc-row"><span class="k">Prochain entretien</span><span class="v">15 févr. 2026</span></div>
+                <div class="mc-row"><span class="k">Devis en attente</span><span class="v">1 ouvert</span></div>
+                <div class="mc-row"><span class="k">Garantie</span><span class="v tick"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check-sm"/></svg> Active, tracée</span></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="testimonial animate">
-        <div class="testimonial-stars">★★★★★</div>
-        <p class="testimonial-text">« En tant que garage, C-AUTO nous a permis de gagner 40% de temps sur la gestion des devis. Nos clients sont plus satisfaits. »</p>
-        <div class="testimonial-author">
-          <img src="img/testimonial-2.jpg" width="200" height="300" loading="lazy" decoding="async" alt="Fatima" class="testimonial-avatar">
-          <div><div class="testimonial-name">Fatima M.</div><div class="testimonial-role">Gérante de garage — Porto-Novo</div></div>
+      <span class="mock-float f1"><svg aria-hidden="true"><use href="#i-file"/></svg> Devis lisible<small>validé par vous</small></span>
+      <span class="mock-float f2"><svg aria-hidden="true"><use href="#i-history"/></svg> Historique<small>tracé et archivé</small></span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ 01 LE CONSTAT ============ -->
+<section class="section" id="constat">
+  <div class="container">
+    <div class="section-head anim">
+      <span class="section-label">01 · Le constat</span>
+      <h2 class="section-title">Posséder une voiture, c'est souvent naviguer dans le brouillard.</h2>
+      <p class="section-desc">Entretien, réparations, devis, pièces, garanties… les informations existent, mais elles sont dispersées et rarement vérifiables.</p>
+    </div>
+    <div class="grid-3">
+      <div class="card pain-card anim">
+        <div class="card-icon orange"><svg aria-hidden="true"><use href="#i-alert"/></svg></div>
+        <h3>Des devis que l'on ne comprend pas</h3>
+        <p>Prix, pièces, main-d'œuvre : difficile de savoir si une facture est juste — ou raisonnable — avant même d'avoir dit oui.</p>
+      </div>
+      <div class="card pain-card anim">
+        <div class="card-icon orange"><svg aria-hidden="true"><use href="#i-history"/></svg></div>
+        <h3>Aucun historique fiable</h3>
+        <p>Chaque réparation se fait dans le vide. Quelques années plus tard, il ne reste plus aucune trace de la vie du véhicule.</p>
+      </div>
+      <div class="card pain-card anim">
+        <div class="card-icon orange"><svg aria-hidden="true"><use href="#i-gauge"/></svg></div>
+        <h3>Aucune visibilité sur l'état réel</h3>
+        <p>La panne arrive toujours au mauvais moment. L'usure, les échéances et les signaux faibles restent invisibles.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 02 LA SOLUTION ============ -->
+<section class="section section-alt" id="solution">
+  <div class="container">
+    <div class="section-head anim">
+      <span class="section-label">02 · La solution</span>
+      <h2 class="section-title">Un seul dossier pour toute la vie du véhicule.</h2>
+      <p class="section-desc">C-AUTO réunit, au même endroit et en permanence, l'identité du véhicule, son C-Score, ses diagnostics, ses devis, ses interventions, ses pièces et sa garantie.</p>
+    </div>
+    <div class="solution-wrap">
+      <div class="anim">
+        <div class="sol-file" role="img" aria-label="Le dossier numérique du véhicule, section par section">
+          <div class="sf-top"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#93b0ff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-file"/></svg><span><b>Dossier véhicule</b><span> · Toyota Corolla 2020</span></span></div>
+          <div class="sol-tabsd">
+            <span class="sol-tab on">Véhicule</span>
+            <span class="sol-tab">C-Score</span>
+            <span class="sol-tab">Diagnostic</span>
+            <span class="sol-tab">Devis</span>
+            <span class="sol-tab">Historique</span>
+          </div>
+          <div class="sol-rows">
+            <div class="sol-row"><span class="ic"><svg aria-hidden="true"><use href="#i-car"/></svg></span><div><b>Identité du véhicule</b><span>Marque, modèle, année, kilométrage, VIN tracé</span></div></div>
+            <div class="sol-row"><span class="ic"><svg aria-hidden="true"><use href="#i-gauge"/></svg></span><div><b>C-Score</b><span>Indicateur global mis à jour</span></div></div>
+            <div class="sol-row"><span class="ic"><svg aria-hidden="true"><use href="#i-file"/></svg></span><div><b>Diagnostics lisibles</b><span>Traduits sans jargon technique</span></div></div>
+            <div class="sol-row"><span class="ic"><svg aria-hidden="true"><use href="#i-wrench"/></svg></span><div><b>Interventions &gt; Devis</b><span>Comparés et validés par vous</span></div></div>
+            <div class="sol-row"><span class="ic"><svg aria-hidden="true"><use href="#i-shield"/></svg></span><div><b>Garantie</b><span>Écrite et conservée</span></div></div>
+            <div class="sol-row"><span class="ic"><svg aria-hidden="true"><use href="#i-history"/></svg></span><div><b>Historique</b><span>Archivé, daté, transférable à la revente</span></div></div>
+          </div>
         </div>
       </div>
-      <div class="testimonial animate">
-        <div class="testimonial-stars">★★★★★</div>
-        <p class="testimonial-text">« Le score de santé est génial. Je vois d'un coup d'œil si ma voiture a besoin d'attention. L'historique est rassurant. »</p>
-        <div class="testimonial-author">
-          <img src="img/testimonial-3.jpg" width="200" height="133" loading="lazy" decoding="async" alt="Carlos" class="testimonial-avatar">
-          <div><div class="testimonial-name">Carlos D.</div><div class="testimonial-role">Client — Abomey-Calavi</div></div>
+      <div class="anim">
+        <div class="sol-distinctions">
+          <div class="dist"><svg aria-hidden="true"><use href="#i-gauge"/></svg><b>Le C-Score</b><p>Un indicateur global de l'état d'entretien et d'historique du véhicule.</p><span class="dl">Ce n'est pas un diagnostic mécanique.</span></div>
+          <div class="dist"><svg aria-hidden="true"><use href="#i-scan"/></svg><b>Le diagnostic</b><p>Toute investigation technique qui requiert un examen du véhicule.</p><span class="dl">Réalisé par un professionnel.</span></div>
+          <div class="dist"><svg aria-hidden="true"><use href="#i-star"/></svg><b>La recommandation</b><p>Des préconisations claires, triées par priorité, avec leur niveau d'urgence.</p><span class="dl">À valider avant toute intervention.</span></div>
+          <div class="dist"><svg aria-hidden="true"><use href="#i-cal"/></svg><b>L'entretien</b><p>Le carnet de maintenance et les échéances à venir, prévus à l'avance.</p><span class="dl">Prochain entretien toujours visible.</span></div>
         </div>
+        <p style="margin-top:1.1rem;font-size:0.85rem;color:var(--muted)">Un état, un diagnostic, une recommandation, un entretien : quatre notions distinctes, réunies dans votre dossier.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ====== FAQ ====== -->
-<section class="section" id="faq">
+<!-- ============ 03 PARCOURS ============ -->
+<section class="section" id="parcours">
   <div class="container">
-    <div style="text-align:center" class="animate">
-      <span class="section-label">Questions fréquentes</span>
-      <h2 class="section-title">FAQ</h2>
+    <div class="section-head anim">
+      <span class="section-label">03 · Comment ça marche</span>
+      <h2 class="section-title">Un parcours clair, du diagnostic au suivi.</h2>
+      <p class="section-desc">À chaque étape, vous restez informé, comparé et décideur.</p>
     </div>
-    <div style="max-width:700px;margin:2rem auto 0" class="animate">
-      <div class="faq-item">
-        <div class="faq-q">C'est gratuit pour les clients ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
-        <div class="faq-a">Oui, l'inscription, l'ajout de véhicules, le diagnostic et le suivi sont 100% gratuits. Seuls les paiements entre clients et professionnels transitent par la plateforme.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q">Comment fonctionne le matching ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
-        <div class="faq-a">Notre algorithme analyse la spécialité requise, la localisation, les notes et la disponibilité pour vous proposer les professionnels les plus adaptés. Un score de matching sur 100 est attribué.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q">Le paiement est-il sécurisé ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
-        <div class="faq-a">Oui. C-AUTO utilise un système de paiement sandbox avec protection anti double-facturation. Les fonds sont libérés uniquement après validation du contrôle qualité.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q">Quelle est la garantie ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
-        <div class="faq-a">Chaque intervention validée bénéficie de 12 mois de garantie pièces et main-d'œuvre. Le certificat de garantie est archivé dans votre historique.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q">Puis-je transférer l'historique ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
-        <div class="faq-a">Oui ! L'historique complet est exportable en PDF ou en JSON. Lors de la revente, vous pouvez transférer la fiche véhicule à l'acheteur.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q">Comment devenir professionnel ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
-        <div class="faq-a">Inscrivez-vous avec le rôle "Garage" ou "Mécanicien". Votre profil sera vérifié puis ajouté au réseau de professionnels certifiés C-AUTO.</div>
-      </div>
+    <div class="flow">
+      <div class="flow-item anim"><span class="num">1</span><svg aria-hidden="true"><use href="#i-scan"/></svg><div><b>Diagnostiquer</b><p>Un diagnostic est réalisé — ou votre historié existant est repris.</p></div></div>
+      <div class="flow-item anim"><span class="num">2</span><svg aria-hidden="true"><use href="#i-file"/></svg><div><b>Comprendre</b><p>Un rapport clair, sans jargon, traduit pour vous.</p></div></div>
+      <div class="flow-item anim"><span class="num">3</span><svg aria-hidden="true"><use href="#i-layers"/></svg><div><b>Comparer</b><p>Des devis de professionnels vérifiés, côte à côte.</p></div></div>
+      <div class="flow-item anim"><span class="num">4</span><svg aria-hidden="true"><use href="#i-wrench"/></svg><div><b>Réparer</b><p>Vous confiez l'intervention à un pro de votre choix.</p></div></div>
+      <div class="flow-item anim"><span class="num">5</span><svg aria-hidden="true"><use href="#i-check"/></svg><div><b>Vérifier</b><p>Vous validez chaque étape avant de payer.</p></div></div>
+      <div class="flow-item anim"><span class="num">6</span><svg aria-hidden="true"><use href="#i-shield"/></svg><div><b>Garantir</b><p>La garantie est écrite dans votre dossier.</p></div></div>
+      <div class="flow-item anim"><span class="num">7</span><svg aria-hidden="true"><use href="#i-history"/></svg><div><b>Tracer</b><p>Tout est archivé dans l'historique du véhicule.</p></div></div>
     </div>
   </div>
 </section>
 
-<!-- ====== CTA ====== -->
-<section class="cta-section" id="cta">
+<!-- ============ 04 LE PRODUIT ============ -->
+<section class="section section-alt" id="produit">
   <div class="container">
-    <h2>Prêt à reprendre le contrôle ?</h2>
-    <p>Rejoignez des milliers d'automobilistes qui font confiance à C-AUTO.</p>
-    <div class="cta-actions">
-      <a href="app/#/register" class="btn btn-white btn-lg">🚗 Ajouter mon véhicule</a>
-      <a href="professionnels.html" class="btn btn-outline btn-lg">🔍 Trouver un professionnel</a>
+    <div class="section-head anim">
+      <span class="section-label">04 · La plateforme</span>
+      <h2 class="section-title">Un produit pour chacun, une logique commune.</h2>
+      <p class="section-desc">Clients, professionnels, entreprises et pièces partagent le même dossier du véhicule.</p>
+    </div>
+
+    <div class="mk-tabs anim" role="tablist" aria-label="Espaces C-AUTO">
+      <button class="mk-tab" role="tab" aria-selected="true" aria-controls="pane-client" id="tab-client"><svg aria-hidden="true"><use href="#i-car"/></svg> Client</button>
+      <button class="mk-tab" role="tab" aria-selected="false" aria-controls="pane-pro" id="tab-pro"><svg aria-hidden="true"><use href="#i-wrench"/></svg> Professionnel</button>
+      <button class="mk-tab" role="tab" aria-selected="false" aria-controls="pane-fleet" id="tab-fleet"><svg aria-hidden="true"><use href="#i-brief"/></svg> Fleet</button>
+      <button class="mk-tab" role="tab" aria-selected="false" aria-controls="pane-pieces" id="tab-pieces"><svg aria-hidden="true"><use href="#i-box"/></svg> Pièces</button>
+    </div>
+
+    <!-- Client -->
+    <div class="mk-panel" id="pane-client" role="tabpanel" aria-labelledby="tab-client" aria-hidden="false">
+      <div class="mk-copy">
+        <span class="sec">Espace client</span>
+        <h2>Votre voiture, sous contrôle.</h2>
+        <p style="color:var(--muted)">Une seule application pour suivre l'état de votre véhicule, ses échéances et ses interventions.</p>
+        <ul class="feature-list">
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check-sm"/></svg> C-Score et échéances d'entretien toujours visibles</li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check-sm"/></svg> Diagnostics et devis lisibles, sans jargon</li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check-sm"/></svg> Validation de chaque étape avant paiement</li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check-sm"/></svg> Historique et garantie archivés sur le véhicule</li>
+        </ul>
+        <a href="app/#/register" class="mk-link">Créer mon espace client <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      </div>
+      <div class="mk-frame" aria-hidden="true">
+        <div class="mk-head"><span class="mk-title">Tableau de bord<span>Espace client</span></span><span class="mk-tag ok"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-right:2px"><use href="#i-check-sm"/></svg>Sain</span></div>
+        <div class="mk-kpis">
+          <div class="mk-kpi"><b>82</b><span>C-Score</span></div>
+          <div class="mk-kpi"><b>1 240 km</b><span>Prochaine échéance</span></div>
+          <div class="mk-kpi"><b>1</b><span>Devis ouvert</span></div>
+          <div class="mk-kpi"><b>Active</b><span>Garantie</span></div>
+        </div>
+        <div style="height:0.8rem"></div>
+        <div class="mk-item"><span class="avatar" style="background:var(--ok-soft);color:#7ce0b9"><svg aria-hidden="true"><use href="#i-wrench"/></svg></span><div><b>Vidange &amp; filtres</b><span>Garage AutoPro · le 12 févr. 2026</span></div><span class="mk-tag ok">Terminée</span></div>
+        <div class="mk-item"><span class="avatar" style="background:var(--warn-soft);color:#f8c879"><svg aria-hidden="true"><use href="#i-alert"/></svg></span><div><b>Vidange recommandée</b><span>Prévue dans 1 240 km</span></div><span class="mk-tag warn">À planifier</span></div>
+        <div class="mk-item"><span class="avatar" style="background:var(--cobalt-soft);color:#b9cdfd"><svg aria-hidden="true"><use href="#i-file"/></svg></span><div><b>Devis — plaquettes avant</b><span>En attente de votre avis</span></div><span class="mk-tag cobalt">À valider</span></div>
+      </div>
+    </div>
+
+    <!-- Pro -->
+    <div class="mk-panel" id="pane-pro" role="tabpanel" aria-labelledby="tab-pro" aria-hidden="true">
+      <div class="mk-copy">
+        <span class="sec">Espace professionnel</span>
+        <h2>Votre atelier, votre vitrine.</h2>
+        <p style="color:var(--muted)">Un profil public, des devis en ligne et des clients qui comprennent ce que vous faites.</p>
+        <ul class="feature-list">
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check-sm"/></svg> Profil public évalué sur le travail réel</li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check-sm"/></svg> Diagnostics et devis envoyés en ligne</li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check-sm"/></svg> Rapports remis au client à chaque intervention</li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check-sm"/></svg> Accès aux pièces et fournisseurs référencés</li>
+        </ul>
+        <a href="professionnels.html" class="mk-link">Découvrir l'espace professionnel <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      </div>
+      <div class="mk-frame" aria-hidden="true">
+        <div class="mk-head"><span class="mk-title">Atelier AutoPro<span>Tableau de bord pro</span></span><span class="mk-tag cobalt">En ligne</span></div>
+        <div class="mk-kpis">
+          <div class="mk-kpi"><b>8</b><span>Interventions</span></div>
+          <div class="mk-kpi"><b>2</b><span>Devis ouverts</span></div>
+          <div class="mk-kpi"><b>31</b><span>Clients suivis</span></div>
+          <div class="mk-kpi"><b>3</b><span>RDV demain</span></div>
+        </div>
+        <div style="height:0.8rem"></div>
+        <div class="mk-item"><span class="avatar" style="background:var(--ok-soft);color:#7ce0b9"><svg aria-hidden="true"><use href="#i-file"/></svg></span><div><b>Devis validé — Toyota Corolla</b><span>Client informé à l'instant</span></div><span class="mk-tag ok">Validé</span></div>
+        <div class="mk-item"><span class="avatar" style="background:var(--cobalt-soft);color:#b9cdfd"><svg aria-hidden="true"><use href="#i-wrench"/></svg></span><div><b>Révision complète — Hyundai Tucson</b><span>RDV demain 09:00</span></div><span class="mk-tag cobalt">Prévu</span></div>
+        <div class="mk-item"><span class="avatar" style="background:var(--warn-soft);color:#f8c879"><svg aria-hidden="true"><use href="#i-scan"/></svg></span><div><b>Plaquettes avant — Isuzu D-Max</b><span>Devis envoyé au client</span></div><span class="mk-tag warn">Devis</span></div>
+      </div>
+    </div>
+
+    <!-- Fleet -->
+    <div class="mk-panel" id="pane-fleet" role="tabpanel" aria-labelledby="tab-fleet" aria-hidden="true">
+      <div class="mk-copy">
+        <span class="sec">C-AUTO FLEET</span>
+        <h2>Chaque véhicule de la flotte, supervisé.</h2>
+        <p style="color:var(--muted)">Entreprises, administrations, loueurs : une vision claire de l'état et des échéances de chaque véhicule.</p>
+        <ul class="feature-list">
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check-sm"/></svg> Scores et état par véhicule</li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check-sm"/></svg> Alertes avant chaque échéance</li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check-sm"/></svg> Un historique et un dossier par véhicule</li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check-sm"/></svg> Dossier transférable lors de la revente</li>
+        </ul>
+        <a href="entreprises.html" class="mk-link">Découvrir C-AUTO FLEET <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      </div>
+      <div class="mk-frame" aria-hidden="true">
+        <div class="mk-head"><span class="mk-title">Gestion de flotte<span>12 véhicules</span></span><span class="mk-tag ghost">Tous lots</span></div>
+        <div class="mk-kpis">
+          <div class="mk-kpi"><b>12</b><span>Véhicules</span></div>
+          <div class="mk-kpi"><b>2</b><span>Alertes actives</span></div>
+          <div class="mk-kpi"><b>10</b><span>Entretiens à jour</span></div>
+          <div class="mk-kpi"><b>1</b><span>Dossier / véhicule</span></div>
+        </div>
+        <div style="height:0.8rem"></div>
+        <table class="mk-table">
+          <thead><tr><th>Véhicule</th><th>État</th><th>Prochain entretien</th></tr></thead>
+          <tbody>
+            <tr><td><b>Toyota Corolla</b></td><td><span class="mk-dot" style="background:var(--ok)"></span>À jour</td><td>15 févr. 2026</td></tr>
+            <tr><td><b>Hyundai Tucson</b></td><td><span class="mk-dot" style="background:var(--warn)"></span>Entretien</td><td>02 mars 2026</td></tr>
+            <tr><td><b>Isuzu D-Max</b></td><td><span class="mk-dot" style="background:var(--bad)"></span>Alerte</td><td>Demain</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pièces -->
+    <div class="mk-panel" id="pane-pieces" role="tabpanel" aria-labelledby="tab-pieces" aria-hidden="true">
+      <div class="mk-copy">
+        <span class="sec">Catalogue pièces</span>
+        <h2>Les bonnes pièces, aux bons véhicules.</h2>
+        <p style="color:var(--muted)">Un catalogue pensé pour votre véhicule, des références vérifiées aux bons professionnels.</p>
+        <ul class="feature-list">
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check-sm"/></svg> Catalogues compatibles par véhicule</li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check-sm"/></svg> Fournisseurs référencés et vérifiés</li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check-sm"/></svg> Références croisées avec les diagnostics</li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check-sm"/></svg> Pièces intégrées dans les devis</li>
+        </ul>
+        <a href="pieces.html" class="mk-link">Explorer le catalogue <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      </div>
+      <div class="mk-frame" aria-hidden="true">
+        <div class="mk-head"><span class="mk-title">Catalogue pièces<span>Compatible Toyota Corolla 2020</span></span><span class="mk-tag cobalt">Références vérifiées</span></div>
+        <div class="mk-search"><svg aria-hidden="true"><use href="#i-search"/></svg><span>Rechercher une pièce compatible…</span></div>
+        <div class="mk-part"><span class="p-img"><svg aria-hidden="true"><use href="#i-box"/></svg></span><div><b>Filtre à huile</b><span>Réf. FO-410 · d'origine</span></div><span class="price"><b>9 500 F</b><span>en stock</span></span></div>
+        <div class="mk-part"><span class="p-img"><svg aria-hidden="true"><use href="#i-box"/></svg></span><div><b>Plaquettes avant</b><span>Set ×4 · référence contrôlée</span></div><span class="price"><b>24 000 F</b><span>sur devis</span></span></div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ====== FOOTER ====== -->
+<!-- ============ 05 ENGAGEMENTS ============ -->
+<section class="section trust" id="engagements">
+  <div class="container">
+    <div class="section-head anim">
+      <span class="section-label gold">05 · Nos engagements</span>
+      <h2 class="section-title">Ce que C-AUTO garantit, concrètement.</h2>
+      <p class="section-desc">Aucune promesse abstraite. Chaque engagement correspond à une fonctionnalité du produit.</p>
+    </div>
+    <div class="trust-grid">
+      <div class="trust-item anim"><svg aria-hidden="true"><use href="#i-file"/></svg><b>Transparence</b><p>Chaque ligne d'un devis est visible et expliquée avant votre accord.</p></div>
+      <div class="trust-item anim"><svg aria-hidden="true"><use href="#i-check"/></svg><b>Validation</b><p>Vous validez avant l'intervention, et vous vérifiez après.</p></div>
+      <div class="trust-item anim"><svg aria-hidden="true"><use href="#i-history"/></svg><b>Traçabilité</b><p>Chaque opération laisse une trace datée dans le dossier.</p></div>
+      <div class="trust-item anim"><svg aria-hidden="true"><use href="#i-db"/></svg><b>Historique durable</b><p>Le carnet du véhicule vous appartient, y compris à la revente.</p></div>
+      <div class="trust-item anim"><svg aria-hidden="true"><use href="#i-star"/></svg><b>Évaluation réelle</b><p>Les professionnels sont notés sur leur travail et leurs clients.</p></div>
+      <div class="trust-item anim"><svg aria-hidden="true"><use href="#i-box"/></svg><b>Pièces vérifiées</b><p>Les références sont croisées avec votre véhicule et le diagnostic.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 06 ÉCOSYSTÈME ============ -->
+<section class="section" id="ecosysteme">
+  <div class="container">
+    <div class="section-head anim">
+      <span class="section-label">06 · L'écosystème</span>
+      <h2 class="section-title">Autour de votre véhicule, tout est connecté.</h2>
+      <p class="section-desc">Des pages dédiées pour explorer chaque espace de C-AUTO.</p>
+    </div>
+    <div class="eco-grid">
+      <a href="professionnels.html" class="eco-card anim">
+        <div class="top"><span class="card-icon blue"><svg aria-hidden="true"><use href="#i-wrench"/></svg></span><span class="arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-arrow"/></svg></span></div>
+        <div><h3>Professionnels</h3><p>Des professionnels vérifiés, évalués sur le travail qu'ils réalisent vraiment.</p></div>
+      </a>
+      <a href="pieces.html" class="eco-card anim">
+        <div class="top"><span class="card-icon cyan"><svg aria-hidden="true"><use href="#i-box"/></svg></span><span class="arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-arrow"/></svg></span></div>
+        <div><h3>Pièces</h3><p>Un catalogue pensé pour votre véhicule, avec des références vérifiées.</p></div>
+      </a>
+      <a href="entreprises.html" class="eco-card anim">
+        <div class="top"><span class="card-icon green"><svg aria-hidden="true"><use href="#i-brief"/></svg></span><span class="arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-arrow"/></svg></span></div>
+        <div><h3>Flotte &amp; entreprises</h3><p>Supervisez toute une flotte, véhicule par véhicule.</p></div>
+      </a>
+      <a href="comment-ca-marche.html" class="eco-card anim">
+        <div class="top"><span class="card-icon purple"><svg aria-hidden="true"><use href="#i-layers"/></svg></span><span class="arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-arrow"/></svg></span></div>
+        <div><h3>Le parcours complet</h3><p>Découvrez comment un véhicule passe du diagnostic au suivi.</p></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 07 CTA FINAL ============ -->
+<section class="section final-cta" id="commencer">
+  <div class="container">
+    <div class="final-panel anim">
+      <span class="goldmark">C-AUTO · La confiance au cœur de l'automobile</span>
+      <h2>Votre véhicule. Votre historique. <span class="hl-gold">Votre contrôle.</span></h2>
+      <p>Chaque intervention devient claire, chaque trace devient durable, chaque professionnel devient responsable.</p>
+      <div class="final-actions">
+        <a href="app/#/register" class="btn btn-primary btn-lg">Commencer avec C-AUTO <svg width="18" height="18" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <a href="professionnels.html" class="btn btn-ghost-light btn-lg">Rejoindre C-AUTO PRO</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
 <footer class="footer">
   <div class="container">
     <div class="footer-grid">
       <div class="footer-brand">
-        <a href="index.html" class="nav-logo" style="margin-bottom:0.5rem">
-          <svg width="32" height="32" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="cm2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2563eb"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><rect x="4" y="4" width="92" height="92" rx="24" fill="url(#cm2)"/><path d="M29 62 h42 a5 5 0 0 0 4.6-3 l2.6-7.6 a10 10 0 0 0-8.6-6.9 l-7.4-.6-6.6-7.6 a7 7 0 0 0-5.4-2.6 h-9.2 a8 8 0 0 0-7 4 l-5.2 8.6 a5 5 0 0 0-1.2 3.3 v9.6 a5 5 0 0 0 5 5 z" fill="#fff"/><circle cx="34" cy="66" r="6" fill="url(#cm2)"/><circle cx="67" cy="66" r="6" fill="url(#cm2)"/><path d="M46 62 h8" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>
-          <span class="wordmark">C-AUTO</span>
-        </a>
-        <p>La confiance au cœur de l'automobile. Plateforme de maintenance transparente et connectée.</p>
+        <a href="index.html" class="nav-logo" aria-label="C-AUTO — accueil"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-logo"/></svg> <span class="wordmark">C-AUTO</span></a>
+        <p>La confiance au cœur de l'automobile. Historique, diagnostics, devis, pièces et professionnels, réunis dans le dossier de votre véhicule.</p>
       </div>
       <div class="footer-col">
-        <h4>Plateforme</h4>
+        <h4>Produit</h4>
+        <a href="#produit">Solutions</a>
         <a href="comment-ca-marche.html">Comment ça marche</a>
-        <a href="professionnels.html">C-AUTO PRO</a>
-        <a href="entreprises.html">C-AUTO FLEET</a>
-        <a href="pieces.html">C-AUTO PIÈCES</a>
+        <a href="professionnels.html">Professionnels</a>
+        <a href="pieces.html">Pièces</a>
+        <a href="entreprises.html">Flotte &amp; entreprises</a>
       </div>
       <div class="footer-col">
-        <h4>Ressources</h4>
-        <a href="aide.html">Centre d'aide</a>
-        <a href="contact.html">Contact</a>
+        <h4>Accès</h4>
+        <a href="app/#/register">Commencer</a>
         <a href="app/#/login">Se connecter</a>
-        <a href="app/#/register">S'inscrire</a>
+        <a href="aide.html">Aide</a>
+        <a href="contact.html">Contact</a>
       </div>
       <div class="footer-col">
         <h4>Légal</h4>
-        <a href="conditions.html">Conditions d'utilisation</a>
-        <a href="confidentialite.html">Politique de confidentialité</a>
+        <a href="conditions.html">Conditions</a>
+        <a href="confidentialite.html">Confidentialité</a>
       </div>
     </div>
     <div class="footer-bottom">
-      <p>&copy; 2026 C-AUTO. Tous droits réservés.</p>
-      <div style="display:flex;gap:1rem">
-        <a href="conditions.html">Conditions</a>
-        <a href="confidentialite.html">Confidentialité</a>
-        <a href="contact.html">Contact</a>
-      </div>
+      <p>&copy; 2026 C-AUTO. Cotonou, Bénin.</p>
+      <span class="legal"><a href="conditions.html">Conditions</a><a href="confidentialite.html">Confidentialité</a><a href="contact.html">Contact</a></span>
     </div>
   </div>
 </footer>
 
-<script src="js/public.js" defer></script>
+<script src="js/public.js"></script>
+<script src="js/home.js"></script>
 </body>
 </html>
