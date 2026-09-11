@@ -585,10 +585,10 @@ async function viewServiceRequestDetail(id) {
           const quote = qd.quote || qd;
           const items = quote.items || [];
           const rows = items.map(it => `<tr style="border-bottom:1px solid var(--border)">
-            <td style="padding:0.35rem 0">${esc(it.label || '')}</td>
-            <td><span class="badge badge-muted">${esc(it.kind || '')}</span></td>
-            <td>${it.qty || 1}</td>
-            <td style="text-align:right;font-weight:600">${money(Math.round((it.qty || 1) * (it.unit_price_cents || 0)))}</td>
+            <td style="padding:0.35rem 0" data-label="Element">${esc(it.label || '')}</td>
+            <td data-label="Type"><span class="badge badge-muted">${esc(it.kind || '')}</span></td>
+            <td data-label="Qte">${it.qty || 1}</td>
+            <td data-label="Total" style="font-weight:600">${money(Math.round((it.qty || 1) * (it.unit_price_cents || 0)))}</td>
           </tr>`).join('');
           actionCard += `
           <div class="card" style="margin-top:0.6rem;border:1px solid rgba(245,158,11,.35)">
@@ -596,14 +596,14 @@ async function viewServiceRequestDetail(id) {
               <h3 style="margin:0">${I('receipt')} Devis proposé par ${esc(sr.professional_name || 'l\'atelier')}</h3>
               ${statusBadge(quote.status || 'PENDING')}
             </div>
-            <table style="width:100%;font-size:0.86rem">
-              <tr style="border-bottom:2px solid var(--border);text-align:left;color:var(--muted);font-size:0.72rem">
+            <table class="quote-table" style="width:100%;font-size:0.86rem">
+              <tr class="qt-head" style="border-bottom:2px solid var(--border);text-align:left;color:var(--muted);font-size:0.72rem">
                 <th style="padding:0.3rem 0">Elément</th><th>Type</th><th>Qte</th><th style="text-align:right">Total</th>
               </tr>
               ${rows}
-              <tr style="font-weight:700;border-top:2px solid var(--border)">
+              <tr class="qt-total" style="font-weight:700;border-top:2px solid var(--border)">
                 <td colspan="3" style="padding:0.4rem 0">TOTAL${quote.delay_days != null ? ' · délai estimé ' + quote.delay_days + 'j' : ''}${fmtDeadline(quote)}${quote.warranty_months != null ? ' · garantie ' + quote.warranty_months + ' mois' : ''}</td>
-                <td style="text-align:right">${money(quote.total_cents || 0)}</td>
+                <td data-label="Total" style="text-align:right">${money(quote.total_cents || 0)}</td>
               </tr>
             </table>
             <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.6rem">
@@ -897,8 +897,8 @@ async function viewQuoteDetail(id) {
 
     <div class="card" style="margin-bottom:1rem">
       <h3>${I('list')} Lignes du devis</h3>
-      <table style="width:100%;font-size:0.88rem;margin-top:0.5rem">
-        <tr style="border-bottom:2px solid var(--border);text-align:left">
+      <table class="quote-table" style="width:100%;font-size:0.88rem;margin-top:0.5rem">
+        <tr class="qt-head" style="border-bottom:2px solid var(--border);text-align:left">
           <th style="padding:0.4rem 0">Element</th>
           <th>Type</th>
           <th>Qte</th>
@@ -906,23 +906,23 @@ async function viewQuoteDetail(id) {
           <th style="text-align:right">Total</th>
         </tr>
         ${items.map(it => `<tr style="border-bottom:1px solid var(--border)">
-          <td style="padding:0.4rem 0">${esc(it.label || '')}</td>
-          <td><span class="badge badge-muted">${esc(it.kind || '')}</span></td>
-          <td>${it.qty || 1}</td>
-          <td>${money(it.unit_price_cents || 0)}</td>
-          <td style="text-align:right;font-weight:600">${money(Math.round((it.qty || 1) * (it.unit_price_cents || 0)))}</td>
+          <td style="padding:0.4rem 0" data-label="Element">${esc(it.label || '')}</td>
+          <td data-label="Type"><span class="badge badge-muted">${esc(it.kind || '')}</span></td>
+          <td data-label="Qte">${it.qty || 1}</td>
+          <td data-label="P.U.">${money(it.unit_price_cents || 0)}</td>
+          <td data-label="Total" style="font-weight:600">${money(Math.round((it.qty || 1) * (it.unit_price_cents || 0)))}</td>
         </tr>`).join('')}
         ${q.discount_granted === true && (q.original_total_cents || q.total_cents) > q.total_cents ? `
         <tr style="border-bottom:1px solid var(--border)">
-          <td style="padding:0.4rem 0">${I('tag')} Remise accordée</td>
-          <td><span class="badge badge-ok">REMISE</span></td>
+          <td style="padding:0.4rem 0" data-label="Element">${I('tag')} Remise accordée</td>
+          <td data-label="Type"><span class="badge badge-ok">REMISE</span></td>
           <td></td>
-          <td>${q.discount_percent != null ? '-' + esc(String(q.discount_percent)) + '%' : ''}</td>
-          <td style="text-align:right;font-weight:600;color:var(--ok)">-${money((q.original_total_cents || q.total_cents) - q.total_cents)}</td>
+          <td data-label="Remise">${q.discount_percent != null ? '-' + esc(String(q.discount_percent)) + '%' : ''}</td>
+          <td data-label="Montant" style="font-weight:600;color:var(--ok)">-${money((q.original_total_cents || q.total_cents) - q.total_cents)}</td>
         </tr>` : ''}
-        <tr style="font-weight:700;border-top:2px solid var(--border)">
+        <tr class="qt-total" style="font-weight:700;border-top:2px solid var(--border)">
           <td colspan="4" style="padding:0.5rem 0">TOTAL${q.discount_granted === true && (q.original_total_cents || q.total_cents) > q.total_cents ? ` <span class="hint" style="font-weight:400;text-decoration:line-through">${money(q.original_total_cents)}</span>` : ''}</td>
-          <td style="text-align:right">${money(q.total_cents || 0)}</td>
+          <td data-label="Total" style="text-align:right">${money(q.total_cents || 0)}</td>
         </tr>
       </table>
     </div>
@@ -1160,9 +1160,9 @@ async function viewRepairDetail(id) {
         : '';
       const remiseRow = remiseApplied
         ? `<tr style="border-bottom:1px solid var(--border)">
-             <td style="padding:0.4rem 0">${I('tag')} Remise accordée</td>
-             <td><span class="badge badge-ok">REMISE</span></td><td></td><td>${quote.discount_percent != null ? '-' + esc(String(quote.discount_percent)) + '%' : ''}</td>
-             <td style="text-align:right;font-weight:600;color:var(--ok)">-${money(original - total)}</td>
+             <td style="padding:0.4rem 0" data-label="Element">${I('tag')} Remise accordée</td>
+             <td data-label="Type"><span class="badge badge-ok">REMISE</span></td><td></td><td data-label="Remise">${quote.discount_percent != null ? '-' + esc(String(quote.discount_percent)) + '%' : ''}</td>
+             <td data-label="Montant" style="font-weight:600;color:var(--ok)">-${money(original - total)}</td>
            </tr>`
         : '';
 
@@ -1173,21 +1173,21 @@ async function viewRepairDetail(id) {
           <span style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center">${complementaryBadge}${statusBadge(quote.status)}</span>
         </div>
         ${quote.is_complementary && quote.complementary_message ? `<p style="margin:.5rem 0 0;font-size:.88rem;color:var(--muted);border-left:3px solid var(--warn);padding-left:.6rem">${esc(quote.complementary_message)}</p>` : ''}
-        <table style="width:100%;font-size:0.88rem;margin-top:0.6rem">
-          <tr style="border-bottom:2px solid var(--border);text-align:left">
+        <table class="quote-table" style="width:100%;font-size:0.88rem;margin-top:0.6rem">
+          <tr class="qt-head" style="border-bottom:2px solid var(--border);text-align:left">
             <th style="padding:0.4rem 0">Element</th><th>Type</th><th>Qte</th><th>P.U.</th><th style="text-align:right">Total</th>
           </tr>
           ${(quote.items || []).map(it => `<tr style="border-bottom:1px solid var(--border)">
-            <td style="padding:0.4rem 0">${esc(it.label || '')}</td>
-            <td><span class="badge badge-muted">${esc(it.kind || '')}</span></td>
-            <td>${it.qty || 1}</td>
-            <td>${money(it.unit_price_cents || 0)}</td>
-            <td style="text-align:right;font-weight:600">${money(Math.round((it.qty || 1) * (it.unit_price_cents || 0)))}</td>
+            <td style="padding:0.4rem 0" data-label="Element">${esc(it.label || '')}</td>
+            <td data-label="Type"><span class="badge badge-muted">${esc(it.kind || '')}</span></td>
+            <td data-label="Qte">${it.qty || 1}</td>
+            <td data-label="P.U.">${money(it.unit_price_cents || 0)}</td>
+            <td data-label="Total" style="font-weight:600">${money(Math.round((it.qty || 1) * (it.unit_price_cents || 0)))}</td>
           </tr>`).join('')}
           ${remiseRow}
-          <tr style="font-weight:700;border-top:2px solid var(--border)">
+          <tr class="qt-total" style="font-weight:700;border-top:2px solid var(--border)">
             <td colspan="4" style="padding:0.5rem 0">TOTAL${remiseApplied ? ` <span class="hint" style="font-weight:400;text-decoration:line-through">${money(original)}</span>` : ''}</td>
-            <td style="text-align:right">${money(total)}</td>
+            <td data-label="Total" style="text-align:right">${money(total)}</td>
           </tr>
         </table>
         ${quote.delay_days != null || quote.warranty_months != null ? `

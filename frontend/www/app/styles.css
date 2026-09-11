@@ -499,6 +499,16 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   .qb-options { gap: 0.5rem; }
   .qb-options label { flex: 1 1 130px; }
   .qb-options input { width: 100%; }
+  .quote-table tr { display: block; margin-bottom: 0.55rem; border: 1px solid var(--border); border-radius: 12px; background: var(--bg2); }
+  .quote-table tr.qt-head { display: none; }
+  .quote-table td { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; padding: 0.3rem 0.7rem; }
+  .quote-table td::first-child { padding-top: 0.6rem; }
+  .quote-table td:last-child { padding-bottom: 0.6rem; }
+  .quote-table td::before { content: attr(data-label); flex-shrink: 0; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.045em; color: var(--muted); }
+  .quote-table td:empty, .quote-table td[colspan]::before { display: none; }
+  .quote-table td[colspan] { display: block; text-align: left; }
+  .quote-table tr.qt-total { border: 2px solid var(--border); background: transparent; }
+  .quote-table tr.qt-total td { font-weight: 700; }
 }
 
 /* ====== COMPLEMENTARY QUOTE OPTION ====== */
