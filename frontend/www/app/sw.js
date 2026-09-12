@@ -5,7 +5,7 @@
    reconnexion (event 'sync' -> 'cauto-flush'). */
 'use strict';
 
-const VERSION = 'cauto-pwa-v33';
+const VERSION = 'cauto-pwa-v34';
 const CORE = [
   './',
   './index.html',

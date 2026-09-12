@@ -2204,6 +2204,14 @@ async function viewProServiceRequestDetail(id) {
               <div style="display:flex;flex-direction:column;gap:.8rem">
                 <div><label>État extérieur <span class="hint">(rayures, chocs, jantes…)</span></label><input id="rec-exterior" placeholder="Ex : rayure pare-chocs avant droit, jante AVG éraflée"></div>
                 <div><label>État intérieur <span class="hint">(propreté, objets, odeurs…)</span></label><input id="rec-interior" placeholder="Ex : intérieur propre, aucun objet volumineux"></div>
+                <div><label>${I('camera')} Photos extérieur <span class="hint">options / 18 Mo max par fichier</span></label>
+                  <input id="rec-photo-ext" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+                  <small class="hint" id="rec-photo-ext-n" style="display:block;margin:.2rem 0 0">Aucune photo</small>
+                </div>
+                <div><label>${I('camera')} Photos intérieur <span class="hint">options / 18 Mo max par fichier</span></label>
+                  <input id="rec-photo-int" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+                  <small class="hint" id="rec-photo-int-n" style="display:block;margin:.2rem 0 0">Aucune photo</small>
+                </div>
                 <div><label>Observations générales</label><textarea id="rec-obs" rows="2" placeholder="Remarques particulières (voyants allumés, bruits…)""></textarea></div>
               </div>
             </div>
@@ -2311,6 +2319,20 @@ async function viewProServiceRequestDetail(id) {
         const kmEl = document.getElementById('rec-km');
         const mileage = kmEl.value ? parseInt(kmEl.value, 10) : null;
         if (vin && vin.length !== 17) { return toast('VIN invalide : 17 caractères requis', 'error'); }
+        const photos = [];
+        for (const selId of ['rec-photo-ext', 'rec-photo-int']) {
+          const sel = document.getElementById(selId);
+          if (sel && sel.files) {
+            for (const f of Array.from(sel.files)) {
+              if (f.size > 18 * 1024 * 1024) { return toast('Photo trop lourde : 18 Mo max', 'error'); }
+              const fd = new FormData(); fd.append('file', f); fd.append('category', 'PHOTO'); fd.append('visibility', 'pro'); fd.append('name', 'Inspection réception - ' + (selId === 'rec-photo-ext' ? 'extérieur' : 'intérieur'));
+              try {
+                const r = await api('/documents', { method: 'POST', body: fd });
+                photos.push(r.document && r.document.id);
+              } catch (e) { return toast((e.message || 'Photo impossible à envoyer') + ' (' + f.name + ')', 'error'); }
+            }
+          }
+        }
         const body = {
           vin: vin || null,
           ...(mileage != null ? { mileage } : {}),
@@ -2318,7 +2340,8 @@ async function viewProServiceRequestDetail(id) {
           keys_provided: document.getElementById('rec-keys').value === 'true',
           exterior: document.getElementById('rec-exterior').value,
           interior: document.getElementById('rec-interior').value,
-          observations: document.getElementById('rec-obs').value
+          observations: document.getElementById('rec-obs').value,
+          ...(photos.length ? { photos } : {})
         };
         if (!(await UX.confirm('Soumettre cette fiche de réception au client pour validation ?', { title: 'Fiche de réception', okLabel: 'Soumettre la fiche', icon: 'send' }))) return;
         try {
