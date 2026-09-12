@@ -34,7 +34,7 @@ function uploadOne(req, res, next) {
 
 const createSchema = z.object({
   category: CATEGORY.default('DOCUMENT'),
-  entity_type: z.enum(['VEHICLE', 'INTERVENTION', 'QUOTE', 'PAYMENT', 'REPAIR', 'WARRANTY', 'PROFILE']).optional(),
+  entity_type: z.enum(['VEHICLE', 'INTERVENTION', 'QUOTE', 'PAYMENT', 'REPAIR', 'WARRANTY', 'PROFILE', 'SERVICE_REQUEST']).optional(),
   entity_id: z.string().uuid().optional(),
   visibility: VISIBILITY.default('private'),
   permissions: z.object({ read: z.array(z.string().max(80)).optional(), write: z.array(z.string().max(80)).optional() }).optional(),
@@ -45,6 +45,13 @@ const createSchema = z.object({
 const ENTITY_TABLES = { QUOTE: 'quotes', PAYMENT: 'payments', REPAIR: 'repairs', WARRANTY: 'warranties' };
 async function entityProUser(entityType, entityId) {
   if (!entityId) return null;
+  if (entityType === 'SERVICE_REQUEST') {
+    const r = await db.one(
+      `SELECT pro.user_id FROM service_requests sr JOIN professionals pro ON pro.id=sr.professional_id WHERE sr.id=$1`,
+      [entityId]
+    ).catch(() => null);
+    return r ? r.user_id : null;
+  }
   if (entityType === 'INTERVENTION') {
     const r = await db.one(
       `SELECT pro.user_id FROM interventions i JOIN professionals pro ON pro.id=i.professional_id WHERE i.id=$1`,
@@ -64,12 +71,26 @@ async function entityProUser(entityType, entityId) {
   return null;
 }
 
-function canRead(doc, user, proUserId) {
+// Client lié à une entité (lecture partagée entity -> client)
+async function entityClientUser(entityType, entityId) {
+  if (!entityId) return null;
+  if (entityType === 'SERVICE_REQUEST') {
+    const r = await db.one(
+      `SELECT user_id FROM service_requests WHERE id=$1`,
+      [entityId]
+    ).catch(() => null);
+    return r ? r.user_id : null;
+  }
+  return null;
+}
+
+function canRead(doc, user, proUserId, clientUserId) {
   if (doc.owner_id === user.sub) return true;
   if (user.role === 'ADMIN' || user.isSuperAdmin) return true;
   if (doc.visibility === 'public') return true;
   const read = (doc.permissions && doc.permissions.read) || ['owner'];
   if (read.includes(user.sub)) return true;
+  if (clientUserId && doc.entity_type === 'SERVICE_REQUEST' && clientUserId === user.sub) return true;
   if (proUserId && read.includes('professional') && proUserId === user.sub) return true;
   return false;
 }

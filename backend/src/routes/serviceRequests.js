@@ -378,7 +378,10 @@ router.post('/:id/reception', requireRole('GARAGE', 'MECANICIEN'), wrap(async (r
     if (!['PRO_ACCEPTED', 'VEHICLE_RECEIVED'].includes(sr.status)) {
         throw new HttpError(400, 'Reception non autorisee a ce stade');
     }
-    const { vin, mileage, fuel_level, exterior, interior, observations, keys_provided } = req.body;
+    const { vin, mileage, fuel_level, exterior, interior, observations, keys_provided, photos } = req.body;
+    let photosArray = Array.isArray(photos) ? photos : [];
+    photosArray = photosArray.map(p => (p && p.id) ? p.id : p).filter(Boolean);
+    if (photosArray.length > 24) throw new HttpError(400, 'Maximum 24 photos d inspection');
     if (vin && !/^[A-HJ-NPR-Z0-9]{11,17}$/i.test(String(vin).replace(/\s+/g, ''))) {
         throw new HttpError(400, 'VIN invalide (11 à 17 caractères alphanumériques sans I, O, Q)');
     }
@@ -386,10 +389,10 @@ router.post('/:id/reception', requireRole('GARAGE', 'MECANICIEN'), wrap(async (r
         `UPDATE service_requests
          SET reception_vin=$1, reception_mileage=$2, reception_fuel_level=$3,
              reception_exterior=$4, reception_interior=$5, reception_observations=$6,
-             reception_keys_provided=$7, reception_submitted_at=NOW(),
-             status='VEHICLE_RECEIVED', updated_at=NOW()
-         WHERE id=$8 RETURNING *`,
-        [vin, mileage, fuel_level, exterior, interior, observations, keys_provided !== false, sr.id]
+             reception_keys_provided=$7, reception_photos=$8,
+             reception_submitted_at=NOW(), status='VEHICLE_RECEIVED', updated_at=NOW()
+         WHERE id=$9 RETURNING *`,
+        [vin, mileage, fuel_level, exterior, interior, observations, keys_provided !== false, JSON.stringify(photosArray), sr.id]
     );
     await db.query(
         `INSERT INTO service_request_history (service_request_id, old_status, new_status, changed_by, notes)

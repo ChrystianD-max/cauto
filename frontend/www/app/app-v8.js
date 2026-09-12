@@ -562,22 +562,51 @@ function viewRegister() {
 }
 
 /* ====== DASHBOARD CLIENT ====== */
+let _receptionBannerHtml = '';
+// Bannière "Action requise" du client : elle pointe vers les demandes de
+// service dont la réception attend validation (VEHICLE_RECEIVED) ou dont le
+// véhicule est prêt à récupérer (QUALITY_CONTROL).
+// Appelée avec un tableau (peuple le cache) puis sans argument (lit le cache).
+function receptionActionBanner(srsOrEmpty) {
+  if (Array.isArray(srsOrEmpty)) {
+    const pending = (srsOrEmpty || []).filter(sr => sr && (sr.status === 'VEHICLE_RECEIVED' || sr.status === 'QUALITY_CONTROL'));
+    if (!pending.length) { _receptionBannerHtml = ''; return _receptionBannerHtml; }
+    _receptionBannerHtml = pending.map(sr => {
+      const isReception = sr.status === 'VEHICLE_RECEIVED';
+      const label = isReception ? 'Valider la réception de mon véhicule' : 'Récupérer mon véhicule';
+      const icon = isReception ? 'clipboard-check' : 'truck';
+      const ctx = isReception
+        ? 'L\'atelier a réceptionné votre véhicule. Confirmez la fiche pour autoriser le diagnostic.'
+        : 'Votre véhicule est prêt. Vérifiez-le et confirmez la bonne réception du travail.';
+      return `<div class="alert alert-warn dash-reception-banner"><div style="flex:1">
+        <b>${I('clipboard-check')} Action requise — ${esc((sr.professional_name || 'l\'atelier'))}</b>
+        <p style="margin:.25rem 0 0">${esc(ctx)}</p></div>
+        <a href="#/service-requests/${esc(sr.id)}" class="btn btn-primary btn-sm" style="white-space:nowrap">${I(icon)} ${esc(label)}</a>
+      </div>`;
+    }).join('');
+    return _receptionBannerHtml;
+  }
+  return _receptionBannerHtml;
+}
+
 async function viewDashboard() {
   loadingShell('dashboard');
   try {
     const { vehicles } = await api('/vehicles');
     const v = vehicles[0];
     let maint = { score: 0, alerts: [], next_due: null, all: [] };
-    let appts = [], intvs = [];
+    let appts = [], intvs = [], srs = [];
     if (v) {
       maint = await api(`/vehicles/${v.id}/maintenance`);
       const apptData = await api('/appointments/mine').catch(() => ({ appointments: [] }));
       appts = apptData.appointments;
       intvs = await api('/interventions/mine').catch(() => ({ interventions: [] })).then(d => d.interventions || []);
+      srs = await api('/service-requests').catch(() => ({ service_requests: [] })).then(d => d.service_requests || []);
     }
+    _receptionBannerHtml = receptionActionBanner(srs);
     const firstName = (S.user.name || 'Client').split(' ')[0];
     layoutApp(`
-    <div class="dash-header">
+    <div class="dash-header">${receptionActionBanner()}
       <div><h1>Bonjour ${esc(firstName)} 👋</h1><p class="hint">Voici le résumé de votre véhicule.</p></div>
       <a href="#/diagnostic" class="btn btn-danger">${I('alert-triangle')} MON VÉHICULE A UN PROBLÈME</a>
     </div>
@@ -1226,16 +1255,39 @@ async function viewProfile() {
 async function viewNotifications() {
   showLoading();
   try {
-    const { notifications } = await api('/admin/notifications');
+    const { notifications, unread_count } = await api('/admin/notifications');
+    const items = (notifications || []).map(n => {
+      const isUnread = !n.seen_at;
+      // Deep-link : la clé de déduplication encode la cible (ex: sr:<id>:reception).
+      const m = /(?:^|:)sr:(service_request_id|[0-9a-f-]{36}):/.exec(n.dedupe_key || '');
+      const href = n.dedupe_key && m && m[1]
+        ? (n.dedupe_key.includes(`sr:${m[1]}:`) ? `#/service-requests/${esc(m[1])}` : null)
+        : null;
+      const target = href || '#/notifications';
+      return `
+      <div class="alert ${isUnread ? 'alert-info' : 'alert-muted'}" style="cursor:pointer">
+        ${I('bell')}<div style="flex:1">
+          <p style="margin:0">${esc(n.message)}</p>
+          <small>${new Date(n.created_at).toLocaleString('fr')}</small>${isUnread ? ` <span class="badge badge-accent" style="font-size:.65rem">non lue</span>` : ''}
+        </div>
+        <button class="btn-ghost btn-sm notif-open" data-href="${esc(target)}" aria-label="Ouvrir">${I('arrow-right')}</button>
+      </div>`;
+    }).join('');
     layoutApp(`
-    <div class="section-title" style="margin-bottom:1rem">${I('bell')} Notifications</div>
-    ${notifications.length ? notifications.map(n => `
-      <div class="alert alert-info">${I('bell')}<div style="flex:1"><p style="margin:0">${esc(n.message)}</p><small>${new Date(n.created_at).toLocaleString('fr')}</small></div>
-      <button class="btn-ghost btn-sm notif-del" data-id="${n.id}">${I('x')}</button></div>`).join('') : '<div class="empty-state">'+I('bell-off')+'<h3>Aucune notification</h3></div>'}
+    <div class="section-title" style="margin-bottom:1rem">${I('bell')} Notifications${unread_count > 0 ? ` <span class="badge badge-danger" style="font-size:.7rem">${unread_count} non lues</span>` : ''}</div>
+    ${items.length ? items : '<div class="empty-state">'+I('bell-off')+'<h3>Aucune notification</h3></div>'}
+    ${unread_count > 0 ? `<div style="margin-top:.8rem"><button class="btn btn-ghost btn-sm" id="btn-read-all-notifs">${I('check')} Tout marquer comme lu</button></div>` : ''}
     `);
-    document.querySelectorAll('.notif-del').forEach(b => b.onclick = async () => {
-      try { await api('/admin/notifications/'+b.dataset.id+'/read',{method:'PATCH'}); toast('Supprimée','success'); viewNotifications(); } catch(e) { toast(e.message,'error'); }
+    document.querySelectorAll('.notif-open').forEach(b => b.onclick = async () => {
+      const href = b.dataset.href;
+      try { await api('/admin/notifications/read-all', { method: 'PATCH' }); } catch(e) {}
+      location.hash = href !== '#/notifications' ? href : '#/notifications';
+      if (href !== '#/notifications') notifyUnread();
     });
+    const ra = document.getElementById('btn-read-all-notifs');
+    if (ra) ra.onclick = async () => {
+      try { await api('/admin/notifications/read-all', { method: 'PATCH' }); toast('Toutes marquées comme lues','success'); viewNotifications(); } catch(e) { toast(e.message,'error'); }
+    };
   } catch(e) { layoutApp(err(e)); }
   hideLoading(); renderIcons();
 }

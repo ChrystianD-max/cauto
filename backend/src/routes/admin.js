@@ -15,16 +15,29 @@ router.use(requireAuth);
 
 /* ============ Notifications personnelles (utilisateur connecté, hors admin) ============ */
 router.get('/notifications', wrap(async (req, res) => {
-  const rows = await db.many(
-    'SELECT * FROM notifications WHERE user_id=$1 ORDER BY created_at DESC LIMIT 50',
-    [req.user.sub]
-  );
-  res.json({ notifications: rows });
+  const [rows, unread] = await Promise.all([
+    db.many(
+      'SELECT * FROM notifications WHERE user_id=$1 ORDER BY created_at DESC LIMIT 50',
+      [req.user.sub]
+    ),
+    db.one('SELECT COUNT(*)::int AS n FROM notifications WHERE user_id=$1 AND seen_at IS NULL', [req.user.sub])
+  ]);
+  res.json({ notifications: rows, unread_count: unread.n });
+}));
+
+router.get('/notifications/unread-count', wrap(async (req, res) => {
+  const unread = await db.one('SELECT COUNT(*)::int AS n FROM notifications WHERE user_id=$1 AND seen_at IS NULL', [req.user.sub]);
+  res.json({ unread_count: unread.n });
 }));
 
 router.patch('/notifications/:id/read', wrap(async (req, res) => {
-  await db.query('DELETE FROM notifications WHERE id=$1 AND user_id=$2', [req.params.id, req.user.sub]);
-  res.json({ message: 'Notification supprimée' });
+  await db.query('UPDATE notifications SET seen_at=NOW() WHERE id=$1 AND user_id=$2', [req.params.id, req.user.sub]);
+  res.json({ message: 'Notification marquee comme lue' });
+}));
+
+router.patch('/notifications/read-all', wrap(async (req, res) => {
+  await db.query('UPDATE notifications SET seen_at=NOW() WHERE user_id=$1 AND seen_at IS NULL', [req.user.sub]);
+  res.json({ message: 'Notifications marquees comme lues' });
 }));
 
 router.delete('/notifications/read-all', wrap(async (req, res) => {
