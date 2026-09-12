@@ -1,11 +1,11 @@
-/* C-AUTO PWA — Service Worker
-   Stratégie : pré-cache des éléments essentiels, network-first sur les navigations
-   (shell HTML toujours frais), cache-first + rafraîchissement en arrière-plan sur
-   les assets (versionnés ?v=), et rejeu de la file d'attente locale à la
+﻿/* C-AUTO PWA â€” Service Worker
+   StratÃ©gie : prÃ©-cache des Ã©lÃ©ments essentiels, network-first sur les navigations
+   (shell HTML toujours frais), cache-first + rafraÃ®chissement en arriÃ¨re-plan sur
+   les assets (versionnÃ©s ?v=), et rejeu de la file d'attente locale Ã  la
    reconnexion (event 'sync' -> 'cauto-flush'). */
 'use strict';
 
-const VERSION = 'cauto-pwa-v34';
+const VERSION = 'cauto-pwa-v35';
 const CORE = [
   './',
   './index.html',
@@ -32,8 +32,8 @@ const CORE = [
   './assets/auth-bg.jpg'
 ];
 
-/* NOTE : quand les versions ?v= des assets de index.html changent, incrémenter
-   VERSION et mettre à jour CORE ci-dessus. */
+/* NOTE : quand les versions ?v= des assets de index.html changent, incrÃ©menter
+   VERSION et mettre Ã  jour CORE ci-dessus. */
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -62,11 +62,11 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (!isSameOrigin(url)) return;
 
-  /* API : uniquement le réseau — jamais mise en cache par le SW */
+  /* API : uniquement le rÃ©seau â€” jamais mise en cache par le SW */
   if (url.pathname.startsWith('/api/')) return;
 
-  /* Navigation (documents HTML) : network-first avec repli coupé par un
-     délai de garde (5 s) sur le shell pré-caché, puis la page hors ligne. */
+  /* Navigation (documents HTML) : network-first avec repli coupÃ© par un
+     dÃ©lai de garde (5 s) sur le shell prÃ©-cachÃ©, puis la page hors ligne. */
   if (request.mode === 'navigate') {
     event.respondWith(
       Promise.race([
@@ -87,8 +87,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  /* Assets (js/css/fonts/images/icônes/manifest) : cache-first puis mise à jour
-     en arrière-plan. */
+  /* Assets (js/css/fonts/images/icÃ´nes/manifest) : cache-first puis mise Ã  jour
+     en arriÃ¨re-plan. */
   event.respondWith(
     caches.match(request).then((hit) => {
       const fetched = fetch(request).then((response) => {
@@ -103,7 +103,7 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-/* Synchronisation en arrière-plan (Background Sync) : notifie la page courante
+/* Synchronisation en arriÃ¨re-plan (Background Sync) : notifie la page courante
    pour rejouer les mutations mises en file d'attente locale. */
 self.addEventListener('sync', (event) => {
   if (event.tag === 'cauto-sync') {
@@ -115,7 +115,7 @@ self.addEventListener('sync', (event) => {
   }
 });
 
-/* Drainage de file déclenché par la page */
+/* Drainage de file dÃ©clenchÃ© par la page */
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'cauto-flush') {
     self.clients.matchAll({ includeUncontrolled: true }).then((clients) =>
@@ -150,7 +150,7 @@ self.addEventListener('notificationclick', (event) => {
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
       for (const client of list) {
         if ('focus' in client) {
-          try { client.navigate(url); } catch (_) { /* déjà sur une autre page */ }
+          try { client.navigate(url); } catch (_) { /* dÃ©jÃ  sur une autre page */ }
           return client.focus();
         }
       }
