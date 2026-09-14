@@ -5,7 +5,8 @@ import { offline } from './offline-db.js';
 window.offline = offline;
 import './command-palette.js';
 import './push-manager.js';
-import { initPresence } from './presence-client.js';
+let initPresence = null;
+try { const mod = await import('./presence-client.js'); initPresence = mod.initPresence; } catch(e) { console.warn('[presence] module unavailable:', e.message); }
 
 const S = { token: localStorage.getItem('token') || null, user: JSON.parse(localStorage.getItem('user') || 'null') };
 let _refreshPromise = null;
@@ -1879,6 +1880,7 @@ function renderCursors() {
 
 // Init presence when user logged in
 function initPresenceIfLogged() {
+  if (!initPresence) { console.warn('[presence] not available'); return; }
   if (window.S?.user?.id) {
     const presence = initPresence(window.S.user.id, window.S.user.name, window.S.user.role);
     window.getPresence = () => presence;
