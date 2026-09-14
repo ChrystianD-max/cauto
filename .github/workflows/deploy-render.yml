@@ -14,8 +14,14 @@ jobs:
         if: ${{ secrets.RENDER_DEPLOY_HOOK != '' }}
         run: |
           echo "🚀 Triggering Render deploy..."
-          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
-          echo "✅ Deploy triggered successfully"
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}")
+          echo "HTTP response: $HTTP_CODE"
+          if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+            echo "✅ Deploy triggered successfully"
+          else
+            echo "⚠️ Deploy hook returned HTTP $HTTP_CODE - secret URL may be invalid/expired"
+            echo "Go to Render Dashboard > Web Service > Settings > Deploy Hook to regenerate"
+          fi
       - name: Skip (no deploy hook configured)
         if: ${{ secrets.RENDER_DEPLOY_HOOK == '' }}
         run: |
