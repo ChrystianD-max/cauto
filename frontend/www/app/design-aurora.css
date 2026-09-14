@@ -210,14 +210,15 @@ h1, h2, h3, .hero-title, [class*="title"]{
   background: var(--panel-strong);
 }
 
-/* ----- 10) Animations au survol / apparition ----- */
+/* ----- 10) Animations au survol / apparition (SECURISEES :
+            jamais de depart a opacity:0 -> aucun ecran vide possible) ----- */
 @keyframes fadeUp{
-  from{ opacity:0; transform: translateY(14px); }
-  to  { opacity:1; transform: translateY(0); }
+  from{ transform: translateY(0); }
+  to  { transform: translateY(0); }
 }
 [class*="card"], [class*="row"], [class*="module"], [class*="item"], [class*="pro"]{
-  animation: fadeUp var(--t-med) var(--ease) both;
-  animation-delay: calc(var(--i, 0) * 40ms);
+  animation: fadeUp 1ms linear 0s both;
+  animation-play-state: running;
 }
 
 /* ----- 11) Scrollbar personnalisee ----- */
