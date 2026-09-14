@@ -1,14 +1,14 @@
 /* C-AUTO — Design system (ne cache rien) */
 :root{
-  --bg:#060b18;--bg2:#0c1428;--panel:rgba(255,255,255,.05);
-  --panel-strong:rgba(255,255,255,.09);--card:rgba(255,255,255,.06);
-  --border:rgba(255,255,255,.1);--border-lit:rgba(34,211,238,.4);
-  --fg:#eef4ff;--fg-soft:#c3d0e6;--muted:#8899bb;
-  --bg-hover:rgba(34,211,238,.1);--accent:#22d3ee;--accent2:#818cf8;
-  --grad:linear-gradient(135deg,#22d3ee,#6366f1,#a855f7);
-  --success:#34d399;--danger:#fb7185;--warn:#fbbf24;
-  --radius:14px;--shadow:0 12px 40px -16px rgba(0,0,0,.6);
-  --glow:0 0 30px -6px rgba(34,211,238,.4);
+  --bg:#0d0505;--bg2:#1a0a0a;--panel:rgba(255,255,255,.06);
+  --panel-strong:rgba(255,255,255,.1);--card:rgba(255,50,50,.08);
+  --border:rgba(255,80,80,.15);--border-lit:rgba(239,68,68,.5);
+  --fg:#fff5f5;--fg-soft:#fca5a5;--muted:#c48080;
+  --bg-hover:rgba(239,68,68,.12);--accent:#ef4444;--accent2:#dc2626;
+  --grad:linear-gradient(135deg,#ef4444,#dc2626,#b91c1c);
+  --success:#22c55e;--danger:#ef4444;--warn:#f59e0b;
+  --radius:14px;--shadow:0 12px 40px -16px rgba(180,0,0,.5);
+  --glow:0 0 30px -6px rgba(239,68,68,.5);
   --font:"Inter",system-ui,-apple-system,sans-serif;
 }
 html,body{background:var(--bg);color:var(--fg);font-family:var(--font);-webkit-font-smoothing:antialiased}
@@ -17,15 +17,16 @@ h1,h2,h3{background:linear-gradient(120deg,var(--fg),var(--accent));-webkit-back
 [class*="card"]:hover{transform:translateY(-2px);box-shadow:var(--shadow),var(--glow)}
 .btn{border-radius:10px;font-weight:600;transition:transform .15s,filter .15s}
 [class*="btn"]:hover{transform:translateY(-1px);filter:brightness(1.08)}
-.btn-primary{background:var(--grad);border:none;box-shadow:0 6px 20px -6px rgba(34,211,238,.5)}
+.btn-primary{background:var(--grad);border:none;box-shadow:0 6px 20px -6px rgba(239,68,68,.5)}
 input,textarea,select{background:var(--panel-strong);border:1px solid var(--border);border-radius:10px;color:var(--fg);transition:border-color .15s,box-shadow .15s}
-input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(34,211,238,.3)}
-.sidebar{background:linear-gradient(180deg,rgba(10,16,32,.95),rgba(6,11,24,.95))!important;border-right:1px solid var(--border)}
-.navbar,header{background:rgba(6,11,24,.7);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(239,68,68,.3)}
+.sidebar{background:linear-gradient(180deg,rgba(20,5,5,.95),rgba(10,3,3,.95))!important;border-right:1px solid var(--border)}
+.navbar,header{background:rgba(20,5,5,.7);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
 [class*="badge"],[class*="pill"]{border-radius:999px;font-size:.65rem;font-weight:700;text-transform:uppercase;padding:.2rem .5rem;border:1px solid var(--border);background:var(--panel-strong)}
 .cmd-window,.toast{background:var(--panel-strong)!important;backdrop-filter:blur(16px);border:1px solid var(--border-lit);border-radius:14px;box-shadow:var(--shadow),var(--glow)}
 *::-webkit-scrollbar{width:8px;height:8px}*::-webkit-scrollbar-track{background:transparent}*::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--accent),var(--accent2));border-radius:6px;border:2px solid var(--bg)}
 ::selection{background:var(--accent);color:#05070d}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media(prefers-color-scheme:light){:root{--bg:#fef2f2;--bg2:#fee2e2;--panel:rgba(255,255,255,.7);--panel-strong:rgba(255,255,255,.9);--card:rgba(255,240,240,.8);--border:rgba(180,50,50,.12);--border-lit:rgba(239,68,68,.5);--fg:#1c0505;--fg-soft:#5c1515;--muted:#993030;--bg-hover:rgba(239,68,68,.1);--accent:#dc2626;--accent2:#b91c1c;--shadow:0 12px 40px -24px rgba(180,0,0,.2)}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
-@media(max-width:768px){[class*="card"]{transform:none!important}.sidebar{background:rgba(6,11,24,.98)!important}}
+@media(max-width:768px){[class*="card"]{transform:none!important}.sidebar{background:rgba(20,5,5,.98)!important}}
