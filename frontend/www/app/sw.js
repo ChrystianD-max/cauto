@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cauto-pwa-v11';
+const CACHE_NAME = 'cauto-pwa-v12';
 const STATIC_ASSETS = [
   '/app/',
   '/app/index.html',

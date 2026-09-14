@@ -3,6 +3,8 @@
 
 import { offline } from './offline-db.js';
 window.offline = offline;
+import './command-palette.js';
+import './push-manager.js';
 
 const S = { token: localStorage.getItem('token') || null, user: JSON.parse(localStorage.getItem('user') || 'null') };
 let _refreshPromise = null;
@@ -1800,5 +1802,31 @@ async function initOffline() {
   }
 }
 initOffline();
+
+// ===== COMMAND PALETTE CSS (injecté) =====
+const cmdCSS = `
+.cmd-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.4); backdrop-filter: blur(2px); z-index: 9998; animation: cmd-fade .15s ease; }
+.cmd-window { position: fixed; top: 15vh; left: 50%; transform: translateX(-50%); width: min(680px, 92vw); background: var(--card); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 24px 48px rgba(0,0,0,.25); z-index: 9999; overflow: hidden; animation: cmd-slide .18s ease; }
+@keyframes cmd-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes cmd-slide { from { opacity: 0; transform: translateX(-50%) translateY(-8px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+.cmd-header { display: flex; align-items: center; gap: .75rem; padding: .85rem 1rem; border-bottom: 1px solid var(--border); }
+.cmd-icon { color: var(--muted); }
+.cmd-input { flex: 1; background: transparent; border: none; outline: none; font-size: 1rem; color: var(--fg); width: 100%; }
+.cmd-input::placeholder { color: var(--muted); }
+.cmd-hint { font-size: .65rem; color: var(--muted); background: var(--bg); padding: .15rem .5rem; border-radius: 4px; font-family: monospace; }
+.cmd-list { max-height: 55vh; overflow-y: auto; }
+.cmd-item { display: flex; align-items: center; gap: .75rem; padding: .7rem 1rem; cursor: pointer; transition: background .1s; }
+.cmd-item:hover, .cmd-item.selected { background: var(--bg-hover); }
+.cmd-item-icon { color: var(--accent); flex-shrink: 0; }
+.cmd-item-content { flex: 1; min-width: 0; }
+.cmd-item-label { font-weight: 500; color: var(--fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cmd-item-desc { font-size: .75rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cmd-item-source { font-size: .65rem; color: var(--muted); background: var(--bg); padding: .1rem .45rem; border-radius: 4px; font-weight: 500; }
+.cmd-empty { padding: 2rem; text-align: center; color: var(--muted); }
+body.cmd-open { overflow: hidden; }
+`;
+const styleEl = document.createElement('style');
+styleEl.textContent = cmdCSS;
+document.head.appendChild(styleEl);
 
 document.addEventListener('DOMContentLoaded', () => route());
