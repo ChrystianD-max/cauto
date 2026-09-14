@@ -115,14 +115,21 @@ const server = app.listen(config.port, () => {
   logger.info(`C-AUTO backend listening on :${config.port} (${config.env})`);
   startAlerts();
 
-  // Module 67 — PUSH : drain de la file outbox (notifications envoyées par
-  // trigger SQL sur la table notifications) dès le démarrage puis périodiquement.
+  // Module 67 — PUSH
   if (require('./services/notifications/WebPushService').isConfigured()) {
     logger.info('Web Push (VAPID) configuré — drain outbox actif');
     setInterval(() => {
       require('./services/notifications/WebPushService').drainOutbox().catch(() => {});
     }, 30000);
     require('./services/notifications/WebPushService').drainOutbox().catch(() => {});
+  }
+
+  // Module 68 — REALTIME PRESENCE + COLLABORATION (Socket.io + Yjs)
+  try {
+    require('./realtime/presence-server').initPresenceServer(server);
+    logger.info('Real-time Presence + Collaboration enabled (/presence, /collab)');
+  } catch (e) {
+    logger.warn('Realtime module failed to init:', e.message);
   }
 });
 

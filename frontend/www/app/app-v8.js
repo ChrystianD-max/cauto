@@ -5,6 +5,7 @@ import { offline } from './offline-db.js';
 window.offline = offline;
 import './command-palette.js';
 import './push-manager.js';
+import { initPresence } from './presence-client.js';
 
 const S = { token: localStorage.getItem('token') || null, user: JSON.parse(localStorage.getItem('user') || 'null') };
 let _refreshPromise = null;
@@ -1828,5 +1829,112 @@ body.cmd-open { overflow: hidden; }
 const styleEl = document.createElement('style');
 styleEl.textContent = cmdCSS;
 document.head.appendChild(styleEl);
+
+// ===== PRESENCE CURSORS CSS =====
+const cursorCSS = `
+.remote-cursor { position: fixed; pointer-events: none; z-index: 10000; transition: transform .05s linear; }
+.remote-cursor .cursor-caret { width: 2px; height: 20px; background: var(--color); animation: blink 1s infinite; }
+.remote-cursor .cursor-label { position: absolute; top: -20px; left: 0; background: var(--color); color: white; padding: 2px 6px; border-radius: 3px; font-size: 11px; white-space: nowrap; transform: translateX(-50%); }
+.remote-cursor .cursor-selection { position: absolute; background: var(--color); opacity: .3; pointer-events: none; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+`;
+const cursorStyle = document.createElement('style');
+cursorStyle.textContent = cursorCSS;
+document.head.appendChild(cursorStyle);
+
+const cursorElements = new Map(); // userId -> { caret, label, selection }
+
+function renderCursors() {
+  const presence = window.getPresence?.();
+  if (!presence) return;
+  const cursors = presence.getCursors();
+  cursors.forEach(([userId, data]) => {
+    if (userId === (window.S?.user?.id)) return;
+    let el = cursorElements.get(userId);
+    if (!el) {
+      el = document.createElement('div');
+      el.className = 'remote-cursor';
+      el.style.setProperty('--color', data.color);
+      el.innerHTML = `<div class="cursor-caret"></div><div class="cursor-label">${data.name}</div>`;
+      document.body.appendChild(el);
+      cursorElements.set(userId, el);
+    }
+    el.style.transform = `translate(${data.x}px, ${data.y}px)`;
+    el.querySelector('.cursor-label').textContent = data.name;
+    if (data.selection) {
+      let sel = el.querySelector('.cursor-selection');
+      if (!sel) { sel = document.createElement('div'); sel.className = 'cursor-selection'; el.appendChild(sel); }
+      sel.style.cssText = `left:${data.selection.x}px;top:${data.selection.y}px;width:${data.selection.w}px;height:${data.selection.h}px;`;
+    } else {
+      const sel = el.querySelector('.cursor-selection');
+      sel?.remove();
+    }
+  });
+  // Remove stale
+  cursorElements.forEach((el, userId) => {
+    if (!presence.getCursors().has(userId)) { el.remove(); cursorElements.delete(userId); }
+  });
+  requestAnimationFrame(renderCursors);
+}
+
+// Init presence when user logged in
+function initPresenceIfLogged() {
+  if (window.S?.user?.id) {
+    const presence = initPresence(window.S.user.id, window.S.user.name, window.S.user.role);
+    window.getPresence = () => presence;
+
+    // Join module on route change
+    window.addEventListener('hashchange', () => {
+      const hash = location.hash;
+      const modMatch = hash.match(/#\/module\/([^/]+)/);
+      if (modMatch) presence.joinModule(modMatch[1]);
+      else if (presence.currentModule) presence.leaveModule(presence.currentModule);
+    });
+
+    // Initial join
+    const hash = location.hash;
+    const modMatch = hash.match(/#\/module\/([^/]+)/);
+    if (modMatch) presence.joinModule(modMatch[1]);
+
+    // Cursor tracking
+    document.addEventListener('mousemove', (e) => {
+      if (presence.currentModule) presence.moveCursor(e.clientX, e.clientY);
+    });
+
+    // Selection tracking
+    document.addEventListener('selectionchange', () => {
+      const sel = window.getSelection();
+      if (sel.rangeCount && presence.currentModule) {
+        const range = sel.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+        presence.moveCursor(rect.left, rect.top, { x: rect.left, y: rect.top, w: rect.width, h: rect.height });
+      }
+    });
+
+    // Typing detection
+    let typingTimer;
+    document.addEventListener('input', (e) => {
+      if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') {
+        const modMatch = location.hash.match(/#\/module\/([^/]+)/);
+        if (modMatch) {
+          presence.startTyping(modMatch[1]);
+          clearTimeout(typingTimer);
+          typingTimer = setTimeout(() => presence.stopTyping(modMatch[1]), 2000);
+        }
+      }
+    });
+
+    renderCursors();
+  }
+}
+
+// Hook into login
+const originalSetSession = window.setSession;
+window.setSession = function(token, user) {
+  originalSetSession(token, user);
+  initPresenceIfLogged();
+};
+
+if (window.S?.user?.id) initPresenceIfLogged();
 
 document.addEventListener('DOMContentLoaded', () => route());

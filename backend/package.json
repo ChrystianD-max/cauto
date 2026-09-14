@@ -30,7 +30,12 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
     "pg": "^8.12.0",
+    "redis": "^4.6.12",
+    "socket.io": "^4.7.5",
+    "@socket.io/redis-adapter": "^8.2.0",
     "web-push": "^3.6.7",
+    "y-websocket": "^2.0.4",
+    "yjs": "^13.6.18",
     "zod": "^3.23.8"
   },
   "devDependencies": {
