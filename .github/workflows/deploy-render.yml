@@ -1,0 +1,28 @@
+name: Deploy to Render
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Trigger Render Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render Deploy Hook
+        if: ${{ secrets.RENDER_DEPLOY_HOOK != '' }}
+        run: |
+          echo "🚀 Triggering Render deploy..."
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+          echo "✅ Deploy triggered successfully"
+      - name: Skip (no deploy hook configured)
+        if: ${{ secrets.RENDER_DEPLOY_HOOK == '' }}
+        run: |
+          echo "⚠️ RENDER_DEPLOY_HOOK secret not set."
+          echo "1. Go to Render Dashboard > Your Web Service > Settings > Deploy Hook"
+          echo "2. Copy the Deploy Hook URL"
+          echo "3. Go to GitHub Repo > Settings > Secrets and variables > Actions > New repository secret"
+          echo "4. Name: RENDER_DEPLOY_HOOK"
+          echo "5. Paste the URL as value"
+          echo "6. Next push will auto-deploy!"
