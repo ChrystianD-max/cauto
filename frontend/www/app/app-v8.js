@@ -1,5 +1,8 @@
-/* C-AUTO SPA — v8 Interface Administrative Complète */
+/* C-AUTO SPA — v8 Interface Administrative Complète — Offline-First */
 'use strict';
+
+import { offline } from './offline-db.js';
+window.offline = offline;
 
 const S = { token: localStorage.getItem('token') || null, user: JSON.parse(localStorage.getItem('user') || 'null') };
 let _refreshPromise = null;
@@ -339,7 +342,7 @@ function renderSidebar() {
     </div>`;
   }).join('')}</nav>`;
   return `<aside class="sidebar">
-    <div class="sidebar-brand"><svg width="30" height="30" viewBox="0 0 100 100"><defs><linearGradient id="cl2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2563eb"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><rect x="4" y="4" width="92" height="92" rx="24" fill="url(#cl2)"/><path d="M29 62 h42 a5 5 0 0 0 4.6-3 l2.6-7.6 a10 10 0 0 0-8.6-6.9 l-7.4-.6-6.6-7.6 a7 7 0 0 0-5.4-2.6 h-9.2 a8 8 0 0 0-7 4 l-5.2 8.6 a5 5 0 0 0-1.2 3.3 v9.6 a5 5 0 0 0 5 5 z" fill="#fff"/><circle cx="34" cy="66" r="6" fill="url(#cl2)"/><circle cx="67" cy="66" r="6" fill="url(#cl2)"/><path d="M46 62 h8" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg><span>C-AUTO${isAdmin() ? ' Admin' : (isPro() ? ' Pro' : '')}</span></div>
+    <div class="sidebar-brand"><img src="icons/logo-app.png" alt="C-AUTO" style="height:30px;width:30px;border-radius:24%;object-fit:cover;vertical-align:middle" /><span>C-AUTO${isAdmin() ? ' Admin' : (isPro() ? ' Pro' : '')}</span></div>
     ${navHtml}
     <div class="sidebar-footer">
       <a href="#/profile" class="sidebar-link"><span class="avatar-sm">${initials}</span><span>${esc(S.user.name)}${S.user.is_certified ? certBadge() : ''}</span></a>
@@ -442,7 +445,7 @@ function viewRegister() {
   <div class="auth-page">
     <div class="auth-card card reg-card">
       <button type="button" class="reg-back hidden" id="reg-back" aria-label="Étape précédente">${I('arrow-left')}</button>
-      <div class="logo-big"><svg width="36" height="36" viewBox="0 0 100 100"><rect rx="18" width="100" height="100" fill="var(--accent)"/><text x="50" y="68" font-size="50" font-weight="bold" text-anchor="middle" fill="white" font-family="system-ui">CA</text></svg> C-AUTO</div>
+      <div class="logo-big"><img src="icons/logo-app.png" alt="C-AUTO" style="width:64px;height:64px;border-radius:32%;object-fit:cover" /></div>
       <p class="subtitle" id="reg-title"></p>
       <div class="reg-progress"><span id="reg-progress-bar"></span></div>
       <form id="f-reg" novalidate>
@@ -1751,4 +1754,51 @@ if (S.user && S.user.role) document.body.setAttribute('data-role', S.user.role);
 if (S.user && S.token) {
   api('/auth/me').then(d => { if (d && d.user) setSession(S.token, { ...S.user, ...d.user }); }).catch(() => {});
 }
+
+// ===== OFFLINE-FIRST INIT =====
+async function initOffline() {
+  if (!window.offline) return;
+  try {
+    // Précharge les listes en cache pour affichage instantané
+    const [convs, modules, pros, innovations] = await Promise.all([
+      offline.getConversations(),
+      offline.getCachedList('modules'),
+      offline.getCachedList('professionals'),
+      offline.getCachedList('innovations')
+    ]);
+    if (convs.length) window.cautoCachedConversations = convs;
+    if (modules.length) window.cautoCachedModules = modules;
+    if (pros.length) window.cautoCachedProfessionals = pros;
+    if (innovations.length) window.cautoCachedInnovations = innovations;
+  } catch (e) { console.warn('[offline] init failed', e); }
+
+  // Sync des mutations en attente
+  window.addEventListener('cauto:sync-now', async () => {
+    const pending = await offline.getPendingMutations();
+    for (const m of pending) {
+      try {
+        await fetch('/api' + m.payload.path, { method: m.payload.method, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + S.token }, body: JSON.stringify(m.payload.body) });
+        await offline.removeMutation(m.id);
+      } catch {
+        await offline.incrementRetry(m.id);
+        if (m.retries >= 3) { console.warn('[offline] mutation abandoned', m); await offline.removeMutation(m.id); }
+      }
+    }
+  });
+
+  // Écoute maj API depuis SW
+  window.addEventListener('cauto:api-updated', (e) => {
+    console.log('[offline] API updated:', e.detail?.url);
+    // Optionnel : invalider cache local correspondant
+  });
+
+  // Enregistrement background sync
+  if ('serviceWorker' in navigator && 'SyncManager' in window) {
+    navigator.serviceWorker.ready.then((reg) => {
+      if (reg.sync) reg.sync.register('sync-mutations').catch(() => {});
+    });
+  }
+}
+initOffline();
+
 document.addEventListener('DOMContentLoaded', () => route());
