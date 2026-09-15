@@ -8,7 +8,7 @@ import './push-manager.js';
 let initPresence = null;
 try { const m = await import('./presence-client.js'); initPresence = m.initPresence; } catch(e) { console.warn('[presence] module indisponible'); }
 
-const S = { token: localStorage.getItem('token') || null, user: JSON.parse(localStorage.getItem('user') || 'null') };
+const S = (function(){try{return{token:localStorage.getItem('token')||null,user:JSON.parse(localStorage.getItem('user')||'null')}}catch{return{token:null,user:null}}})();
 let _refreshPromise = null;
 const $app = document.getElementById('app');
 
@@ -1940,3 +1940,14 @@ window.setSession = function(token, user) {
 if (window.S?.user?.id) initPresenceIfLogged();
 
 document.addEventListener('DOMContentLoaded', () => route());
+
+// Garde anti-ecran vide : capture toute erreur non geree
+window.onerror = function(msg, src, line, col, err) {
+  console.error('[C-AUTO error]', msg, src, line, col, err);
+  const app = document.getElementById('app');
+  if (app) app.innerHTML = '<div style="padding:2rem;text-align:center;color:#ef4444"><h2>Une erreur est survenue</h2><p>Rafraichis la page (Ctrl+Shift+R)</p><small>'+String(msg).substring(0,100)+'</small></div>';
+  return true;
+};
+window.addEventListener('unhandledrejection', function(e) {
+  console.error('[C-AUTO unhandled]', e.reason);
+});
