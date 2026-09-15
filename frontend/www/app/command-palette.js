@@ -1,6 +1,7 @@
 // frontend/www/app/command-palette.js
 // Command Palette ⌘K — recherche fuzzy unifiée (modules, pros, innovations, chats, actions)
-import Fuse from 'https://esm.run/fuse.js@7.0.0';
+let Fuse = null;
+try { const m = await import('https://esm.run/fuse.js@7.0.0'); Fuse = m.default || m; } catch(e) { console.warn('[cmd] Fuse CDN indisponible'); }
 
 const COMMAND_SOURCES = {
   modules: { label: 'Modules', icon: 'book-open', get: () => window.cautoCachedModules || [] },
