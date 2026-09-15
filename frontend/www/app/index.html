@@ -27,7 +27,7 @@
 <link rel="stylesheet" href="admin-theme.css?v=1.0" />
 </head>
 <body>
-<script>(async(){try{const regs=await navigator.serviceWorker.getRegistrations();for(const r of regs){await r.unregister();}console.log('[SW] all unregistered');}catch(e){console.warn('[SW] unregister failed',e);}})();</script>
+<script>(async(){try{const regs=await navigator.serviceWorker.getRegistrations();for(const r of regs){await r.unregister();}const keys=await caches.keys();for(const k of keys){await caches.delete(k);}console.log('[SW+Cache] cleared');}catch(e){console.warn('[SW+Cache] failed',e);}})();</script>
 <div id="toast-container"></div>
 <div id="loading-overlay" class="hidden"><div class="loader"><div class="spinner"></div><div class="loader-tag">C-AUTO</div></div></div>
 <header>
