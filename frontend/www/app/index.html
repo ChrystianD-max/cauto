@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="description" content="C-AUTO — Plateforme de maintenance automobile intelligente. Suivi vehicules, diagnostics, devis, paiement securise." />
 <meta name="theme-color" content="#0f1420" />
 <meta name="mobile-web-app-capable" content="yes" />
@@ -24,6 +27,7 @@
 <link rel="stylesheet" href="admin-theme.css?v=1.0" />
 </head>
 <body>
+<script>(async(){try{const regs=await navigator.serviceWorker.getRegistrations();for(const r of regs){await r.unregister();}console.log('[SW] all unregistered');}catch(e){console.warn('[SW] unregister failed',e);}})();</script>
 <div id="toast-container"></div>
 <div id="loading-overlay" class="hidden"><div class="loader"><div class="spinner"></div><div class="loader-tag">C-AUTO</div></div></div>
 <header>
