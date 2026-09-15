@@ -1,21 +1,13 @@
 // frontend/www/app/presence-client.js
 // Frontend Presence + Cursors + Awareness Client (Socket.io)
 
-let io = null;
-try {
-  const mod = await import('https://cdn.socket.io/4.7.5/socket.io.esm.min.js');
-  io = mod.io;
-} catch(e) {
-  console.warn('[presence] Socket.io CDN unavailable, presence disabled:', e.message);
-}
+import { io } from 'https://cdn.socket.io/4.7.5/socket.io.esm.min.js';
 
 const PRESENCE_URL = '/presence';
 const COLLAB_URL = '/collab';
 
 class PresenceClient {
   constructor(userId, userName, userRole) {
-    if (!io) { console.warn('[presence] Socket.io not available, skipping init'); this.disabled = true; return; }
-    this.disabled = false;
     this.userId = userId;
     this.userName = userName;
     this.userRole = userRole;
@@ -29,7 +21,6 @@ class PresenceClient {
   }
 
   connect() {
-    if (this.disabled || !io) { console.warn('[presence] connect() skipped'); return; }
     // Presence namespace
     this.presenceSocket = io(PRESENCE_URL, {
       auth: { userId: this.userId, userName: this.userName, userRole: this.userRole, route: location.hash }

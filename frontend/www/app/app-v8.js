@@ -5,8 +5,7 @@ import { offline } from './offline-db.js';
 window.offline = offline;
 import './command-palette.js';
 import './push-manager.js';
-let initPresence = null;
-try { const mod = await import('./presence-client.js'); initPresence = mod.initPresence; } catch(e) { console.warn('[presence] module unavailable:', e.message); }
+import { initPresence } from './presence-client.js';
 
 const S = { token: localStorage.getItem('token') || null, user: JSON.parse(localStorage.getItem('user') || 'null') };
 let _refreshPromise = null;
