@@ -1,9 +1,12 @@
 // frontend/www/app/offline-db.js
-// IndexedDB offline storage via Dexie (auto-chargé via import)
-import Dexie from 'https://esm.run/dexie@3.2.4';
+// IndexedDB offline storage via Dexie (chargement CDN optionnel)
 
-export const offlineDB = new Dexie('cauto-offline');
+let Dexie = null;
+try { const m = await import('https://esm.run/dexie@3.2.4'); Dexie = m.default || m; } catch(e) { console.warn('[offline] Dexie CDN indisponible, mode lecture seule'); }
 
+export const offlineDB = Dexie ? new Dexie('cauto-offline') : null;
+
+if (offlineDB) {
 offlineDB.version(1).stores({
   messages: '++id, conversationId, content, timestamp, synced, localId',
   conversations: '++id, title, updatedAt, unreadCount',
@@ -13,6 +16,7 @@ offlineDB.version(1).stores({
   mutations: '++id, type, payload, timestamp, retries',
   userProfile: 'id, name, email, role, avatar, updatedAt'
 });
+}
 
 // Helpers pour l'app
 export const offline = {
