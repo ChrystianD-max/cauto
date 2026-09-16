@@ -154,16 +154,8 @@ async function viewAdminUsers() {
   try {
     const { users } = await api('/admin/users');
     const sums = users.reduce((a, u) => { a[u.role] = (a[u.role] || 0) + 1; a.suspended += u.status === 'SUSPENDED' ? 1 : 0; return a; }, { suspended: 0 });
-    layoutApp(adminShell('users', 'Utilisateurs', 'users', `
-      <div class="fl-stats-line">
-        <span class="fl-chip mute">Total ${users.length}</span>
-        <span class="fl-chip accent">Clients ${sums.CLIENT || 0}</span>
-        <span class="fl-chip ok">Garages ${sums.GARAGE || 0}</span>
-        <span class="fl-chip warn">Techniciens ${sums.MECANICIEN || 0}</span>
-        <span class="fl-chip mute">Fournisseurs ${sums.SUPPLIER || 0}</span>
-        <span class="fl-chip mute">Admins ${sums.ADMIN || 0}</span>
-        ${sums.suspended ? `<span class="fl-chip ko">Suspendus ${sums.suspended}</span>` : ''}
-      </div>
+    const isSuper = S.user && S.user.role === 'SUPER_ADMIN';
+    const admPanel = isSuper ? `
       <div class="fl-panel-h" style="margin-top:1rem">
         ${I('user-plus')} Ajouter un administrateur
         <button class="btn btn-sm btn-ghost" data-new-adm-toggle style="margin-left:auto">${I('plus')} Nouveau compte</button>
@@ -181,7 +173,18 @@ async function viewAdminUsers() {
           </div>
           <div class="fl-field" style="align-self:flex-end"><button class="btn" type="submit">${I('user-plus')} Créer le compte</button><span class="hint" data-new-adm-msg></span></div>
         </div>
-      </form>
+      </form>` : '';
+    layoutApp(adminShell('users', 'Utilisateurs', 'users', `
+      <div class="fl-stats-line">
+        <span class="fl-chip mute">Total ${users.length}</span>
+        <span class="fl-chip accent">Clients ${sums.CLIENT || 0}</span>
+        <span class="fl-chip ok">Garages ${sums.GARAGE || 0}</span>
+        <span class="fl-chip warn">Techniciens ${sums.MECANICIEN || 0}</span>
+        <span class="fl-chip mute">Fournisseurs ${sums.SUPPLIER || 0}</span>
+        <span class="fl-chip mute">Admins ${sums.ADMIN || 0}</span>
+        ${sums.suspended ? `<span class="fl-chip ko">Suspendus ${sums.suspended}</span>` : ''}
+      </div>
+      ${admPanel}
       <div class="fl-form-row">
         <input class="fl-search" id="ad-user-search" placeholder="Rechercher par nom, email, téléphone…" value="">
       </div>

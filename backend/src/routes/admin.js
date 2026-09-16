@@ -122,9 +122,10 @@ router.get('/users/:id', wrap(async (req, res) => {
 }));
 
 /* ===== CRÉATION D'UTILISATEUR / ADMINISTRATEUR (console admin) =====
-   Permission `users.roles.assign` (même que le PATCH role) :
-   un admin qui peut déjà attribuer des rôles peut créer un nouveau compte. */
-router.post('/users', requirePermission('users.roles.assign'), wrap(async (req, res) => {
+   Permission `users.roles.assign` + rôle SUPER_ADMIN :
+   seul un SUPER_ADMIN peut créer un compte destiné à l'administration
+   (un ADMIN ne peut PAS ajouter d'autres admins à la chaîne). */
+router.post('/users', requireRole('SUPER_ADMIN'), requirePermission('users.roles.assign'), wrap(async (req, res) => {
   const { name, email, phone, password, role = 'ADMIN' } = req.body || {};
   if (!name || !email || !password) throw new HttpError(400, 'name, email et password requis');
   const cleanRole = String(role).toUpperCase();
@@ -148,6 +149,8 @@ router.post('/users', requirePermission('users.roles.assign'), wrap(async (req, 
 router.patch('/users/:id', requirePermission('users.roles.assign'), wrap(async (req, res) => {
   const cur = await db.one('SELECT * FROM users WHERE id=$1', [req.params.id]);
   if (!cur) throw new HttpError(404, 'Utilisateur introuvable');
+  if ('role' in req.body && req.user.role !== 'SUPER_ADMIN' && !req.user.isSuperAdmin)
+    throw new HttpError(403, 'Seul un SUPER_ADMIN peut attribuer ou retirer le rôle ADMIN');
   if (cur.id === req.user.sub && (req.body.status === 'SUSPENDED')) throw new HttpError(400, 'Impossible de suspendre votre propre compte');
   const sets = []; const params = []; let i = 1;
   if (req.body.role) {
