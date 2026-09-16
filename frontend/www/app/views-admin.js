@@ -83,7 +83,7 @@ async function viewAdminDashboard() {
         <div class="ad-kpi-value">${value}</div>
         ${sub ? `<div class="ad-kpi-sub">${sub}</div>` : ''}
       </div>`;
-    const me = (S && S.user && S.user.name) || 'Administrateur';
+    const me = (window.S && window.S.user && window.S.user.name) || 'Administrateur';
     const first = String(me).trim().split(/\s+/)[0];
     layoutApp(adminShell('dashboard', 'Tableau de bord', 'layout-dashboard', `
       <section class="ad-hero">

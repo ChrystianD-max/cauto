@@ -17,7 +17,7 @@ const chatState = { pollTimer: null, convId: null, media: new Map(), rec: { acti
 function clearChatPoll() { if (chatState.pollTimer) { clearInterval(chatState.pollTimer); chatState.pollTimer = null; } chatState.convId = null; }
 
 async function updateChatUnread() {
-  if (!S.token || !S.user) return;
+  if (!window.S.token || !window.S.user) return;
   const badge = document.getElementById('chat-unread');
   if (!badge) return;
   try {
@@ -55,7 +55,7 @@ function fmtSize(b) {
 }
 const TICK_SVG = '<svg class="tick" viewBox="0 0 16 12" aria-hidden="true"><path d="M1.5 6.5 5.5 10 14.5 2"/></svg>';
 function tickHtml(m) {
-  if (!m || m.sender_id !== S.user.id) return '';
+  if (!m || m.sender_id !== window.S.user.id) return '';
   const read = !!m.read_at, del = !!m.delivered_at;
   return `<span class="msg-ticks ${read ? 'is-read' : (del ? 'is-delivered' : '')}" title="${read ? 'Lu' : (del ? 'Délivré' : 'Envoyé')}">${TICK_SVG}${TICK_SVG}</span>`;
 }
@@ -78,7 +78,7 @@ function attHtml(m) {
 /* Récupère le binaire authentifié → object URL, puis hydrate les médias du fil. */
 async function loadChatBlob(docId) {
   if (chatState.media.has(docId)) return chatState.media.get(docId);
-  const r = await fetch('/api/documents/' + docId + '/download?view=1', { headers: { Authorization: 'Bearer ' + S.token } });
+  const r = await fetch('/api/documents/' + docId + '/download?view=1', { headers: { Authorization: 'Bearer ' + window.S.token } });
   if (!r.ok) throw new Error('http ' + r.status);
   const blob = await r.blob();
   const url = URL.createObjectURL(blob);
@@ -110,10 +110,10 @@ async function downloadChatDoc(docId, name) {
 }
 function msgBubbleHtml(m, dayHeader) {
   return `${dayHeader ? `<div class="chat-day"><span>${esc(dayHeader)}</span></div>` : ''}
-  <div class="chat-bubble-row ${m.sender_id === S.user.id ? 'mine' : 'theirs'}" data-mid="${m.id}">
-    ${m.sender_id === S.user.id ? '' : chatAvatar(m.sender_name, m.sender_id)}
+  <div class="chat-bubble-row ${m.sender_id === window.S.user.id ? 'mine' : 'theirs'}" data-mid="${m.id}">
+    ${m.sender_id === window.S.user.id ? '' : chatAvatar(m.sender_name, m.sender_id)}
     <div class="chat-bubble">
-      ${m.sender_id === S.user.id ? '' : `<div class="chat-bubble-author">${esc(m.sender_name)}</div>`}
+      ${m.sender_id === window.S.user.id ? '' : `<div class="chat-bubble-author">${esc(m.sender_name)}</div>`}
       ${attHtml(m)}
       ${m.body ? `<div class="chat-bubble-body">${esc(m.body)}</div>` : ''}
       <div class="chat-bubble-time">${tickHtml(m)}${chatTime(m.created_at)}</div>
@@ -153,7 +153,7 @@ async function viewChat() {
     const convs = d.conversations || [];
     const items = convs.length ? convs.map(c => {
       const span = c.participants.map(p => p.name).join(', ') || c.title;
-      const lastBy = c.last_message && c.last_message.sender_id === S.user.id ? 'Vous : ' : (c.last_message ? esc(c.last_message.sender_name) + ' : ' : '');
+      const lastBy = c.last_message && c.last_message.sender_id === window.S.user.id ? 'Vous : ' : (c.last_message ? esc(c.last_message.sender_name) + ' : ' : '');
       let sub = 'Nouvelle conversation';
       if (c.last_message) {
         sub = c.last_message.body ? String(c.last_message.body) : (KIND_LABEL[c.last_message.attachment_kind] || 'Pièce jointe');
@@ -193,7 +193,7 @@ async function viewChatDetail(id) {
         <div class="page-head">
           <a class="btn btn-ghost btn-sm" href="#/chat">${I('arrow-left')} Retour</a>
           <div class="chat-title"><h1>${esc(title)}</h1>
-            <p class="page-sub">${conv.kind === 'GROUP' ? 'Conversation de groupe' : ''} ${d.participants.filter(p => p.id !== S.user.id).map(p => `${ROLE_LABELS[p.role] || p.role} · ${esc(p.name)}`).join(' · ')}</p>
+            <p class="page-sub">${conv.kind === 'GROUP' ? 'Conversation de groupe' : ''} ${d.participants.filter(p => p.id !== window.S.user.id).map(p => `${ROLE_LABELS[p.role] || p.role} · ${esc(p.name)}`).join(' · ')}</p>
           </div>
         </div>
         <div class="chat-thread" id="chat-thread">${buildThreadRows(d.messages || [])}</div>
@@ -433,7 +433,7 @@ async function openNewConversation() {
 }
 
 /* Poeur de badge global (démarré une fois) — idempotent */
-setInterval(() => { if (S.token) updateChatUnread(); }, 25000);
+setInterval(() => { if (window.S.token) updateChatUnread(); }, 25000);
 
 /* Lance une conversation directe avec un utilisateur (depuis une fiche pro/fournisseur) */
 async function startChatWith(userId, name) {

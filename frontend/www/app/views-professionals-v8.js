@@ -365,7 +365,7 @@ async function viewProfessionalDetail(id) {
     <div id="pro-tab-content"></div>
 
     <div style="text-align:center;margin-top:1.5rem;display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap">
-      ${(S.user && p.user_id && S.user.id !== p.user_id) ? `<button type="button" class="btn btn-ghost" id="btn-chat-pro">${I('message-square')} Contacter</button>` : ''}
+      ${(window.S.user && p.user_id && window.S.user.id !== p.user_id) ? `<button type="button" class="btn btn-ghost" id="btn-chat-pro">${I('message-square')} Contacter</button>` : ''}
       <a href="#/service-requests/new?professional_id=${id}" class="btn btn-primary">${I('file-text')} Demander un devis</a>
     </div>
     `);
@@ -863,7 +863,7 @@ async function viewQuoteDetail(id) {
     const evidences = q.evidences || [];
 
     let actionsHtml = '';
-    if (q.status === 'PENDING' && S.user && S.user.role === 'CLIENT') {
+    if (q.status === 'PENDING' && window.S.user && window.S.user.role === 'CLIENT') {
       const remiseApplied = q.discount_granted === true && (q.original_total_cents || q.total_cents) > q.total_cents;
       const remiseNote = remiseApplied
         ? `<p class="hint" style="margin:0 0 .6rem">Remise accordée : <b>${money((q.original_total_cents || q.total_cents) - q.total_cents)}</b> — nouveau total <b>${money(q.total_cents)}</b>.</p>`
@@ -877,7 +877,7 @@ async function viewQuoteDetail(id) {
           <button class="btn btn-ko" id="btn-refuse-quote">${I('x')} Refuser le devis</button>
         </div>
       </div>`;
-    } else if (q.status === 'REFUSED' && q.discount_granted === false && S.user && S.user.role === 'CLIENT') {
+    } else if (q.status === 'REFUSED' && q.discount_granted === false && window.S.user && window.S.user.role === 'CLIENT') {
       actionsHtml = `
       <div class="card" style="margin-top:1rem;border:1px solid rgba(239,68,68,.3)">
         <h3 style="margin:0 0 .4rem">${I('alert-circle')} Prix maintenu par le professionnel</h3>
@@ -1048,7 +1048,7 @@ function quoteRefuseForm() {
 }
 
 async function viewRepairDetail(id) {
-  const isPro = S.user && ['GARAGE', 'MECANICIEN'].includes(S.user.role);
+  const isPro = window.S.user && ['GARAGE', 'MECANICIEN'].includes(window.S.user.role);
   showLoading();
   try {
     const d = await api('/repairs/' + id);
@@ -1071,7 +1071,7 @@ async function viewRepairDetail(id) {
       <div class="detail-grid">
         <div class="card"><div class="detail-label">Vehicule</div><div class="detail-value">${esc(r.vehicle_make || '')} ${esc(r.vehicle_model || '')} · ${esc(r.vehicle_plate || '')}</div></div>
         <div class="card"><div class="detail-label">Professionnel</div><div class="detail-value">${esc(r.professional_name || '')}</div></div>
-        <div class="card"><div class="detail-label">Client</div><div class="detail-value">${esc(r.client_name || (isPro ? 'Client' : (S.user && S.user.name) || ''))}</div></div>
+        <div class="card"><div class="detail-label">Client</div><div class="detail-value">${esc(r.client_name || (isPro ? 'Client' : (window.S.user && window.S.user.name) || ''))}</div></div>
         ${r.mileage != null ? `<div class="card"><div class="detail-label">Kilometrage</div><div class="detail-value">${Number(r.mileage).toLocaleString('fr')} km</div></div>` : ''}
       </div>`;
 
@@ -1701,7 +1701,7 @@ async function viewDisputeDetail(id) {
     <div class="card" style="margin-bottom:1rem">
       <h3>${I('message-square')} Discussion</h3>
       ${messages.length ? `<div style="margin-top:0.5rem;max-height:400px;overflow-y:auto">${messages.map(m => {
-        const isMine = m.author_id === S.user.id;
+        const isMine = m.author_id === window.S.user.id;
         return `<div style="margin-bottom:0.8rem;display:flex;flex-direction:column;${isMine ? 'align-items:flex-end' : ''}">
           <div class="hint" style="font-size:0.75rem;margin-bottom:0.2rem">${esc(m.author_name || '')} · ${m.created_at ? new Date(m.created_at).toLocaleString('fr') : ''}</div>
           <div class="card" style="max-width:75%;padding:0.6rem !important;${isMine ? 'background:var(--accent);color:white' : ''}">
@@ -2451,7 +2451,7 @@ async function viewProAppointments() {
 async function viewProRatings() {
   showLoading();
   try {
-    const { ratings, breakdown } = await api('/ratings/professional/' + (S.user.professional_id || '')).catch(()=>({ratings:[],breakdown:{}}));
+    const { ratings, breakdown } = await api('/ratings/professional/' + (window.S.user.professional_id || '')).catch(()=>({ratings:[],breakdown:{}}));
     layoutApp(`
       <div class="section-title" style="margin-bottom:1rem">${I('star')} Avis clients</div>
       ${breakdown.overall ? `
@@ -2516,7 +2516,7 @@ async function viewProProfile() {
       api('/professionals/me').catch(() => null),
       api('/documents').catch(() => null)
     ]);
-    const user = (meR && meR.user) || S.user;
+    const user = (meR && meR.user) || window.S.user;
     const pro = (proR && proR.professional) || null;
     const allDocs = (docR && docR.documents) || [];
     const attIds = (pro && pro.attestation_doc_ids) || [];

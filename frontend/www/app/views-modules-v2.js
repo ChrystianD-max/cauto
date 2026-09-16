@@ -195,7 +195,7 @@ async function viewSupplierPage(id) {
       <div class="page-top"><h1>${I('truck')} ${esc(s.name)}</h1>
         ${s.rating>0 ? `<span class="badge badge-ok">★ ${s.rating}</span>` : ''} ${s.is_active ? '<span class="badge badge-ok">Actif</span>' : '<span class="badge badge-ko">Inactif</span>'}
       </div>
-      ${(S.user && s.user_id && S.user.id !== s.user_id) ? `<div style="margin-top:0.8rem"><button type="button" class="btn btn-primary" id="btn-chat-sup">${I('message-square')} Contacter le fournisseur</button></div>` : ''}
+      ${(window.S.user && s.user_id && window.S.user.id !== s.user_id) ? `<div style="margin-top:0.8rem"><button type="button" class="btn btn-primary" id="btn-chat-sup">${I('message-square')} Contacter le fournisseur</button></div>` : ''}
       ${s.description ? `<p class="hint">${esc(s.description)}</p>` : ''}
       <div class="section-title" style="margin-top:1rem">${I('package')} Pièces (${parts.length})</div>
       <div class="grid-2">${

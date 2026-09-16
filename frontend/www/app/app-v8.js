@@ -8,7 +8,7 @@ import './push-manager.js';
 let initPresence = null;
 try { const m = await import('./presence-client.js'); initPresence = m.initPresence; } catch(e) { console.warn('[presence] module indisponible'); }
 
-const S = (function(){try{return{token:localStorage.getItem('token')||null,user:JSON.parse(localStorage.getItem('user')||'null')}}catch{return{token:null,user:null}}})();
+const S = (function(){try{return{token:localStorage.getItem('token')||null,user:JSON.parse(localStorage.getItem('user')||'null')}}catch{return{token:null,user:null}}})(); window.S = S;
 let _refreshPromise = null;
 const $app = document.getElementById('app');
 
