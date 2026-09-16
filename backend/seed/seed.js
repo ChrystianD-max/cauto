@@ -65,7 +65,7 @@ async function ensureDemoPassword(c, email) {
    ------------------------------------------------------------------------- */
 async function seedEnvAdmin(c) {
   const isProd = process.env.NODE_ENV === 'production' || process.env.APP_ENV === 'production';
-  if (isProd) {
+  if (isProd && !process.env.SEED_ADMIN_PASSWORD) {
     console.log('- compte admin de developpement ignore (environnement production).');
     return null;
   }

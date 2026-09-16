@@ -27,8 +27,18 @@ services:
         value: 10000
       - key: NODE_ENV
         value: production
+      - key: APP_ENV
+        value: staging
       - key: DEMO_MODE
         value: "true"
+      - key: SEED_ADMIN_EMAIL
+        value: admin.dev@cauto.local
+      - key: SEED_ADMIN_NAME
+        value: Admin Developpement
+      - key: SEED_ADMIN_PASSWORD
+        value: Dev#Admin#85
+      - key: SEED_ADMIN_PHONE
+        value: +22997000000
       - key: APP_PUBLIC_URL
         value: https://cauto.onrender.com
       - key: CORS_ORIGINS
