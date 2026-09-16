@@ -1951,3 +1951,32 @@ window.onerror = function(msg, src, line, col, err) {
 window.addEventListener('unhandledrejection', function(e) {
   console.error('[C-AUTO unhandled]', e.reason);
 });
+
+/* ============ EXPOSITION GLOBALE (scripts classiques views-*.js) ============
+   app-v8.js est charge en <script type="module"> : ses fonctions et const
+   de niveau top sont SCOPED au module et invisibles depuis les scripts
+   classiques views-*.js (views-admin.js, views-chat.js, ...) qui les appellent.
+   On les expose donc explicitement sur window. */
+window.S = S;
+window.api = api;
+window.toast = toast;
+window.money = money;
+window.I = I;
+window.esc = esc;
+window.err = err;
+window.errFromHttp = errFromHttp;
+window.showLoading = showLoading;
+window.hideLoading = hideLoading;
+window.renderIcons = renderIcons;
+window.severityBadge = severityBadge;
+window.statusBadge = statusBadge;
+window.certBadge = certBadge;
+window.logout = logout;
+window.viewDashboard = viewDashboard;
+window.viewAppointments = viewAppointments;
+window.renderSidebar = renderSidebar;
+window.renderTabbar = renderTabbar;
+window.layoutApp = layoutApp;
+window.showLoading = showLoading;
+window.hideLoading = hideLoading;
+
