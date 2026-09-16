@@ -86,7 +86,7 @@ function forceLogout(status) {
   document.body.removeAttribute('data-role');
   location.hash = '#/login';
 }
-function setSession(token, user) { S.token = token; S.user = user; localStorage.setItem('token', token); localStorage.setItem('user', JSON.stringify(user)); document.body.setAttribute('data-role', user.role || 'CLIENT'); if (window.cautoResyncPush) window.cautoResyncPush(); }
+function setSession(token, user) { S.token = token; S.user = user; localStorage.setItem('token', token); localStorage.setItem('user', JSON.stringify(user)); document.body.setAttribute('data-role', user.role || 'CLIENT'); if (window.cautoResyncPush) window.cautoResyncPush(); } window.setSession = setSession;
 function logout() { localStorage.clear(); S.token = null; S.user = null; document.body.removeAttribute('data-role'); location.hash = '#/login'; }
 
 /* ====== HELPERS ====== */
@@ -1933,7 +1933,7 @@ function initPresenceIfLogged() {
 // Hook into login
 const originalSetSession = window.setSession;
 window.setSession = function(token, user) {
-  originalSetSession(token, user);
+  if (originalSetSession) originalSetSession(token, user);
   initPresenceIfLogged();
 };
 
