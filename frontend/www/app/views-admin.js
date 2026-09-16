@@ -154,7 +154,7 @@ async function viewAdminUsers() {
   try {
     const { users } = await api('/admin/users');
     const sums = users.reduce((a, u) => { a[u.role] = (a[u.role] || 0) + 1; a.suspended += u.status === 'SUSPENDED' ? 1 : 0; return a; }, { suspended: 0 });
-    const isSuper = S.user && S.user.role === 'SUPER_ADMIN';
+    const isSuper = S.user && (S.user.role === 'SUPER_ADMIN' || S.user.isSuperAdmin);
     const admPanel = isSuper ? `
       <div class="fl-panel-h" style="margin-top:1rem">
         ${I('user-plus')} Ajouter un administrateur
@@ -203,6 +203,12 @@ async function viewAdminUsers() {
       const [id, status] = b.dataset.status.split(':');
       try { await api('/admin/users/' + id, { method: 'PATCH', body: { status } }); toast('Statut mis à jour', 'success'); viewAdminUsers(); }
       catch (e) { toast(e.message, 'error'); } });
+    const search = document.querySelector('#ad-user-search');
+    if (search) search.addEventListener('input', () => {
+      const q = (search.value || '').toLowerCase().trim();
+      document.querySelectorAll('#app .ad-body table tbody tr[data-id]').forEach(tr => {
+        tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none'; });
+    });
     document.querySelector('[data-new-adm-toggle]')?.addEventListener('click', () => {
       const f = document.querySelector('[data-new-adm-form]');
       if (f) f.style.display = f.style.display === 'none' ? '' : 'none'; });
