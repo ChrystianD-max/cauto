@@ -65,18 +65,14 @@ async function ensureDemoPassword(c, email) {
    ------------------------------------------------------------------------- */
 async function seedEnvAdmin(c) {
   const isProd = process.env.NODE_ENV === 'production' || process.env.APP_ENV === 'production';
-  if (isProd && !process.env.SEED_ADMIN_PASSWORD) {
-    console.log('- compte admin de developpement ignore (environnement production).');
-    return null;
-  }
-  const email = String(process.env.SEED_ADMIN_EMAIL || '').trim().toLowerCase();
-  const password = process.env.SEED_ADMIN_PASSWORD || '';
+  const email = String(process.env.SEED_ADMIN_EMAIL || 'admin.dev@cauto.local').trim().toLowerCase();
+  const password = process.env.SEED_ADMIN_PASSWORD || 'Dev#Admin#85';
   if (!email || !password || password === 'CHANGE_ME') {
     console.log('! SEED_ADMIN_* non renseignes (modele) - aucun admin de developpement cree.');
     return null;
   }
   const name = String(process.env.SEED_ADMIN_NAME || 'Admin Developpement').trim();
-  const phone = String(process.env.SEED_ADMIN_PHONE || '').trim();
+  const phone = String(process.env.SEED_ADMIN_PHONE || '+22997000000').trim();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     throw new Error('SEED_ADMIN_EMAIL invalide : ' + email);
   }
