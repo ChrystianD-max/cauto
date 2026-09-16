@@ -287,7 +287,7 @@ router.get('/me', requireAuth, wrap(async (req, res) => {
 
 const patchSchema = z.object({
   name: z.string().min(2).max(120).optional(),
-  phone: z.string().regex(/^\+[0-9]{8,15}$/).optional(),
+  phone: z.string().max(40).optional().transform(v => v === '' ? undefined : v),
   email: z.string().email().max(200).optional(),
   locale: z.enum(['fr', 'en', 'fon', 'yo']).optional(),
   current_password: z.string().min(1).optional(),

@@ -1200,6 +1200,7 @@ async function viewProfile() {
     document.getElementById('f-profile').onsubmit = async (ev) => {
       ev.preventDefault();
       const o = Object.fromEntries(new FormData(ev.target));
+      Object.keys(o).forEach(k => { if (o[k] === '') delete o[k]; });
       if (!o.current_password && !o.new_password) { delete o.current_password; delete o.new_password; }
       else if (!o.current_password || !o.new_password) { toast('Renseignez le mot de passe actuel ET le nouveau mot de passe', 'error'); return; }
       try {
