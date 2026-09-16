@@ -298,7 +298,7 @@ router.patch('/me', requireAuth, wrap(async (req, res) => {
   const data = patchSchema.parse(req.body);
   const user = await db.one('SELECT * FROM users WHERE id=$1', [req.user.sub]);
   if (data.email && data.email.toLowerCase() !== user.email) {
-    const dup = await db.one('SELECT id FROM users WHERE email=$1 AND id<>$2', [data.email.toLowerCase(), req.user.sub]);
+    const dup = await db.oneOrNone('SELECT id FROM users WHERE email=$1 AND id<>$2', [data.email.toLowerCase(), req.user.sub]);
     if (dup) throw new HttpError(409, 'Cet email est déjà utilisé');
   }
   if (data.new_password) {
