@@ -311,7 +311,7 @@ function renderTabbar() {
   return `<nav class="tabbar" aria-label="Navigation principale">${tabs.map(item).join('')}</nav>`;
 }
 
-const isAdmin = () => S.user && ['ADMIN','SUPER_ADMIN'].includes(S.user.role);
+const isAdmin = () => { const r = !!(S.user && ['ADMIN','SUPER_ADMIN'].includes(S.user.role)); console.log('[DEBUG] isAdmin:', r, 'S.user.role:', S.user?.role); return r; };
 const isPro = () => S.user && ['GARAGE','MECANICIEN','EXPERT'].includes(S.user.role);
 const isSupplier = () => S.user && S.user.role === 'SUPPLIER';
 const currentNav = () => isAdmin() ? ADMIN_NAV : (isPro() ? PRO_NAV : (isSupplier() ? SUPPLIER_NAV : CLIENT_NAV));
@@ -413,7 +413,7 @@ function viewLogin(msg='') {
   </div>`;
   document.getElementById('f-login').onsubmit = async (ev) => {
     ev.preventDefault();
-    try { const d = await api('/auth/login',{method:'POST',body:Object.fromEntries(new FormData(ev.target))}); setSession(d.token,d.user); toast('Connexion réussie','success'); location.hash = S.user.role==='SUPPLIER'?'#/supplier/dashboard':(isPro()?'#/pro/dashboard':(isAdmin()?'#/admin/dashboard':'#/app')); }
+    try { const d = await api('/auth/login',{method:'POST',body:Object.fromEntries(new FormData(ev.target))}); setSession(d.token,d.user); console.log('[DEBUG] after setSession S.user:', S.user); toast('Connexion réussie','success'); location.hash = S.user.role==='SUPPLIER'?'#/supplier/dashboard':(isPro()?'#/pro/dashboard':(isAdmin()?'#/admin/dashboard':'#/app')); }
     catch(e) { viewLogin(err(e)); }
   };
   const pk = document.getElementById('login-peek');
