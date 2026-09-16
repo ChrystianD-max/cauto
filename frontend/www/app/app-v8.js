@@ -1166,7 +1166,7 @@ async function viewProfile() {
         <form id="f-profile" class="pp-form">
           <label>Nom complet <input name="name" value="${esc(user.name)}" minlength="2" required></label>
           <label>Email <input name="email" type="email" value="${esc(user.email)}" required></label>
-          <label>Téléphone <input name="phone" type="tel" value="${esc(user.phone || '')}" pattern="\\+[0-9]{8,15}" placeholder="+22990000000" required></label>
+          <label>Téléphone <input name="phone" type="tel" value="${esc(user.phone || '')}" placeholder="+22990000000"></label>
           <details class="pp-pass">
             <summary>${I('lock')} Changer le mot de passe (optionnel)</summary>
             <label>Mot de passe actuel <input name="current_password" type="password" autocomplete="current-password" placeholder="Votre mot de passe actuel"></label>
