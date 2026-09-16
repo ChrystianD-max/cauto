@@ -164,6 +164,27 @@ async function viewAdminUsers() {
         <span class="fl-chip mute">Admins ${sums.ADMIN || 0}</span>
         ${sums.suspended ? `<span class="fl-chip ko">Suspendus ${sums.suspended}</span>` : ''}
       </div>
+      <div class="fl-panel-h" style="margin-top:1rem">
+        ${I('user-plus')} Ajouter un administrateur
+        <button class="btn btn-sm btn-ghost" data-new-adm-toggle style="margin-left:auto">${I('plus')} Nouveau compte</button>
+      </div>
+      <form class="card fl-panel" data-new-adm-form style="display:none;margin-bottom:1rem">
+        <div class="fl-form-row">
+          <div class="fl-field"><label>Nom complet</label><input name="name" required placeholder="Prénom Nom"></div>
+          <div class="fl-field"><label>Email</label><input name="email" type="email" required placeholder="nom@domaine.fr"></div>
+          <div class="fl-field"><label>Téléphone</label><input name="phone" placeholder="06 12 34 56 78"></div>
+        </div>
+        <div class="fl-form-row">
+          <div class="fl-field"><label>Mot de passe (min. 8 car.)</label><input name="password" type="password" required minlength="8" placeholder="••••••••"></div>
+          <div class="fl-field"><label>Rôle</label>
+            <select name="role">${['CLIENT','GARAGE','MECANICIEN','EXPERT','SUPPLIER','LIVREUR','FLEET_MANAGER','ADMIN'].map(r => `<option ${r === 'ADMIN' ? 'selected' : ''}>${r}</option>`).join('')}</select>
+          </div>
+          <div class="fl-field" style="align-self:flex-end"><button class="btn" type="submit">${I('user-plus')} Créer le compte</button><span class="hint" data-new-adm-msg></span></div>
+        </div>
+      </form>
+      <div class="fl-form-row">
+        <input class="fl-search" id="ad-user-search" placeholder="Rechercher par nom, email, téléphone…" value="">
+      </div>
       ${adTable('<th>Utilisateur</th><th>Rôle</th><th>Téléphone</th><th>Véhicules</th><th>Inscription</th><th>Statut</th><th></th>',
         users.map(u => `<tr data-id="${u.id}">
           <td><div class="fl-veh-main">${I('user')}<div><b>${esc(u.name)}</b><span class="hint">${esc(u.email)}</span></div></div></td>
@@ -179,6 +200,27 @@ async function viewAdminUsers() {
       const [id, status] = b.dataset.status.split(':');
       try { await api('/admin/users/' + id, { method: 'PATCH', body: { status } }); toast('Statut mis à jour', 'success'); viewAdminUsers(); }
       catch (e) { toast(e.message, 'error'); } });
+    document.querySelector('[data-new-adm-toggle]')?.addEventListener('click', () => {
+      const f = document.querySelector('[data-new-adm-form]');
+      if (f) f.style.display = f.style.display === 'none' ? '' : 'none'; });
+    document.querySelector('[data-new-adm-form]')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const f = e.currentTarget;
+      const fd = new FormData(f);
+      const msg = f.querySelector('[data-new-adm-msg]');
+      msg.textContent = 'Création en cours…';
+      try {
+        const { user } = await api('/admin/users', {
+          method: 'POST',
+          body: { name: fd.get('name'), email: fd.get('email'), phone: fd.get('phone'),
+                  role: fd.get('role'), password: fd.get('password') }
+        });
+        msg.textContent = '';
+        f.reset(); f.style.display = 'none';
+        toast(`${user.role === 'ADMIN' ? 'Administrateur ' : ''}${esc(user.name)} créé ✓`, 'success');
+        viewAdminUsers();
+      } catch (e) { msg.textContent = ''; toast(e.message, 'error'); }
+    });
     renderIcons();
   } catch (e) { layoutApp(err(e)); } finally { hideLoading(); }
 }

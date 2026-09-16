@@ -1,5 +1,6 @@
 const express = require('express');
 const crypto = require('crypto');
+const bcryptjs = require('bcryptjs');
 const db = require('../db');
 const { requireAuth, requireRole, requirePermission } = require('../middlewares/auth');
 const { audit, auditChange } = require('../middlewares/audit');
@@ -118,6 +119,30 @@ router.get('/users/:id', wrap(async (req, res) => {
   const pro = await db.one('SELECT * FROM professionals WHERE user_id=$1', [req.params.id]).catch(() => null);
   const sup = await db.one('SELECT * FROM suppliers WHERE user_id=$1', [req.params.id]).catch(() => null);
   res.json({ user: u, professional: pro, supplier: sup });
+}));
+
+/* ===== CRÉATION D'UTILISATEUR / ADMINISTRATEUR (console admin) =====
+   Permission `users.roles.assign` (même que le PATCH role) :
+   un admin qui peut déjà attribuer des rôles peut créer un nouveau compte. */
+router.post('/users', requirePermission('users.roles.assign'), wrap(async (req, res) => {
+  const { name, email, phone, password, role = 'ADMIN' } = req.body || {};
+  if (!name || !email || !password) throw new HttpError(400, 'name, email et password requis');
+  const cleanRole = String(role).toUpperCase();
+  if (!ROLES.includes(cleanRole) || cleanRole === 'SUPER_ADMIN')
+    throw new HttpError(400, 'Rôle invalide (SUPER_ADMIN non autorisé ici)');
+  if (String(password).length < 8) throw new HttpError(400, 'Le mot de passe doit faire au moins 8 caractères');
+  const cleanEmail = String(email).toLowerCase().trim();
+  const dup = await db.one('SELECT id FROM users WHERE email=$1', [cleanEmail]).catch(() => null);
+  if (dup) throw new HttpError(409, 'Un compte existe déjà avec cet email');
+  const hash = await bcryptjs.hash(password, 12);
+  const created = await db.one(
+    `INSERT INTO users (name,email,phone,password_hash,role,status)
+     VALUES ($1,$2,$3,$4,$5,'ACTIVE') RETURNING id,name,email,phone,role,status,created_at`,
+    [String(name).trim(), cleanEmail, phone || '', hash, cleanRole]);
+  await db.query(`INSERT INTO user_roles (user_id, role_id)
+    SELECT $1, r.id FROM roles r WHERE r.code=$2 ON CONFLICT DO NOTHING`, [created.id, cleanRole]);
+  await audit(req, 'admin.user.create', 'user', created.id, { role: cleanRole });
+  res.status(201).json({ user: created });
 }));
 
 router.patch('/users/:id', requirePermission('users.roles.assign'), wrap(async (req, res) => {
