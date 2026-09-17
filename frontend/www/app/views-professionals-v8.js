@@ -18,6 +18,24 @@ function fmtPrefDate(v) {
   if (isNaN(d.getTime())) return String(v);
   return d.toLocaleDateString('fr-FR') + ' à ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 }
+function renderQuoteDeposit(q) {
+  if (!q) return '';
+  const percent = q.acompte_percent == null ? null : Number(q.acompte_percent);
+  const hasPercent = Number.isFinite(percent) && percent >= 0 && percent <= 100;
+  const total = Number(q.total_cents);
+  const cents = hasPercent && Number.isFinite(total) && total >= 0
+    ? Math.round(total * percent / 100)
+    : Number(q.acompte_cents);
+  const note = typeof q.acompte_note === 'string' ? q.acompte_note.trim() : '';
+  const required = Number.isFinite(cents) && cents > 0;
+  if (!required && !note) return '';
+  return `<div class="card" style="margin-top:1rem;border-left:4px solid var(--warn)">
+    <h3 style="margin:0">${I('percent')} ${required ? 'Acompte exigé — avance avant travaux' : 'Note professionnelle'}</h3>
+    ${required ? `<p style="margin:.5rem 0 0">Une avance${hasPercent ? ' de ' + percent + '%' : ''}, soit <b>${money(cents)}</b>, est exigée avant l'exécution des travaux.</p>` : ''}
+    ${note ? `<p style="margin:.5rem 0 0;white-space:pre-line;font-size:.88rem">${esc(note)}</p>` : ''}
+  </div>`;
+}
+
 function fmtDeadline(q) {
   if (!q || q.delay_days == null) return '';
   const base = q.approved_at || q.created_at;
@@ -613,6 +631,7 @@ async function viewServiceRequestDetail(id) {
                 <td data-label="Total" style="text-align:right">${money(quote.total_cents || 0)}</td>
               </tr>
             </table>
+            ${renderQuoteDeposit(quote)}
             <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.6rem">
               <button class="btn btn-primary" id="btn-approve-quote-sr">${I('check-circle')} Approuver le devis</button>
               <button class="btn btn-ko" id="btn-refuse-quote-sr">${I('x')} Refuser</button>
@@ -859,6 +878,7 @@ async function viewQuoteDetail(id) {
   try {
     const d = await api('/quotes/' + id);
     const q = d.quote || d;
+    const acompteHtml = renderQuoteDeposit(q);
     const items = q.items || [];
     const evidences = q.evidences || [];
 
@@ -938,6 +958,8 @@ async function viewQuoteDetail(id) {
       ${q.delay_days != null ? `<div class="card"><div class="detail-label">Delai estime</div><div class="detail-value">${q.delay_days} jour(s)${fmtDeadline(q)}</div></div>` : ''}
       ${q.warranty_months != null ? `<div class="card"><div class="detail-label">Garantie</div><div class="detail-value">${q.warranty_months} mois</div></div>` : ''}
     </div>
+
+    ${acompteHtml}
 
     ${evidences.length ? `
     <div class="card" style="margin-top:1rem">
@@ -1202,6 +1224,7 @@ async function viewRepairDetail(id) {
           ${quote.delay_days != null ? `<div><span class="detail-label">Délai estimé</span><div class="detail-value">${quote.delay_days} jour(s)${fmtDeadline(quote)}</div></div>` : ''}
           ${quote.warranty_months != null ? `<div><span class="detail-label">Garantie</span><div class="detail-value">${quote.warranty_months} mois</div></div>` : ''}
         </div>` : ''}
+        ${renderQuoteDeposit(quote)}
       </div>${decisionHtml}`;
     } else if (isPro && diagnostic && ['DIAGNOSTIC', 'QUOTE_SENT'].includes(status)) {
       quoteHtml = `
@@ -1219,10 +1242,15 @@ async function viewRepairDetail(id) {
           <div class="qb-options">
             <label>Délai estimé (j)<input id="q-delay" type="number" min="0" value="1"></label>
             <label>Garantie (mois)<input id="q-warranty" type="number" min="0" value="12"></label>
+            <label>Acompte exigé (%)<input id="q-acompte-percent" type="number" min="0" max="100" step="0.01" value="80"></label>
           </div>
           <div style="flex:1"></div>
           <button class="btn btn-primary" id="btn-submit-quote">${I('send')} Soumettre le devis au client</button>
         </div>
+
+        <label style="display:block;margin:.6rem 0 0">Acompte — note professionnelle au client
+          <textarea id="q-acompte-note" rows="2" maxlength="2000" placeholder="Précisez les modalités de versement de l'acompte avant le démarrage des travaux."></textarea>
+        </label>
 
         <div class="comp-option" id="comp-option">
           <label class="comp-toggle" for="q-complementary">
@@ -1426,8 +1454,13 @@ async function viewRepairDetail(id) {
         const complementary_message = (is_complementary && document.getElementById('q-complementary-msg'))
           ? (document.getElementById('q-complementary-msg').value || '').trim()
           : undefined;
+        const acompteEl = document.getElementById('q-acompte-percent');
+        const acompteValue = acompteEl ? acompteEl.value.trim() : '80';
+        const acompte_percent = Number(acompteValue.replace(',', '.'));
+        if (!acompteValue || !Number.isFinite(acompte_percent) || acompte_percent < 0 || acompte_percent > 100) return toast('L’acompte doit être compris entre 0 et 100 %', 'error');
+        const acompte_note = (document.getElementById('q-acompte-note')?.value || '').trim() || undefined;
         try {
-          await api('/interventions/' + id + '/quote', { method: 'POST', body: { items, is_complementary, complementary_message } });
+          await api('/interventions/' + id + '/quote', { method: 'POST', body: { items, is_complementary, complementary_message, acompte_percent, acompte_note } });
           toast(is_complementary ? 'Devis complémentaire soumis au client !' : 'Devis soumis au client !', 'success');
           viewRepairDetail(id);
         } catch(e) { toast(e.message, 'error'); }

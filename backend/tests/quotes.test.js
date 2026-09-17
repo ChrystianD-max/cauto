@@ -9,12 +9,35 @@ test('QUOTES: devis cree par le pro avec items et total corrects (PENDING)', asy
   const q = r.data.quote;
   assert.equal(q.status, 'PENDING');
   assert.equal(q.total_cents, 31000);
+  assert.equal(Number(q.acompte_percent), 80);
+  assert.equal(q.acompte_cents, 24800);
   assert.equal(q.delay_days, 2);
   assert.equal(q.warranty_months, 12);
   assert.equal(q.items.length, 2);
   assert.equal(q.created_by, (await api('GET', '/api/auth/me', { token: pro })).data.user.id);
   const visible = await api('GET', `/api/quotes?intervention_id=${interventionId}`, { token: client.token });
   assert.ok(visible.data.quotes.some((x) => x.id === quoteId));
+});
+
+test('QUOTES: acompte modifiable, visible au client et valide avant ecriture', async () => {
+  const { quoteId, pro, client } = await buildJourney({ stage: 'quote' });
+  const items = [{ label: 'Main d oeuvre', kind: 'LABOR', qty: 1, unit_price_cents: 10000 }];
+  const updated = await api('PUT', `/api/quotes/${quoteId}`, {
+    token: pro, body: { items, acompte_percent: 75.5, acompte_note: 'Avance avant travaux' }
+  });
+  assert.equal(updated.status, 200);
+  assert.equal(updated.data.quote.acompte_cents, 7550);
+  const visible = await api('GET', `/api/quotes/${quoteId}`, { token: client.token });
+  assert.equal(visible.status, 200);
+  assert.equal(visible.data.quote.acompte_note, 'Avance avant travaux');
+  assert.equal(Number(visible.data.quote.acompte_percent), 75.5);
+  for (const acompte_percent of [-1, 101, 'invalid']) {
+    const invalid = await api('PUT', `/api/quotes/${quoteId}`, { token: pro, body: { items, acompte_percent } });
+    assert.equal(invalid.status, 400);
+  }
+  const still = await api('GET', `/api/quotes/${quoteId}`, { token: client.token });
+  assert.equal(still.data.quote.acompte_cents, 7550);
+  assert.equal(still.data.quote.items.length, 1);
 });
 
 test('QUOTES: refuse avec motif enregistre (REFUSED)', async () => {
@@ -48,6 +71,7 @@ test('QUOTES: remise concedee par le pro puis approbation client', async () => {
   assert.equal(remise.data.quote.status, 'PENDING');
   assert.equal(remise.data.quote.discount_granted, true);
   assert.equal(remise.data.quote.total_cents, 27900);
+  assert.equal(remise.data.quote.acompte_cents, 22320);
 
   const appr = await api('POST', `/api/quotes/${quoteId}/approve`, { token: client.token, body: {} });
   assert.equal(appr.status, 200);

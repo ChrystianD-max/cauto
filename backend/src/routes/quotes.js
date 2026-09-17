@@ -68,19 +68,24 @@ router.post('/', wrap(async (req, res) => {
         throw new HttpError(403, 'Acces refuse');
     }
 
-    const { intervention_id, service_request_id, items, delay_days, warranty_months, notes, is_complementary, complementary_message } = req.body;
+    const { intervention_id, service_request_id, items, delay_days, warranty_months, notes, is_complementary, complementary_message, acompte_percent, acompte_note } = req.body;
     if (!intervention_id) throw new HttpError(400, 'intervention_id requis');
 
     const existingQuote = await db.one('SELECT id, status FROM quotes WHERE intervention_id = $1', [intervention_id]).catch(() => null);
     if (existingQuote) throw new HttpError(409, 'Un devis existe déjà pour cette intervention (un seul devis par intervention)');
 
     const total_cents = (items || []).reduce((s, it) => s + (it.qty || 1) * (it.unit_price_cents || 0), 0);
+    const perc = acompte_percent == null ? 80 : acompte_percent;
+    if (typeof perc !== 'number' || !Number.isFinite(perc) || perc < 0 || perc > 100) throw new HttpError(400, 'Acompte invalide');
+    if (acompte_note != null && (typeof acompte_note !== 'string' || acompte_note.length > 2000)) throw new HttpError(400, 'Note d’acompte invalide');
+    const acompte_cents = Math.round(total_cents * perc / 100);
 
     const quote = await db.one(
-        `INSERT INTO quotes (intervention_id, service_request_id, total_cents, original_total_cents, created_by, delay_days, warranty_months, notes, status, is_complementary, complementary_message)
-         VALUES ($1, $2, $3, $3, $4, $5, $6, $7, 'PENDING', $8, $9) RETURNING *`,
+        `INSERT INTO quotes (intervention_id, service_request_id, total_cents, original_total_cents, created_by, delay_days, warranty_months, notes, status, is_complementary, complementary_message, acompte_percent, acompte_note, acompte_cents)
+         VALUES ($1, $2, $3, $3, $4, $5, $6, $7, 'PENDING', $8, $9, $10, $11, $12) RETURNING *`,
         [intervention_id, service_request_id || null, total_cents, req.user.sub,
-         delay_days || null, warranty_months || null, notes || null, Boolean(is_complementary), complementary_message || null]
+         delay_days || null, warranty_months || null, notes || null, Boolean(is_complementary), complementary_message || null,
+         perc, acompte_note || null, acompte_cents]
     );
 
     for (const it of (items || [])) {
@@ -142,14 +147,19 @@ router.put('/:id', wrap(async (req, res) => {
     if (quote.status !== 'PENDING') throw new HttpError(400, 'Impossible de modifier un devis non en attente');
     if (req.user.sub !== quote.created_by) throw new HttpError(403, 'Seul le créateur peut modifier ce devis');
 
-    const { items, delay_days, warranty_months, notes, is_complementary, complementary_message } = req.body;
+    const { items, delay_days, warranty_months, notes, is_complementary, complementary_message, acompte_percent, acompte_note } = req.body;
     const total_cents = (items || []).reduce((s, it) => s + (it.qty || 1) * (it.unit_price_cents || 0), 0);
+    const perc = acompte_percent != null ? acompte_percent : (quote.acompte_percent == null ? null : Number(quote.acompte_percent));
+    if (perc != null && (typeof perc !== 'number' || !Number.isFinite(perc) || perc < 0 || perc > 100)) throw new HttpError(400, 'Acompte invalide');
+    if (acompte_note != null && (typeof acompte_note !== 'string' || acompte_note.length > 2000)) throw new HttpError(400, 'Note d’acompte invalide');
+    const acompte_cents = perc == null ? null : Math.round(total_cents * perc / 100);
 
     await db.query('DELETE FROM quote_items WHERE quote_id = $1', [quote.id]);
 
     const updated = await db.one(
-        `UPDATE quotes SET total_cents = $1, delay_days = $2, warranty_months = $3, notes = $4, is_complementary = $5, complementary_message = $6 WHERE id = $7 RETURNING *`,
-        [total_cents, delay_days || quote.delay_days, warranty_months || quote.warranty_months, notes || quote.notes, is_complementary != null ? Boolean(is_complementary) : quote.is_complementary, complementary_message != null ? complementary_message : quote.complementary_message, quote.id]
+        `UPDATE quotes SET total_cents = $1, delay_days = $2, warranty_months = $3, notes = $4, is_complementary = $5, complementary_message = $6, acompte_percent = $7, acompte_note = $8, acompte_cents = $9 WHERE id = $10 RETURNING *`,
+        [total_cents, delay_days || quote.delay_days, warranty_months || quote.warranty_months, notes || quote.notes, is_complementary != null ? Boolean(is_complementary) : quote.is_complementary, complementary_message != null ? complementary_message : quote.complementary_message,
+         perc, acompte_note != null ? acompte_note : quote.acompte_note, acompte_cents, quote.id]
     );
 
     for (const it of (items || [])) {
@@ -269,7 +279,8 @@ router.post('/:id/remise', wrap(async (req, res) => {
         const updated = await db.one(
             `UPDATE quotes SET status='PENDING', decided_at=NULL,
                     discount_granted=true, discount_percent=$1, discount_cents=$2,
-                    pro_comment=$3, total_cents=$4
+                    pro_comment=$3, total_cents=$4,
+                    acompte_cents=CASE WHEN acompte_percent IS NULL THEN NULL ELSE round($4::integer::numeric * acompte_percent / 100)::integer END
              WHERE id=$5 RETURNING *`,
             [discount_percent != null ? Number(discount_percent) : (discount_cents != null ? Math.round(amount * 100 / original) : null),
              amount, comment ? comment.trim() : null, newTotal, quote.id]

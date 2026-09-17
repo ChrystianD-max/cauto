@@ -28,10 +28,10 @@ class LLMProvider extends AIProvider {
   }
   async _chat(messages) {
     if (this.cfg.code === 'anthropic') {
-      var data = await AIProvider.httpPost(this.cfg.baseUrl + '/messages', { model: this.cfg.model, max_tokens: 600, messages: messages }, { 'x-api-key': this.cfg.key, 'anthropic-version': '2023-06-01' });
+      const data = await AIProvider.httpPost(this.cfg.baseUrl + '/messages', { model: this.cfg.model, max_tokens: 600, messages: messages }, { 'x-api-key': this.cfg.key, 'anthropic-version': '2023-06-01' });
       return { text: (data.content || []).map(function (b) { return b.text || ''; }).join('') };
     }
-    var data = await AIProvider.httpPost(this.cfg.baseUrl + '/chat/completions', { model: this.cfg.model, messages: messages, max_tokens: 600 }, { Authorization: 'Bearer ' + this.cfg.key });
+    const data = await AIProvider.httpPost(this.cfg.baseUrl + '/chat/completions', { model: this.cfg.model, messages: messages, max_tokens: 600 }, { Authorization: 'Bearer ' + this.cfg.key });
     return { text: (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '' };
   }
   _buildPrompt(cap, ctx, decision) {

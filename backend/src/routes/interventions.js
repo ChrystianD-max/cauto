@@ -165,42 +165,49 @@ router.get('/evidences/:fileId/raw', wrap(async (req, res, next) => {
 router.post('/:id/quote', requireRole('GARAGE', 'MECANICIEN'), wrap(async (req, res) => {
   await loadIntervention(req);
   if (!req.isProSide) throw new HttpError(403, 'Devis réservé au professionnel');
-  const s = z.object({
-    items: z.array(z.object({
-      label: z.string().min(1).max(200),
-      kind: z.enum(['PARTS', 'LABOR']),
-      qty: z.number().positive().default(1),
-      unit_price_cents: z.number().int().min(0).max(100000000)
-    })).min(1),
-    is_complementary: z.boolean().default(false),
-    complementary_message: z.string().max(2000).nullable().optional()
-  }).parse(req.body);
-  if (req.intervention.status !== 'DIAGNOSTIC' && req.intervention.status !== 'QUOTE_SENT') {
-    throw new HttpError(409, 'Devis non autorisé à ce stade');
-  }
-  const total = s.items.reduce((sum, it) => sum + Math.round(it.qty * it.unit_price_cents), 0);
-  const quote = await db.tx(async (c) => {
-    const exists = await c.query('SELECT id FROM quotes WHERE intervention_id=$1', [req.intervention.id]);
-    if (exists.rows[0]) throw new HttpError(409, 'Un devis existe déjà');
-    const q = await c.query(
-      `INSERT INTO quotes (intervention_id,total_cents,original_total_cents,created_by,is_complementary,complementary_message)
-       VALUES ($1,$2,$2,$3,$4,$5) RETURNING *`,
-      [req.intervention.id, total, req.user.sub, s.is_complementary, s.complementary_message || null]
-    );
-    for (const it of s.items) {
-      await c.query(
-        `INSERT INTO quote_items (quote_id,label,kind,qty,unit_price_cents) VALUES ($1,$2,$3,$4,$5)`,
-        [q.rows[0].id, it.label, it.kind, it.qty, it.unit_price_cents]
-      );
+    const s = z.object({
+        items: z.array(z.object({
+            label: z.string().min(1).max(200),
+            kind: z.enum(['PARTS', 'LABOR']),
+            qty: z.number().positive().default(1),
+            unit_price_cents: z.number().int().min(0).max(100000000)
+        })).min(1),
+        is_complementary: z.boolean().default(false),
+        complementary_message: z.string().max(2000).nullable().optional(),
+        // Acompte (avance) exigé par le professionnel : pourcentage (défaut 80%) + note pro.
+        acompte_percent: z.number().min(0).max(100).optional(),
+        acompte_note: z.string().max(2000).nullable().optional()
+    }).parse(req.body);
+    if (req.intervention.status !== 'DIAGNOSTIC' && req.intervention.status !== 'QUOTE_SENT') {
+        throw new HttpError(409, 'Devis non autorisé à ce stade');
     }
-    await c.query(`UPDATE interventions SET status='QUOTE_SENT' WHERE id=$1`, [req.intervention.id]);
-    await c.query(
-      `UPDATE service_requests SET status='QUOTE_SENT', updated_at=NOW()
-       WHERE intervention_id=$1 OR (vehicle_id=$2 AND status='DIAGNOSIS')`,
-      [req.intervention.id, req.intervention.vehicle_id]
-    ).catch(() => {});
-    return q.rows[0];
-  });
+    const total = (s.items || []).reduce((sum, it) => sum + Math.round(it.qty * it.unit_price_cents), 0);
+    const acompte_percent = s.acompte_percent != null ? s.acompte_percent : 80;
+    const acompte_cents = Math.round(total * acompte_percent / 100);
+    const quote = await db.tx(async (c) => {
+        const exists = await c.query('SELECT id FROM quotes WHERE intervention_id=$1', [req.intervention.id]);
+        if (exists.rows[0]) throw new HttpError(409, 'Un devis existe déjà');
+        const q = await c.query(
+            `INSERT INTO quotes (intervention_id,total_cents,original_total_cents,created_by,is_complementary,complementary_message,
+                                 acompte_percent,acompte_note,acompte_cents)
+             VALUES ($1,$2,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+            [req.intervention.id, total, req.user.sub, s.is_complementary, s.complementary_message || null,
+             acompte_percent, s.acompte_note || null, acompte_cents]
+        );
+        for (const it of s.items) {
+            await c.query(
+                `INSERT INTO quote_items (quote_id,label,kind,qty,unit_price_cents) VALUES ($1,$2,$3,$4,$5)`,
+                [q.rows[0].id, it.label, it.kind, it.qty, it.unit_price_cents]
+            );
+        }
+        await c.query(`UPDATE interventions SET status='QUOTE_SENT' WHERE id=$1`, [req.intervention.id]);
+        await c.query(
+            `UPDATE service_requests SET status='QUOTE_SENT', updated_at=NOW()
+             WHERE intervention_id=$1 OR (vehicle_id=$2 AND status='DIAGNOSIS')`,
+            [req.intervention.id, req.intervention.vehicle_id]
+        );
+        return q.rows[0];
+    });
   await db.query(
     `INSERT INTO notifications (user_id,message,dedupe_key)
      VALUES ($1,$2,$3) ON CONFLICT (dedupe_key) DO NOTHING`,
