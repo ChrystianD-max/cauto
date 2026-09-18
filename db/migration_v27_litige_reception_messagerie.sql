@@ -1,4 +1,4 @@
-﻿-- v27 144�?" Litige reception : resolution par le pro (resolution_kind
+-- v27 144�?" Litige reception : resolution par le pro (resolution_kind
 --       'REPAIR' = reparation materielle | 'COMPENSATION' = compensation
 --       financiere plafonnee au solde restant = total - acompte, soit les
 --       20 % restants), confirmation des DEUX cotes (pro + client) avant
