@@ -336,4 +336,70 @@ router.post('/:id/evidences', wrap(async (req, res) => {
     res.json({ evidence });
 }));
 
+// ---- Réédition d'un devis REFUSÉ par le professionnel (diagnostic ré-émis).
+//      Contexte (blocage réel signalé) : après un refus du client SANS demande
+//      de remise, la procédure s'arrêtait — plus aucun moyen pour le pro de
+//      ré-établir un devis de diagnostic. Cette route rouvre le devis en
+//      PENDING (un seul devis par intervention : même ligne, statut réouvert),
+//      incrémente reissue_count (audit traçable) et pose une note pro standard
+//      adressée au client (prise d'acte + compréhension + à disposition).
+router.post('/:id/reissue', wrap(async (req, res) => {
+    if (req.user.role !== 'PRO') throw new HttpError(403, 'Réservé au professionnel');
+
+    const quote = await db.one('SELECT * FROM quotes WHERE id = $1', [req.params.id]).catch(() => null);
+    if (!quote) throw new HttpError(404, 'Devis introuvable');
+    if (quote.status !== 'REFUSED') throw new HttpError(409, 'Seul un devis refusé peut être ré-émis');
+    if (quote.created_by !== req.user.sub) throw new HttpError(403, "Seul l'auteur du devis peut le ré-émettre");
+    if (quote.is_complementary) throw new HttpError(409, 'Un devis complémentaire ne se ré-édite pas ici');
+
+    const { items, delay_days, warranty_months, notes, acompte_percent, acompte_note } = req.body || {};
+    const total_cents = (items || []).reduce((s, it) => s + (it.qty || 1) * (it.unit_price_cents || 0), 0);
+    if (!(total_cents > 0)) throw new HttpError(400, 'Le devis ré-émis doit contenir au moins un article');
+
+    const perc = acompte_percent == null ? 80 : acompte_percent;
+    if (typeof perc !== 'number' || !Number.isFinite(perc) || perc < 0 || perc > 100) throw new HttpError(400, 'Acompte invalide');
+    const acompte_cents = Math.round(total_cents * perc / 100);
+
+    const note = (notes && String(notes).trim())
+        ? String(notes).trim()
+        : `Nous prenons acte de votre décision et comprenons votre refus. Pour le diagnostic, nous vous proposons un nouveau devis ajusté — restons à votre disposition pour toute précision.`;
+
+    const updated = await db.one(
+        `UPDATE quotes SET status='PENDING', decided_at=NULL, refusal_reason=NULL,
+           refusal_comment=NULL, request_discount=false, discount_granted=false,
+           reissue_count = reissue_count + 1, last_pro_note = $1,
+           notes = $2, delay_days = COALESCE($3, delay_days),
+           warranty_months = COALESCE($4, warranty_months),
+           acompte_percent = $5, acompte_note = $6, acompte_cents = $7,
+           total_cents = $8, original_total_cents = $8
+         WHERE id = $9 RETURNING *`,
+        [note, notes ? String(notes).trim() : quote.notes, delay_days || null,
+         warranty_months || null, perc, acompte_note || null, acompte_cents,
+         total_cents, quote.id]
+    );
+
+    await db.query('DELETE FROM quote_items WHERE quote_id = $1', [quote.id]).catch(() => {});
+    for (const it of (items || [])) {
+        await db.query(
+            `INSERT INTO quote_items (quote_id, label, kind, qty, unit_price_cents) VALUES ($1, $2, $3, $4, $5)`,
+            [quote.id, it.label, it.kind || 'OTHER', it.qty || 1, it.unit_price_cents || 0]
+        ).catch(() => {});
+    }
+
+    const owner = await db.one(
+        `SELECT v.owner_id FROM quotes q JOIN interventions i ON i.id=q.intervention_id JOIN vehicles v ON v.id=i.vehicle_id WHERE q.id=$1`,
+        [quote.id]
+    ).catch(() => null);
+    if (owner) {
+        await notify(owner.owner_id, `Votre professionnel a établi un nouveau devis de diagnostic (réédition) : ${moneyEur(updated.total_cents)}`, `quote:${quote.id}:reissue`).catch(() => {});
+    }
+    await auditChange(req, 'quote.reissue', 'quote', quote.id,
+        { status: quote.status, reissue_count: quote.reissue_count, total_cents: quote.total_cents },
+        { status: updated.status, reissue_count: updated.reissue_count, total_cents: updated.total_cents, last_pro_note: updated.last_pro_note },
+        { approved: false, reissued: true });
+
+    const quoteItems = await db.many('SELECT * FROM quote_items WHERE quote_id = $1', [quote.id]).catch(() => []);
+    res.json({ quote: { ...updated, items: quoteItems } });
+}));
+
 module.exports = router;

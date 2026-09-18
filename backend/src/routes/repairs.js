@@ -239,8 +239,63 @@ router.post('/:id/client-confirm', wrap(async (req, res) => {
 
     const { received_ok = true, notes } = req.body || {};
 
+    // ---- RÃ©ception : deux cas totalement distincts.
+    //  A) received_ok=true  -> bonne rÃ©ception : dossier clÃ´turÃ© (existant).
+    //  B) received_ok=false -> le client signale un problÃ¨me : le dossier NE DOIT
+    //     PAS Ãªtre clÃ´turÃ©. Litige ouvert immÃ©diatement, pris en charge par le pro
+    //     (rÃ©paration OU compensation sur les 20 % restants) + notification
+    //     immÃ©diate du pro ET de l'admin (qui veille Ã  sa rÃ©solution des 2 cÃ´tÃ©s).
+    if (received_ok === false) {
+        const dispute = await db.tx(async (c) => {
+            const inserted = await c.one(
+                `INSERT INTO disputes (user_id, service_request_id, intervention_id, professional_id, subject, description, photos, videos)
+                 SELECT $1, sr.id, sr.intervention_id, i.professional_id, 'ProblÃ¨me signalÃ© Ã  la rÃ©ception du vÃ©hicule', $2, '{}', '{}'
+                 FROM service_requests sr JOIN interventions i ON i.id = sr.intervention_id
+                 WHERE sr.intervention_id = $3
+                 RETURNING *`,
+                [req.user.sub,
+                 'Le client a signalÃ© un problÃ¨me lors de la remise du vÃ©hicule.' + (notes ? ' \u2014 ' + String(notes).slice(0, 1200) : ''),
+                 req.params.id]
+            );
+            await c.query(
+                `INSERT INTO service_request_history (service_request_id, old_status, new_status, changed_by, notes)
+                 SELECT id, status, 'IN_DISPUTE', $1, $2 FROM service_requests WHERE intervention_id=$3`,
+                [req.user.sub, 'Client a signalÃ© un problÃ¨me Ã  la rÃ©ception â€” litige ouvert, dossiers maintenus en lâ€™Ã©tat', req.params.id]
+            );
+            return inserted;
+        });
+
+        await db.query(
+            `INSERT INTO notifications (user_id,message,dedupe_key)
+             SELECT pu.id, $1, $2 FROM professionals p
+             JOIN interventions i ON i.professional_id = p.id AND i.id = $3
+             JOIN users pu ON pu.id = p.user_id
+             ON CONFLICT (dedupe_key) DO NOTHING`,
+            ['Litige ouvert : le client a signalÃ© un problÃ¨me Ã  la rÃ©ception. Prenez-le en charge (rÃ©paration ou compensation sur les 20 % restants).', 'repair:' + req.params.id + ':dispute:pro', req.params.id]
+        ).catch(() => {});
+        await db.query(
+            `INSERT INTO notifications (user_id,message,dedupe_key)
+             SELECT id, $1, $2 FROM users WHERE role='ADMIN'
+             ON CONFLICT (dedupe_key) DO NOTHING`,
+            [`Litige rÃ©ception ouvert (#${req.params.id}) par le client \u2014 suivi requis jusquâ€™Ã  rÃ©solution des deux cÃ´tÃ©s.`, 'repair:' + req.params.id + ':dispute:admin']
+        ).catch(() => {});
+        await db.query(
+            `INSERT INTO history_entries (vehicle_id,entry_type,title,details,created_by)
+             SELECT vehicle_id, 'INTERVENTION', 'ProblÃ¨me signalÃ© Ã  la rÃ©ception â€” litige ouvert', $1, $2
+             FROM interventions WHERE id=$3`,
+            [JSON.stringify({ intervention_id: req.params.id, received_ok: false }), req.user.sub, req.params.id]
+        ).catch(() => {});
+
+        res.status(201).json({
+            status: 'IN_DISPUTE',
+            dispute: { ...dispute, status: 'OPEN' },
+            message: 'ProblÃ¨me signalÃ© : le litige a Ã©tÃ© ouvert et pris en charge. Le dossiers ne sera clÃ´turÃ© quâ€™aprÃ¨s rÃ©solution confirmÃ©e par le client ET le professionnel.'
+        });
+        return;
+    }
+
     await db.tx(async (c) => {
-        await c.query(`UPDATE interventions SET status='CLOSED' WHERE id=$1`, [req.params.id]);
+        await c.query(`UPDATE repairs SET status='CLOSED' WHERE id=$1`, [req.params.id]);
         await c.query(`UPDATE repair_orders SET status='CLOSED' WHERE intervention_id=$1`, [req.params.id]);
         if (repair.appointment_id) {
             await c.query(`UPDATE appointments SET status='DONE' WHERE id=$1`, [repair.appointment_id]);
@@ -252,10 +307,10 @@ router.post('/:id/client-confirm', wrap(async (req, res) => {
         await c.query(
             `INSERT INTO service_request_history (service_request_id, old_status, new_status, changed_by, notes)
              SELECT id, status, 'COMPLETED', $1, $2 FROM service_requests WHERE intervention_id=$3`,
-            [req.user.sub, (received_ok ? 'Client a confirmé la bonne réception du véhicule — dossier clôturé' : 'Client a signalé un problème sur la réception du véhicule') + (notes ? ' : ' + String(notes).slice(0, 500) : ''), req.params.id]
+            [req.user.sub, 'Client a confirmÃ© la bonne rÃ©ception du vÃ©hicule \u2014 dossier clÃ´turÃ©' + (notes ? ' : ' + String(notes).slice(0, 500) : ''), req.params.id]
         );
-        // Module 74 — Traçabilité : journal immutable de la réparation
-        // (QUI/QUOI/QUAND/VÉHICULE/KILOMÉTRAGE/PIÈCE/RÉFÉRENCE/PRIX/RÉSULTAT/GARANTIE).
+        // Module 74 â€” TraÃ§abilitÃ© : journal immutable de la rÃ©paration
+        // (QUI/QUOI/QUAND/VÃ‰HICULE/KILOMÃ‰TRAGE/PIECE/RÃ‰FÃ‰RENCE/PRIX/RÃ‰SULTAT/GARANTIE).
         await repairTrace.traceRepairClosure(c, req.params.id, req.user.sub).catch(() => {});
     });
     await db.query(
