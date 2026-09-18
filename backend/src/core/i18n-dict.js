@@ -5,7 +5,7 @@
 const fr = {
   'app.name': 'C-AUTO',
   'app.tagline': 'Entretien automobile connecté',
-  'footer.tagline': 'La confiance au coeur de l\'automobile · Staging',
+  'footer.tagline': 'La confiance au coeur de l\'automobile',
   'footer.copy': '© 2026 C-AUTO. Tous droits réservés.',
   'nav.home': 'Accueil',
   'nav.vehicles': 'Mes véhicules',

@@ -79,7 +79,7 @@
       return state({
         icon: 'wifi-off', tone: 'warn',
         title: 'Mode hors connexion',
-        message: 'Vous n\u2019êtes pas connecté à internet. Les données locales ne sont pas perdues : reconnectez-vous pour synchroniser.',
+        message: 'Vous n\u2019êtes pas connecté à internet. Les données locales sont conservées. Revenez en ligne pour synchroniser.',
         action: action || '<button class="btn btn-primary" onclick="location.reload()">' + icon('refresh-cw') + 'Réessayer</button>',
         key: 'state.offline'
       });

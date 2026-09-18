@@ -28,7 +28,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: APP_ENV
-        value: staging
+        value: production
       - key: DEMO_MODE
         value: "true"
       - key: SEED_ADMIN_EMAIL
