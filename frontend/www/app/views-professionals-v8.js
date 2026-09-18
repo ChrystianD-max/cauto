@@ -4,7 +4,7 @@
 const PROFILE_LABELS = { STANDARD:'Standard', DIAGNOSTIC:'Diagnostic', EMERGENCY:'Urgence', MAINTENANCE:'Entretien', MOBILE:'Mobile', SPECIALIST:'Specialiste', FLEET:'Flotte' };
 const PROFILE_ICONS = { STANDARD:'wrench', DIAGNOSTIC:'stethoscope', EMERGENCY:'zap', MAINTENANCE:'settings', MOBILE:'truck', SPECIALIST:'award', FLEET:'building' };
 const SR_STATUS_LABELS = { CREATED:'Creee', MATCHING:'Recherche', PROFESSIONAL_SELECTED:'Pro selectionne', APPOINTMENT_CONFIRMED:'RDV confirme', VEHICLE_RECEIVED:'Vehicule recu', DIAGNOSTIC:'Diagnostic', QUOTE_PENDING:'Devis en attente', QUOTE_SENT:'Devis envoye', QUOTE_APPROVED:'Devis approuve', REPAIRING:'En reparation', QUALITY_CONTROL:'Controle qualite', COMPLETED:'Termine', PAID:'Paye', WARRANTY_ACTIVE:'Garantie active', CLOSED:'Cloturee' };
-const QUOTE_STATUS = { PENDING:'En attente', APPROVED:'Approuve', REFUSE:'Refuse' };
+const QUOTE_STATUS = { PENDING:'En attente', APPROVED:'Approuve', REFUSED:'Refuse' };
 const DISPUTE_STATUS = { OPEN:'Ouvert', IN_REVIEW:'En cours', RESOLVED:'Resolu', ESCALATED:'Escalade', CLOSED:'Cloture' };
 const DAY_LABELS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
 const STEP_ICONS = ['wrench','file-text','check-circle','settings','shield-check','flag'];
@@ -615,12 +615,45 @@ async function viewServiceRequestDetail(id) {
             <td data-label="Qte">${it.qty || 1}</td>
             <td data-label="Total" style="font-weight:600">${money(Math.round((it.qty || 1) * (it.unit_price_cents || 0)))}</td>
           </tr>`).join('');
+          let qDecisionHtml = '';
+          if (quote.status === 'PENDING') {
+            qDecisionHtml = `
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.6rem">
+              <button class="btn btn-primary" id="btn-approve-quote-sr">${I('check-circle')} Approuver le devis</button>
+              <button class="btn btn-ko" id="btn-refuse-quote-sr">${I('x')} Refuser</button>
+              <a href="#/quotes/${first.id}" class="btn btn-ghost">${I('eye')} Consulter le détail</a>
+            </div>`;
+          } else if (quote.status === 'REFUSED' && quote.request_discount && quote.discount_granted == null) {
+            qDecisionHtml = `
+            <div class="alert alert-info" style="margin-top:0.6rem">${I('message-square')}<div><b>Demande de remise envoyée</b><p style="margin:.2rem 0 0">Votre demande de remise a été transmise au professionnel. Vous serez notifié dès sa réponse.</p></div></div>`;
+          } else if (quote.status === 'REFUSED' && quote.discount_granted === false) {
+            qDecisionHtml = `
+            <div class="card" style="margin-top:0.6rem;border:1px solid rgba(239,68,68,.3)">
+              <h3 style="margin:0 0 .4rem">${I('alert-circle')} Prix maintenu par le professionnel</h3>
+              <p class="hint" style="margin:0 0 .6rem">${quote.pro_comment && quote.pro_comment !== 'Prix maintenu' ? esc(quote.pro_comment) : 'Le professionnel a maintenu le prix du devis.'} Vous pouvez l&apos;accepter si vous changez d&apos;avis.</p>
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+                <button class="btn btn-primary" id="btn-approve-quote-sr">${I('check-circle')} Accepter le devis malgré tout</button>
+                <a href="#/quotes/${first.id}" class="btn btn-ghost">${I('eye')} Consulter le détail</a>
+              </div>
+            </div>`;
+          } else if (quote.status === 'REFUSED' && quote.discount_granted == null && !quote.request_discount) {
+            qDecisionHtml = `
+            <div class="card" style="margin-top:0.6rem;border:1px solid rgba(239,68,68,.3)">
+              <h3 style="margin:0 0 .4rem">${I('alert-triangle')} Devis refusé</h3>
+              <p class="hint" style="margin:0 0 .6rem">${quote.refusal_reason ? 'Motif : <b>' + esc(quote.refusal_reason) + '</b>. ' : ''}Vous pouvez demander une remise au professionnel pour négocier le prix.</p>
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+                <button class="btn btn-primary" id="btn-request-remise-sr">${I('tag')} Demander une remise</button>
+                <a href="#/quotes/${first.id}" class="btn btn-ghost">${I('eye')} Consulter le détail</a>
+              </div>
+            </div>`;
+          }
           actionCard += `
           <div class="card" style="margin-top:0.6rem;border:1px solid rgba(245,158,11,.35)">
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.3rem">
               <h3 style="margin:0">${I('receipt')} Devis proposé par ${esc(sr.professional_name || 'l\'atelier')}</h3>
               ${statusBadge(quote.status || 'PENDING')}
             </div>
+            ${quote.refusal_reason ? `<p style="margin:0 0 .3rem;font-size:.84rem;color:var(--ko)">Refusé — motif : <b>${esc(quote.refusal_reason)}</b>${quote.refusal_comment ? ' : ' + esc(quote.refusal_comment) : ''}</p>` : ''}
             <table class="quote-table" style="width:100%;font-size:0.86rem">
               <tr class="qt-head" style="border-bottom:2px solid var(--border);text-align:left;color:var(--muted);font-size:0.72rem">
                 <th style="padding:0.3rem 0">Elément</th><th>Type</th><th>Qte</th><th style="text-align:right">Total</th>
@@ -632,11 +665,7 @@ async function viewServiceRequestDetail(id) {
               </tr>
             </table>
             ${renderQuoteDeposit(quote)}
-            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.6rem">
-              <button class="btn btn-primary" id="btn-approve-quote-sr">${I('check-circle')} Approuver le devis</button>
-              <button class="btn btn-ko" id="btn-refuse-quote-sr">${I('x')} Refuser</button>
-              <a href="#/quotes/${first.id}" class="btn btn-ghost">${I('eye')} Consulter le détail</a>
-            </div>
+            ${qDecisionHtml}
           </div>`;
         } else {
           actionCard += `<div class="alert alert-warn">${I('receipt')}<div><b>Devis en attente</b><p style="margin:0.2rem 0 0">L'atelier prépare votre devis — il s'affichera ici dès sa soumission.</p></div></div>`;
@@ -816,13 +845,34 @@ async function viewServiceRequestDetail(id) {
     }
     const refuseQuoteSr = document.getElementById('btn-refuse-quote-sr');
     if (refuseQuoteSr) {
-      refuseQuoteSr.onclick = async () => {
+      refuseQuoteSr.onclick = () => {
+        const btns = refuseQuoteSr.closest('.card');
+        btns.insertAdjacentHTML('beforeend', quoteRefuseForm());
+        renderIcons();
+        const preserve = document.getElementById('btn-approve-quote-sr');
+        if (preserve) preserve.style.display = 'none';
+        refuseQuoteSr.style.display = 'none';
+        document.getElementById('btn-refuse-confirm').onclick = async () => {
+          const motif = (document.getElementById('q-refuse-motif').value || '').trim();
+          if (!motif) return toast('Motif du refus requis', 'error');
+          const comment = (document.getElementById('q-refuse-comment').value || '').trim();
+          const request_discount = document.getElementById('q-refuse-remise').checked;
+          try {
+            await api('/quotes/' + quoteSrId + '/refuse', { method: 'POST', body: { reason: motif, comment: comment || undefined, request_discount } });
+            toast(request_discount ? 'Devis refusé — demande de remise envoyée' : 'Devis refusé', 'success');
+            viewServiceRequestDetail(id);
+          } catch(e) { toast(e.message, 'error'); }
+        };
+        document.getElementById('btn-refuse-cancel').onclick = () => viewServiceRequestDetail(id);
+      };
+    }
+    const requestRemiseSr = document.getElementById('btn-request-remise-sr');
+    if (requestRemiseSr) {
+      requestRemiseSr.onclick = async () => {
         if (!quoteSrId) return toast('Devis introuvable — recharger la page', 'error');
-        const motif = await UX.prompt('Motif du refus :');
-        if (motif === null || !motif.trim()) return;
         try {
-          await api('/quotes/' + quoteSrId + '/refuse', { method: 'POST', body: { reason: motif.trim() } });
-          toast('Devis refusé', 'success');
+          await api('/quotes/' + quoteSrId + '/request-remise', { method: 'POST' });
+          toast('Demande de remise envoyée au professionnel', 'success');
           viewServiceRequestDetail(id);
         } catch(e) { toast(e.message, 'error'); }
       };
@@ -904,6 +954,23 @@ async function viewQuoteDetail(id) {
         <p class="hint" style="margin:0 0 .6rem">${q.pro_comment && q.pro_comment !== 'Prix maintenu' ? esc(q.pro_comment) : 'Le professionnel a maintenu le prix du devis.'} Vous pouvez l&apos;accepter si vous changez d&apos;avis.</p>
         <button class="btn btn-primary" id="btn-approve-quote">${I('check-circle')} Accepter le devis malgré tout</button>
       </div>`;
+    } else if (q.status === 'REFUSED' && q.request_discount && q.discount_granted == null && window.S.user && window.S.user.role === 'CLIENT') {
+      actionsHtml = `
+      <div class="card" style="margin-top:1rem;border:1px solid rgba(245,158,11,.35)">
+        <h3 style="margin:0 0 .4rem">${I('message-square')} Demande de remise envoyée</h3>
+        <p class="hint" style="margin:0 0 .6rem">Votre demande de remise a été transmise au professionnel. Vous serez notifié dès sa réponse.</p>
+        <button class="btn btn-ghost" id="btn-approve-quote">${I('check')} Accepter le devis malgré tout</button>
+      </div>`;
+    } else if (q.status === 'REFUSED' && q.discount_granted == null && !q.request_discount && window.S.user && window.S.user.role === 'CLIENT') {
+      actionsHtml = `
+      <div class="card" style="margin-top:1rem;border:1px solid rgba(239,68,68,.3)">
+        <h3 style="margin:0 0 .4rem">${I('alert-triangle')} Devis refusé</h3>
+        <p class="hint" style="margin:0 0 .6rem">${q.refusal_reason ? 'Motif : <b>' + esc(q.refusal_reason) + '</b>. ' : ''}Vous pouvez demander une remise au professionnel pour négocier le prix.</p>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+          <button class="btn btn-primary" id="btn-request-remise">${I('tag')} Demander une remise</button>
+          <button class="btn btn-ghost" id="btn-approve-quote">${I('check')} Accepter le devis malgré tout</button>
+        </div>
+      </div>`;
     }
 
     layoutApp(`
@@ -978,6 +1045,16 @@ async function viewQuoteDetail(id) {
         try {
           await api('/quotes/' + id + '/approve', { method: 'POST' });
           toast('Devis approuve', 'success');
+          viewQuoteDetail(id);
+        } catch(e) { toast(e.message, 'error'); }
+      };
+    }
+    const requestRemiseBtn = document.getElementById('btn-request-remise');
+    if (requestRemiseBtn) {
+      requestRemiseBtn.onclick = async () => {
+        try {
+          await api('/quotes/' + id + '/request-remise', { method: 'POST' });
+          toast('Demande de remise envoyée au professionnel', 'success');
           viewQuoteDetail(id);
         } catch(e) { toast(e.message, 'error'); }
       };
@@ -1170,6 +1247,23 @@ async function viewRepairDetail(id) {
           <h3 style="margin:0 0 .4rem">${I('alert-circle')} Devis refusé — prix maintenu</h3>
           <p class="hint" style="margin:0 0 .3rem">Le professionnel a maintenu le prix${quote.pro_comment && quote.pro_comment !== 'Prix maintenu' ? ` : <b>${esc(quote.pro_comment)}</b>` : '.'} Vous pouvez tout de même accepter le devis.</p>
           <button class="btn btn-primary" id="btn-approve-quote">${I('check')} Accepter le devis quand même</button>
+        </div>`;
+      } else if (!isPro && quote.status === 'REFUSED' && quote.request_discount && quote.discount_granted == null) {
+        decisionHtml = `
+        <div class="card" style="margin-top:1rem;border:1px solid rgba(245,158,11,.35)">
+          <h3 style="margin:0 0 .4rem">${I('message-square')} Demande de remise envoyée</h3>
+          <p class="hint" style="margin:0 0 .6rem">Votre demande de remise a été transmise au professionnel. Vous serez notifié dès sa réponse.</p>
+          <button class="btn btn-ghost" id="btn-approve-quote">${I('check')} Accepter le devis quand même</button>
+        </div>`;
+      } else if (!isPro && quote.status === 'REFUSED' && quote.discount_granted == null && !quote.request_discount) {
+        decisionHtml = `
+        <div class="card" style="margin-top:1rem;border:1px solid rgba(239,68,68,.3)">
+          <h3 style="margin:0 0 .4rem">${I('alert-triangle')} Devis refusé</h3>
+          <p class="hint" style="margin:0 0 .6rem">${quote.refusal_reason ? 'Motif : <b>' + esc(quote.refusal_reason) + '</b>. ' : ''}Vous pouvez demander une remise au professionnel pour négocier le prix.</p>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+            <button class="btn btn-primary" id="btn-request-remise">${I('tag')} Demander une remise</button>
+            <button class="btn btn-ghost" id="btn-approve-quote">${I('check')} Accepter le devis quand même</button>
+          </div>
         </div>`;
       } else if (isPro && quote.status === 'PENDING') {
         decisionHtml = `<div class="alert alert-warn" style="margin-top:1rem">${I('clock')} <div><b>Devis envoyé</b><p style="margin:.2rem 0 0">En attente de la décision du client.</p></div></div>`;
@@ -1474,6 +1568,16 @@ async function viewRepairDetail(id) {
         try {
           await api('/quotes/' + quote.id + '/approve', { method: 'POST', body: {} });
           toast('Devis approuvé', 'success');
+          viewRepairDetail(id);
+        } catch(e) { toast(e.message, 'error'); }
+      };
+    }
+    const requestRemiseBtn = document.getElementById('btn-request-remise');
+    if (requestRemiseBtn) {
+      requestRemiseBtn.onclick = async () => {
+        try {
+          await api('/quotes/' + quote.id + '/request-remise', { method: 'POST' });
+          toast('Demande de remise envoyée au professionnel', 'success');
           viewRepairDetail(id);
         } catch(e) { toast(e.message, 'error'); }
       };

@@ -84,6 +84,45 @@ test('QUOTES: remise sans refus prealable 409', async () => {
   assert.equal(r.status, 409);
 });
 
+test('QUOTES: demande de remise apres un refus sans remise (request-remise)', async () => {
+  const { quoteId, client, pro } = await buildJourney({ stage: 'quote' });
+  const ref = await api('POST', `/api/quotes/${quoteId}/refuse`, {
+    token: client.token, body: { reason: 'Trop cher' }
+  });
+  assert.equal(ref.status, 200);
+  assert.equal(ref.data.quote.status, 'REFUSED');
+  assert.equal(ref.data.quote.request_discount, false);
+  assert.equal(ref.data.quote.discount_granted, null);
+
+  const remise = await api('POST', `/api/quotes/${quoteId}/remise`, { token: pro, body: { grant: false } });
+  assert.equal(remise.status, 409);
+
+  const req = await api('POST', `/api/quotes/${quoteId}/request-remise`, { token: client.token, body: {} });
+  assert.equal(req.status, 200);
+  assert.equal(req.data.quote.request_discount, true);
+
+  const granted = await api('POST', `/api/quotes/${quoteId}/remise`, { token: pro, body: { grant: true, discount_percent: 10 } });
+  assert.equal(granted.status, 200);
+  assert.equal(granted.data.quote.status, 'PENDING');
+  assert.equal(granted.data.quote.discount_granted, true);
+
+  const appr = await api('POST', `/api/quotes/${quoteId}/approve`, { token: client.token, body: {} });
+  assert.equal(appr.status, 200);
+  assert.equal(appr.data.quote.status, 'APPROVED');
+});
+
+test('QUOTES: request-remise bloquee si pas de refus, deja demandee ou deja traitee', async () => {
+  const { quoteId, client } = await buildJourney({ stage: 'quote' });
+  const noRefus = await api('POST', `/api/quotes/${quoteId}/request-remise`, { token: client.token, body: {} });
+  assert.equal(noRefus.status, 409);
+
+  await api('POST', `/api/quotes/${quoteId}/refuse`, {
+    token: client.token, body: { reason: 'Trop cher', request_discount: true }
+  });
+  const twice = await api('POST', `/api/quotes/${quoteId}/request-remise`, { token: client.token, body: {} });
+  assert.equal(twice.status, 409);
+});
+
 test('QUOTES: un seul devis par intervention - double creation rejetee 409', async () => {
   const { quoteId, pro, interventionId } = await buildJourney({ stage: 'quote' });
   const second = await api('POST', '/api/quotes', {

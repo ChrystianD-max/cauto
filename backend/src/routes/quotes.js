@@ -249,6 +249,30 @@ router.post('/:id/refuse', wrap(async (req, res) => {
     res.json({ quote: updated });
 }));
 
+// ---- The client requests a discount (remise) AFTER refusing the quote
+router.post('/:id/request-remise', wrap(async (req, res) => {
+    const quote = await db.one('SELECT * FROM quotes WHERE id = $1', [req.params.id]).catch(() => null);
+    if (!quote) throw new HttpError(404, 'Devis introuvable');
+    if (quote.status !== 'REFUSED') throw new HttpError(409, 'Le devis n’est pas refusé');
+    if (quote.discount_granted != null) throw new HttpError(409, 'Remise déjà traitée');
+    if (quote.request_discount) throw new HttpError(409, 'Une demande de remise est déjà en cours');
+
+    const updated = await db.one(
+        `UPDATE quotes SET request_discount=true WHERE id=$1 RETURNING *`,
+        [quote.id]
+    );
+    const proUser = await proUserOf(quote.intervention_id);
+    if (proUser) {
+        await notify(proUser,
+            `Le client souhaite une remise sur le devis refusé (${updated.refusal_reason || 'devis refusé'}).`,
+            `quote:${quote.id}:remise-requested`);
+    }
+    await auditChange(req, 'quote.request_remise', 'quote', quote.id,
+        { request_discount: false }, { request_discount: true },
+        { service_request_id: quote.service_request_id });
+    res.json({ quote: updated });
+}));
+
 // ---- Pro decision on the client's discount request (remise)
 router.post('/:id/remise', wrap(async (req, res) => {
     if (!['GARAGE', 'MECANICIEN', 'ADMIN'].includes(req.user.role)) {
