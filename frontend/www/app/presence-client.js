@@ -22,7 +22,6 @@ class PresenceClient {
     });
 
     this.presenceSocket.on('connect', () => {
-      console.log('[presence] connected');
       this.emit('connected');
     });
 
@@ -94,7 +93,6 @@ class PresenceClient {
     });
 
     this.collabSocket.on('connect', () => {
-      console.log('[collab] connected to module:', moduleId);
       this.emit('collab:connected');
     });
 

@@ -42,7 +42,6 @@ class PushManager {
         applicationServerKey: urlB64ToUint8Array(VAPID_PUBLIC_KEY)
       });
       await this.sendSubscriptionToServer(this.subscription);
-      console.log('[push] Abonné:', this.subscription.endpoint);
       return this.subscription;
     } catch (e) {
       console.error('[push] Échec abonnement:', e);
@@ -55,7 +54,6 @@ class PushManager {
       await this.subscription.unsubscribe();
       await this.deleteSubscriptionFromServer(this.subscription);
       this.subscription = null;
-      console.log('[push] Désabonné');
     } catch (e) {
       console.error('[push] Échec désabonnement:', e);
     }
