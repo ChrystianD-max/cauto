@@ -111,7 +111,8 @@ router.get('/conversations', wrap(async (req, res) => {
      FROM conversations c
      JOIN conversation_members cm ON cm.conversation_id = c.id
      WHERE cm.user_id = $1
-     ORDER BY c.updated_at DESC`, [req.user.sub]
+       AND ($2::uuid IS NULL OR c.service_request_id = $2::uuid)
+     ORDER BY c.updated_at DESC`, [req.user.sub, req.query.service_request_id ?? null]
   );
   const conversations = await Promise.all(rows.map(async (r) => {
     const participants = (await participantsFor(r.id)).filter(p => p.id !== req.user.sub);
@@ -142,7 +143,8 @@ router.get('/conversations', wrap(async (req, res) => {
 // ------ Créer une conversation (directe ou de groupe) ------
 const createConvSchema = z.object({
   participant_ids: z.array(z.string().uuid()).min(1).max(PARTICIPANT_LIMIT),
-  title: z.string().max(160).optional()
+  title: z.string().max(160).optional(),
+  service_request_id: z.string().uuid().optional()
 });
 router.post('/conversations', validate(createConvSchema), wrap(async (req, res) => {
   const ids = [...new Set(req.body.participant_ids)];
@@ -174,9 +176,9 @@ router.post('/conversations', validate(createConvSchema), wrap(async (req, res) 
   const autoTitle = req.body.title || other.map(u => u.name).join(', ');
   const conv = await db.tx(async (c) => {
     const r = (await c.query(
-      `INSERT INTO conversations (kind, title, created_by)
-       VALUES ($1, $2, $3) RETURNING *`,
-      [ids.length === 1 ? 'DIRECT' : 'GROUP', autoTitle, req.user.sub]
+      `INSERT INTO conversations (kind, title, service_request_id, created_by)
+       VALUES ($1, $2, $3::UUID, $4) RETURNING *`,
+      [ids.length === 1 ? 'DIRECT' : 'GROUP', autoTitle, req.body.service_request_id ?? null, req.user.sub]
     )).rows[0];
     const members = [[r.id, req.user.sub], ...ids.map(id => [r.id, id])];
     for (const [cid, uid] of members) {
