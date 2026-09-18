@@ -12,8 +12,12 @@ const config = require('../config');
 
 const router = express.Router();
 
-const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: Number(process.env.RATE_LIMIT_AUTH_MAX || 20) });
-const otpLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: Number(process.env.RATE_LIMIT_OTP_MAX || 10) });
+// En NODE_ENV=test on desactive le rate-limit (aucun effet en prod) : la suite
+// d'integration cree beaucoup de comptes depuis la meme IP, ce qui declenchait
+// un 429 rate limit sur /auth/register et coupait toute la suite.
+const skipInTest = () => process.env.NODE_ENV === 'test';
+const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: Number(process.env.RATE_LIMIT_AUTH_MAX || 20), skip: skipInTest });
+const otpLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: Number(process.env.RATE_LIMIT_OTP_MAX || 10), skip: skipInTest });
 
 // Recherche à coût constant : la valeur d'une liste de cibles est elle aussi divulguée,
 // mais on évite une énumération triviale par différence de timing.
