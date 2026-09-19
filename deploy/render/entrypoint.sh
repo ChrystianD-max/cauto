@@ -60,10 +60,10 @@ EOF
 
 echo "[entrypoint] Migrations DB (idempotent)..."
 node /app/scripts/db-migrate.js
-echo "[entrypoint] Seed DB (idempotent)..."
-node /app/scripts/db-seed.js
-echo "[entrypoint] Seed JS (comptes demo)..."
-node /app/seed/seed.js
+echo "[entrypoint] Seed DB (idempotent, non bloquant)..."
+node /app/scripts/db-seed.js || echo "[entrypoint] WARN seed SQL ignoré (base peut-être pleine / déjà seedée)"
+echo "[entrypoint] Seed JS (comptes demo, non bloquant)..."
+node /app/seed/seed.js || echo "[entrypoint] WARN seed JS ignoré (base peut-être pleine / déjà seedée)"
 
 echo "[entrypoint] Demarrage du backend node sur :4000 (PORT web = ${LISTEN_PORT})"
 PORT=4000 node /app/src/server.js &
