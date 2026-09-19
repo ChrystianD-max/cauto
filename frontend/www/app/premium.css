@@ -308,3 +308,118 @@ input::placeholder, textarea::placeholder { color: var(--p-muted); }
   .app-main { margin-left: 268px !important; padding: 2rem 2.2rem !important; }
   .grid-cards { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
 }
+
+/* =====================================================================
+   AUTH C-AUTO — pages Connexion / Inscription (identité visuelle brand)
+   Fond clair blanc/gris, carte centrale aérée, rouge C-AUTO, angles
+   légèrement arrondis, hiérarchie : logo → titre → description → champs
+   → bouton principal → actions secondaires → lien discret.
+   ===================================================================== */
+.auth-page {
+  background: radial-gradient(760px 460px at 88% -8%, rgba(220, 38, 38, 0.06), transparent 62%),
+              radial-gradient(620px 420px at 4% 104%, rgba(37, 99, 235, 0.05), transparent 60%),
+              #f6f8fc;
+}
+.auth-page::before, .auth-page::after { display: none !important; }
+.auth-page .auth-card {
+  z-index: 1;
+  width: 100%;
+  max-width: 400px;
+  margin: auto 0;
+  padding: 2.4rem 2rem 2.2rem !important;
+  text-align: center;
+  border-radius: 22px !important;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+}
+.auth-page .auth-card .logo-big { justify-content: center; gap: .6rem; margin-bottom: 1.1rem; }
+.auth-page .auth-title {
+  margin: 0 0 .5rem;
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  color: var(--text, #0f172a);
+}
+.auth-page .auth-desc { margin: 0 0 1.4rem; font-size: .95rem; color: var(--muted, #64748b); }
+.auth-page .auth-card form { text-align: left; margin: 0; }
+.auth-page .auth-card .auth-form { display: flex; flex-direction: column; gap: .95rem; }
+/* Étiquette de champ : icône + libellé + contrôle */
+.auth-page .auth-field { position: relative; display: block; margin: 0; width: 100%; }
+.auth-page .auth-field > i {
+  position: absolute; z-index: 1; left: .95rem; top: 2.42rem;
+  width: 17px; height: 17px; color: var(--muted, #64748b); pointer-events: none;
+}
+.auth-page .auth-field > span { display: block; font-weight: 650; font-size: .8rem; color: var(--text2, #334155); margin-bottom: .4rem; }
+.auth-page .auth-field input {
+  width: 100%; display: block;
+  padding: .82rem 1rem .82rem 2.5rem;
+  border-radius: 14px !important;
+  border: 1px solid var(--border2, #cbd5e1) !important;
+  background: #ffffff !important;
+  color: var(--text, #0f172a) !important;
+  box-shadow: none;
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+.auth-page .auth-field input:focus {
+  outline: none;
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.14) !important;
+  background: #ffffff !important;
+}
+.auth-page .auth-field .pw-wrap { position: relative; display: block; }
+.auth-page .auth-field .pw-wrap input { padding-right: 2.9rem; }
+.auth-page .auth-field .pw-peek {
+  position: absolute; right: .4rem; top: 50%; transform: translateY(-50%);
+  display: grid; place-items: center; width: 2.3rem; height: 2.3rem;
+  border: none; background: none; cursor: pointer; color: var(--muted, #64748b); border-radius: 50%;
+}
+.auth-page .auth-field .pw-peek:active { background: rgba(15, 23, 42, 0.06); }
+.auth-page .auth-field .pw-peek i { width: 17px; height: 17px; }
+/* Bouton principal C-AUTO : rouge franc, angles légèrement arrondis */
+.auth-page .auth-btn {
+  width: 100%;
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  min-height: 3.1rem; margin-top: .35rem; padding: .85rem 1.1rem;
+  border: none; border-radius: 14px; cursor: pointer;
+  font-family: inherit; font-size: .98rem; font-weight: 700; color: #fff;
+  background: linear-gradient(135deg, #e11d48, #be123c);
+  box-shadow: 0 12px 26px rgba(190, 18, 60, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: transform .15s ease, filter .2s ease, box-shadow .2s ease;
+}
+.auth-page .auth-btn:hover { filter: brightness(1.06); }
+.auth-page .auth-btn:active { transform: scale(0.985); }
+.auth-page .auth-btn i { width: 18px; height: 18px; }
+/* Actions secondaires : rangée de confiance discrète */
+.auth-page .auth-extra { display: flex; justify-content: center; gap: .4rem; flex-wrap: wrap; margin-top: 1.15rem; }
+.auth-page .auth-extra span {
+  display: inline-flex; align-items: center; gap: .28rem;
+  font-size: .68rem; font-weight: 600; color: var(--muted, #64748b);
+  background: #eef2f7; border: 1px solid rgba(15, 23, 42, 0.06);
+  padding: .28rem .55rem; border-radius: 999px;
+}
+.auth-page .auth-extra i { width: 12px; height: 12px; color: #dc2626; }
+/* Lien discret sous le formulaire */
+.auth-page .auth-footer { margin-top: 1.25rem; font-size: .88rem; color: var(--muted, #64748b); }
+.auth-page .auth-footer a { color: #dc2626; font-weight: 700; }
+.auth-page .auth-footer a:hover { color: #b91c1c; }
+/* Inscription : question d'étape + progression C-AUTO */
+.auth-page .reg-question { margin: 0 0 .75rem; font-size: .95rem; font-weight: 700; color: var(--text, #0f172a); }
+.auth-page .reg-progress { height: 4px; border-radius: 99px; background: #e3e8f0; overflow: hidden; margin: 0 0 1.15rem; }
+.auth-page .reg-progress span { background: linear-gradient(90deg, #e11d48, #f97316); }
+.auth-page .reg-back { top: .8rem; left: .8rem; width: 2.2rem; height: 2.2rem; border-radius: 50%; border: 1px solid var(--border, #e2e8f0); background: #ffffff; color: var(--text2, #334155); }
+.auth-page .reg-back:hover { background: #f1f5f9; }
+.auth-page .reg-step label > span { color: var(--text2, #334155); }
+.auth-page .reg-step input:not([type=radio]) {
+  background: #ffffff !important;
+  border-radius: 14px;
+  border-color: var(--border2, #cbd5e1);
+}
+.auth-page .reg-step input:not([type=radio]):focus { border-color: #dc2626 !important; box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.14) !important; }
+.auth-page .reg-peek { color: #dc2626; }
+.auth-page .reg-step { text-align: left; }
+.auth-page .role-tile { border-color: #e2e8f0; background: #f8fafc; }
+.auth-page .role-tile:hover { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12); }
+.auth-page .role-tile.sel { border-color: #dc2626; background: rgba(220, 38, 38, 0.06); box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12); }
+.auth-page .role-tile .role-icon { background: #ffffff; color: #dc2626; }
+@media (max-width: 480px) {
+  .auth-page .auth-card { max-width: 100%; padding: 2rem 1.4rem !important; border-radius: 20px !important; }
+}

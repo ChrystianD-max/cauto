@@ -385,25 +385,25 @@ function layoutApp(html) {
 function viewLogin(msg='') {
   document.querySelector('header').classList.remove('hidden');
   document.querySelector('footer').classList.remove('hidden');
-  $app.innerHTML = `<div class="auth-page login-bg">
+  $app.innerHTML = `<div class="auth-page">
     <div class="auth-card card login-card">
-      <div class="logo-big"><svg width="40" height="40" viewBox="0 0 100 100"><rect rx="24" width="100" height="100" fill="url(#cl1)"/><path d="M29 62 h42 a5 5 0 0 0 4.6-3 l2.6-7.6 a10 10 0 0 0-8.6-6.9 l-7.4-.6-6.6-7.6 a7 7 0 0 0-5.4-2.6 h-9.2 a8 8 0 0 0-7 4 l-5.2 8.6 a5 5 0 0 0-1.2 3.3 v9.6 a5 5 0 0 0 5 5 z" fill="#fff"/><circle cx="34" cy="66" r="6" fill="url(#cl1)"/><circle cx="67" cy="66" r="6" fill="url(#cl1)"/><path d="M46 62 h8" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg> C-AUTO</div>
-      <p class="login-welcome">Heureux de vous revoir</p>
-      <p class="subtitle">Suivez vos véhicules, demandez vos devis, pilotez vos réparations.</p>
+      <div class="logo-big"><svg width="44" height="44" viewBox="0 0 100 100"><defs><linearGradient id="clA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e11d48"/><stop offset="1" stop-color="#9f1239"/></linearGradient></defs><rect rx="24" width="100" height="100" fill="url(#clA)"/><path d="M29 62 h42 a5 5 0 0 0 4.6-3 l2.6-7.6 a10 10 0 0 0-8.6-6.9 l-7.4-.6-6.6-7.6 a7 7 0 0 0-5.4-2.6 h-9.2 a8 8 0 0 0-7 4 l-5.2 8.6 a5 5 0 0 0-1.2 3.3 v9.6 a5 5 0 0 0 5 5 z" fill="#fff"/><circle cx="34" cy="66" r="6" fill="url(#clA)"/><circle cx="67" cy="66" r="6" fill="url(#clA)"/><path d="M46 62 h8" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg> C-AUTO</div>
+      <h1 class="auth-title">Heureux de vous revoir</h1>
+      <p class="auth-desc">Suivez vos véhicules, demandez vos devis, pilotez vos réparations.</p>
       ${msg ? `<div class="alert alert-ok">${I('check-circle')}<span>${esc(msg)}</span></div>` : ''}
-      <form id="f-login">
-        <label class="login-field">${I('mail')}<span>Adresse email</span>
+      <form id="f-login" class="auth-form">
+        <label class="auth-field">${I('mail')}<span>Adresse email</span>
           <input name="email" type="email" autocomplete="email" required placeholder="vous@email.com">
         </label>
-        <label class="login-field">${I('lock')}<span>Mot de passe</span>
+        <label class="auth-field">${I('lock')}<span>Mot de passe</span>
           <span class="pw-wrap">
             <input name="password" id="login-password" type="password" autocomplete="current-password" required placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022">
             <button type="button" class="pw-peek" id="login-peek" aria-label="Afficher ou masquer le mot de passe">${I('eye')}</button>
           </span>
         </label>
-        <button type="submit" class="login-submit">${I('log-in')} Se connecter</button>
+        <button type="submit" class="auth-btn auth-btn-primary">${I('log-in')} Se connecter</button>
       </form>
-      <div class="login-feats">
+      <div class="auth-extra">
         <span>${I('shield-check')} Données sécurisées</span>
         <span>${I('zap')} Devis en ligne</span>
         <span>${I('heart-handshake')} Confiance</span>
@@ -450,8 +450,10 @@ function viewRegister() {
     <div class="auth-card card reg-card">
       <button type="button" class="reg-back hidden" id="reg-back" aria-label="Étape précédente">${I('arrow-left')}</button>
       <div class="logo-big"><img src="icons/logo-app.png" alt="C-AUTO" style="width:64px;height:64px;border-radius:32%;object-fit:cover" /></div>
-      <p class="subtitle" id="reg-title"></p>
+      <h1 class="auth-title">Créer votre compte</h1>
+      <p class="auth-desc">Rejoignez C-AUTO en quelques étapes.</p>
       <div class="reg-progress"><span id="reg-progress-bar"></span></div>
+      <p class="reg-question" id="reg-title"></p>
       <form id="f-reg" novalidate>
         <div id="reg-error" class="hidden"></div>
         <div class="reg-step" id="r-step-name">
@@ -485,7 +487,7 @@ function viewRegister() {
           <p class="reg-help">Au moins 8 caractères.</p>
           <button type="button" class="reg-peek" id="reg-peek">${I('eye')} Afficher</button>
         </div>
-        <button type="submit" id="reg-next" class="btn btn-primary btn-block">Suivant</button>
+        <button type="submit" id="reg-next" class="auth-btn auth-btn-primary">Suivant</button>
       </form>
       <p class="auth-footer"><a href="#/login">${I('arrow-left')} J'ai déjà un compte</a></p>
     </div>
