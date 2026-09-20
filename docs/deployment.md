@@ -155,6 +155,7 @@ En CI/CD, le job `build` vérifie la construction sur `main` avant tout déploie
 - PostgreSQL **16** (base `cauto`, user `cauto`).
 - Recommandé : base managée (Neon, Supabase, RDS, Aiven) + Redis managé (Upstash, Render Redis, ElastiCache) — ou les services du compose sur le VPS.
 - Connexion : `DATABASE_URL=postgresql://cauto:CHANGE_ME@HOST:5432/cauto?sslmode=require` (TLS obligatoire pour une base managée).
+- **Production actuelle (déployée sur Render `cauto.onrender.com`)** : base **Supabase** (PostgreSQL 17, région `ca-central-1`) connectée via le *transaction pooler* PyPgBouncer — `DATABASE_URL=postgresql://postgres.<ref>:<MDP>@aws-0-ca-central-1.pooler.supabase.com:6543/postgres`. Le schéma complet (migrations + seeds) s'est appliqué au boot ; l'ancien Postgres Render free (`dpg-dacmgoifngtc73e0n9ng-a`, disque saturé) est abandonné.
 - Le schéma se crée/applique par migration (étape 6) ; `db/init.sql` pose le socle au premier boot en local uniquement.
 
 ### 5. Environment variables
