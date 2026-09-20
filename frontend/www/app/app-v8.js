@@ -1942,7 +1942,8 @@ window.setSession = function(token, user) {
 
 if (window.S?.user?.id) initPresenceIfLogged();
 
-document.addEventListener('DOMContentLoaded', () => route());
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => route());
+else route();
 
 // Garde anti-ecran vide : capture toute erreur non geree
 window.onerror = function(msg, src, line, col, err) {
