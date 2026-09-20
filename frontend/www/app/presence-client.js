@@ -2,7 +2,7 @@
 // Frontend Presence + Cursors + Awareness Client (Socket.io)
 
 let io = null;
-try { const m = await import('https://cdn.socket.io/4.7.5/socket.io.esm.min.js'); io = m.io; } catch(e) { console.warn('[presence] CDN socket.io indisponible'); }
+try { const m = await import('./vendor/socket.io.esm.js'); io = m.io; } catch(e) { console.warn('[presence] socket.io indisponible'); }
 
 const PRESENCE_URL = '/presence';
 const COLLAB_URL = '/collab';

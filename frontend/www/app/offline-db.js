@@ -2,7 +2,7 @@
 // IndexedDB offline storage via Dexie (chargement CDN optionnel)
 
 let Dexie = null;
-try { const m = await import('https://esm.run/dexie@3.2.4'); Dexie = m.default || m; } catch(e) { console.warn('[offline] Dexie CDN indisponible, mode lecture seule'); }
+try { const m = await import('./vendor/dexie.esm.js'); Dexie = m.default || m; } catch(e) { console.warn('[offline] Dexie indisponible, mode lecture seule'); }
 
 export const offlineDB = Dexie ? new Dexie('cauto-offline') : null;
 
