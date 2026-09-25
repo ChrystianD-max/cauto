@@ -110,87 +110,6 @@ function loadingShell(kind) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function scoreRing(score) { const cls=score>=80?'score-high':score>=50?'score-mid':'score-low'; return `<div class="score-ring ${cls}">${score}</div>`; }
-
-/* ============================================================
-   TRUETRACK — helpers graphiques SVG (thème dashboard client)
-   - ttRing(pct, label, color, size) : anneau de progression
-   - ttSpark(values, color, w, h)   : courbe pointillée
-   - ttBars(values)                 : barres verticales
-   - ttVehIllust(color)             : silhouette de voiture
-   ============================================================ */
-function ttColor(pct) {
-  if (pct === null || pct === undefined) return { c: '#97886f', soft: '#f1ece0' };
-  if (pct >= 80) return { c: '#16a34a', soft: '#dcfce7' };
-  if (pct >= 45) return { c: '#f59e0b', soft: '#fef3c7' };
-  return { c: '#dc2626', soft: '#fee2e2' };
-}
-function ttSvgAttr(name, value) { return `${name}="${value}"`; }
-function ttRing(pct, label, color, size = 74) {
-  const stroke = Math.max(7, Math.round(size / 10));
-  const r = (size - stroke) / 2;
-  const C = 2 * Math.PI * r;
-  const val = pct === null ? 0 : Math.max(0, Math.min(100, pct));
-  const col = color || ttColor(pct).c;
-  return `<div class="tt-ring" style="width:${size}px;height:${size}px">
-    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true">
-      <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="#eee3cd" stroke-width="${stroke}"/>
-      ${pct === null ? '' : `<circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${col}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${(val/100)*C - 3} ${C}" stroke-dashoffset="0"/>`}
-    </svg>
-    <div class="tt-ring-val" style="font-size:${Math.round(size/4.6)}px">${pct === null ? '—' : Math.round(val)}</div>
-    ${label ? `<small style="position:absolute;top:100%;width:100%">${esc(label)}</small>` : ''}
-  </div>`;
-}
-/* Courbe pointillée : points visibles + ligne tiretée. Les points en excès
-   sont ignorés pour garder un tracé lisible dans le panneau (TrueTrack). */
-function ttSpark(values, color, w = 260, h = 88) {
-  const col = color || '#f97316';
-  const pts = (values || []).filter(v => v !== null && v !== undefined).map(Number);
-  if (pts.length < 2) return `<div class="tt-empty">${I('trending-up')}Données insuffisantes</div>`;
-  const padL = 6, padR = 6, padT = 10, padB = 16;
-  const min = Math.min(...pts), max = Math.max(...pts);
-  const span = (max - min) || 1;
-  const iw = Math.max(10, w - padL - padR), ih = h - padT - padB;
-  const X = (i) => padL + (i / (pts.length - 1)) * iw;
-  const Y = (v) => padT + ih - ((v - min) / span) * ih;
-  const line = pts.map((v, i) => `${i === 0 ? 'M' : 'L'}${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ');
-  const dots = pts.map((v, i) => `<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="4.4" fill="${col}"><title>${Math.round(v)}</title></circle>`).join('');
-  const last = pts[pts.length - 1];
-  return `<svg viewBox="0 0 ${w} ${h}" role="img" style="max-width:100%">
-    <defs><pattern id="tt-dots" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(0)"><circle cx="2" cy="2" r="1.2" fill="${col}" opacity=".35"/></pattern></defs>
-    <path d="${line}" fill="none" stroke="${col}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5.5 4" opacity=".9"/>
-    <path d="${line}" fill="none" stroke="url(#tt-dots)" stroke-width="1" opacity=".7"/>
-    ${dots}
-    <g transform="translate(${(padL + pts.length>1 ? X(pts.length-1) : X(0)) - 26},${Y(last) - 34})">
-      <text x="10" y="0" font-size="11" font-weight="800" fill="${col}" stroke="#fffdf7" stroke-width="4" paint-order="stroke">${Math.round(last)}</text>
-    </g>
-  </svg>`;
-  }
-function ttBars(values, color) {
-  const col = color || '#f97316';
-  const pts = (values || []).filter(v => v !== null && v !== undefined).map(Number);
-  if (!pts.length) return `<div class="tt-empty">${I('bar-chart-3')}Aucune donnée</div>`;
-  const max = Math.max(...pts, 1);
-  return `<div style="display:flex;align-items:flex-end;gap:6px;height:96px">
-    ${pts.map(v => `<div title="${Math.round(v)}" style="flex:1;height:${Math.max(8, (v/max)*96)}px;border-radius:7px 7px 3px 3px;background:linear-gradient(180deg,${col},${col}cc);position:relative"><span style="position:absolute;bottom:-15px;left:50%;transform:translateX(-50%);font-size:.6rem;color:var(--tt-ink-3);font-weight:700">${Math.round(v)}</span></div>`).join('')}
-  </div>`;
-}
-/* Silhouette de voiture stylisée (vue latérale) — couleur dynamique. */
-function ttVehIllust(color) {
-  const c = color || '#f97316';
-  return `<svg viewBox="0 0 220 118" aria-hidden="true">
-    <rect x="8" y="68" width="204" height="34" rx="16" fill="${c}"/>
-    <path d="M60 66 L78 40 h62 l34 26 z" fill="${c}"/>
-    <rect x="8" y="66" width="204" height="8" fill="${c}"/>
-    <rect x="60" y="63" width="90" height="30" rx="14" fill="#fff" opacity=".4"/>
-    <rect x="124" y="40" width="30" height="24" rx="9" fill="#fff" opacity=".32"/>
-    <circle cx="60" cy="98" r="15" fill="#2b2620"/>
-    <circle cx="60" cy="98" r="7" fill="#8b8577"/>
-    <circle cx="164" cy="98" r="15" fill="#2b2620"/>
-    <circle cx="164" cy="98" r="7" fill="#8b8577"/>
-  </svg>`;
-}
-/* Applique le thème TrueTrack au <body> (fond crème) — utilisé par les vues .tt-* */
-function ttBody(on) { document.body.classList.toggle('tt', !!on); }
 const FUEL_LABELS = { ESSENCE:'Essence', DIESEL:'Diesel', HYBRIDE:'Hybride', ELECTRIQUE:'Électrique', GPL:'GPL' };
 const GEAR_LABELS = { MANUELLE:'Manuelle', AUTOMATIQUE:'Automatique', SEMI_AUTO:'Semi-auto' };
 const TRANS_LABELS = { TWD:'Traction', FWD:'Traction avant', RWD:'Propulsion', AWD:'4 roues motrices' };
@@ -226,7 +145,6 @@ const CLIENT_NAV = [
   ]},
   { label: 'Garanties & support', items: [
     { hash:'#/warranties', icon:'shield', label:'Garanties' },
-    { hash:'#/documents', icon:'folder-lock', label:'Coffre-fort' },
     { hash:'#/disputes', icon:'alert-triangle', label:'Litiges' },
   ]},
   { label: 'Innovations', items: [
@@ -682,153 +600,48 @@ function receptionActionBanner(srsOrEmpty) {
 
 async function viewDashboard() {
   loadingShell('dashboard');
-  ttBody(true);
   try {
-    const [vehRes, fleetRes] = await Promise.all([
-      api('/vehicles'),
-      api('/fleet/dashboard').catch(() => null)
-    ]);
-    const vehicles = vehRes.vehicles || [];
-    const stats = (fleetRes && fleetRes.stats) || { total_vehicles: vehicles.length, operational: vehicles.length, immobilized: 0, maintenance_due_soon: 0, costs_total: 0, costs_ytd: 0 };
-    const dueSoon = (fleetRes && fleetRes.due_soon) || [];
-
-    // Score + santé par véhicule (pour anneaux, cartes et courbe).
-    const healths = await Promise.all(vehicles.map(v => api(`/vehicles/${v.id}/health-score`).then(d => d.health).catch(() => null)));
-    const vehScore = (idx) => { const h = healths[idx]; return (h && typeof h.score === 'number') ? h.score : null; };
-
-    let appts = [], srs = [];
-    const [apptRes, srRes] = await Promise.all([
-      api('/appointments/mine').catch(() => ({ appointments: [] })),
-      api('/service-requests').catch(() => ({ service_requests: [] }))
-    ]);
-    appts = apptRes.appointments || [];
-    srs = srRes.service_requests || [];
-    _receptionBannerHtml = receptionActionBanner(srs);
-
-    const firstName = (S.user.name || 'Client').split(' ')[0];
-    const today = new Date().toLocaleDateString('fr', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-
-    // Véhicule vedette (le premier) : score + alertes + prochaine échéance.
+    const { vehicles } = await api('/vehicles');
     const v = vehicles[0];
     let maint = { score: 0, alerts: [], next_due: null, all: [] };
-    if (v) maint = await api(`/vehicles/${v.id}/maintenance`);
-    const overdueCount = dueSoon.filter(d => d.worst_status === 'OVERDUE').length + (maint.alerts || []).filter(a => a.status === 'OVERDUE').length;
-
-    const overdue = (maint.alerts || []).filter(a => a.status === 'OVERDUE');
-    const soon = (maint.alerts || []).filter(a => a.status !== 'OVERDUE');
-    const recalls = [
-      ...overdue.map(a => ({ label: a.label, when: 'ÉCHUE', cls: 'overdue', icon: 'alert-circle', statusTxt: 'Date d\'échéance dépassée' })),
-      ...soon.map(a => ({ label: a.label, when: 'Bientôt', cls: 'soon', icon: 'clock', statusTxt: a.km_left !== undefined ? `${a.km_left} km ou ${a.days_left} jours` : 'à venir' })),
-      ...(maint.next_due ? [{ label: maint.next_due.label, when: 'Prochaine', cls: 'ok', icon: 'calendar-check', statusTxt: maint.next_due.km_left !== undefined ? `${maint.next_due.km_left} km ou ${maint.next_due.days_left} jours` : 'à venir' }] : [])
-    ];
-
-    // Courbe de performances : scores santé par véhicule (croissant).
-    const scores = vehicles.map((_, i) => vehScore(i)).filter(s => s !== null);
-    const colorOf = (vid) => `#${(localStorage.getItem('cauto.vcolor.' + vid) || 'f97316')}`;
-    const vehCards = vehicles.map((veh, i) => {
-      const sc = vehScore(i);
-      const st = sc === null ? 'muted' : (sc >= 80 ? 'ok' : sc >= 45 ? 'warn' : 'ko');
-      const stLbl = sc === null ? 'Non évalué' : (sc >= 80 ? 'Excellent' : sc >= 45 ? 'À surveiller' : 'Critique');
-      return `<a href="#/vehicles/${veh.id}" class="tt-veh b-${st}">
-        <div class="tt-veh-top">
-          <span class="tt-veh-badge">${st==='ok'?I('check-circle'):st==='warn'?I('alert-triangle'):st==='ko'?I('octagon-alert'):I('help-circle')} ${stLbl}</span>
-          <span>${esc(veh.plate)}</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:.9rem">
-          <div style="width:64px;flex-shrink:0">${ttRing(sc, '', null, 64)}</div>
-          <div style="flex:1;min-width:0">
-            <div class="tt-veh-name">${esc(veh.make)} ${esc(veh.model)}</div>
-            <div class="tt-veh-sub">${veh.year} · ${Number(veh.mileage).toLocaleString('fr')} km</div>
-            ${veh.engine_name ? `<div class="tt-veh-sub" style="font-size:.74rem">${esc(veh.engine_name)} · ${FUEL_LABELS[veh.fuel_type]||veh.fuel_type}</div>` : ''}
-          </div>
-        </div>
-        <div class="tt-veh-footer">
-          <span class="tt-mini"><b>${I('wrench')} Entretien</b><span>Voir le programme →</span></span>
-        </div>
-      </a>`;
-    }).join('');
-
+    let appts = [], intvs = [], srs = [];
+    if (v) {
+      maint = await api(`/vehicles/${v.id}/maintenance`);
+      const apptData = await api('/appointments/mine').catch(() => ({ appointments: [] }));
+      appts = apptData.appointments;
+      intvs = await api('/interventions/mine').catch(() => ({ interventions: [] })).then(d => d.interventions || []);
+      srs = await api('/service-requests').catch(() => ({ service_requests: [] })).then(d => d.service_requests || []);
+    }
+    _receptionBannerHtml = receptionActionBanner(srs);
+    const firstName = (S.user.name || 'Client').split(' ')[0];
     layoutApp(`
-    <div class="tt-page">
-      <div class="tt-top">
-        <div>
-          <h1>Bonjour, ${esc(firstName)}</h1>
-          <div class="tt-date">${esc(today)} — Vue d'ensemble de votre garage.</div>
-        </div>
-        <div class="tt-actions">
-          <a href="#/vehicles/new" class="tt-btn ghost">${I('plus')} Ajouter un véhicule</a>
-          <a href="#/diagnostic" class="tt-btn">${I('alert-triangle')} Un problème ?</a>
-        </div>
-      </div>
-      ${receptionActionBanner()}
-      ${vehicles.length ? `
-      <div class="tt-kpis">
-        <div class="tt-kpi acc-teal"><div class="tt-kpi-ic">${I('car-front')}</div><div><b>${stats.operational ?? 0} / ${stats.total_vehicles ?? vehicles.length}</b><span>Véhicules en service</span></div></div>
-        <div class="tt-kpi ${overdueCount ? 'acc-ko' : 'acc-ok'}"><div class="tt-kpi-ic">${I('alert-triangle')}</div><div><b>${overdueCount || 0}</b><span>Rappels urgents·s</span></div></div>
-        <div class="tt-kpi acc-warn"><div class="tt-kpi-ic">${I('refresh-cw')}</div><div><b>${dueSoon.length || soon.length}</b><span>Renouvellements à venir</span></div></div>
-        <div class="tt-kpi ${stats.costs_total ? 'acc-ok' : ''}"><div class="tt-kpi-ic">${I('wallet')}</div><div><b>${stats.costs_total ? money(stats.costs_total) : '—'}</b><span>Coûts d'utilisation</span></div></div>
-      </div>
-
-      <div class="tt-hero">
-        <div class="tt-hero-main">
-          <div class="tt-hero-car">
-            <div class="tt-car-illus">${ttVehIllust(colorOf(v.id))}</div>
-            <div style="flex:1;min-width:200px">
-              <div class="tt-hero-name">${esc(v.make)} ${esc(v.model)}</div>
-              <div class="tt-hero-sub">${I('map-pin')} ${esc(v.plate)} · ${Number(v.mileage).toLocaleString('fr')} km ${v.engine_name ? ' · ' + esc(v.engine_name) : ''}</div>
-              <div class="tt-hero-chips">
-                <span class="tt-chip">${I('calendar')} ${appts.length} rendez-vous</span>
-                <span class="tt-chip">${I('shield-check')} Garantie 12 mois / intervention</span>
-                <span class="tt-chip">${I('fuel')} ${FUEL_LABELS[v.fuel_type]||v.fuel_type}</span>
-              </div>
-              <div style="margin-top:1rem;display:flex;gap:.55rem;flex-wrap:wrap">
-                <a href="#/vehicles/${v.id}" class="tt-btn sm">${I('eye')} Voir la fiche</a>
-                <a href="#/vehicles/${v.id}/passport" class="tt-btn sm ghost">${I('file-text')} Passeport</a>
-                <a href="#/appointments" class="tt-btn sm ghost">${I('calendar-plus')} Prendre rendez-vous</a>
-              </div>
-            </div>
-            <div style="text-align:center;flex-shrink:0;padding-right:.2rem">
-              ${ttRing(maint.score, 'SCORE C-AUTO', null, 96)}
-            </div>
-          </div>
-        </div>
-        <div class="tt-hero-side">
-          <div class="tt-card-h"><span class="tt-card-t">${I('bell-ring')} Rappels par échéance</span><a class="tt-link" href="#/maintenance">Gérer →</a></div>
-          <div class="tt-reminders">
-          ${recalls.length ? recalls.slice(0,5).map(r => `
-            <div class="tt-rem st-${r.cls}">
-              <div class="tt-rem-ic">${I(r.icon)}</div>
-              <div class="tt-rem-body"><b>${esc(r.label)}</b><span>${esc(r.statusTxt)}</span></div>
-              <div class="tt-rem-right"><span class="tt-rem-date">${esc(r.when)}</span><br><span class="tt-rem-badge b-${r.cls}">${r.cls==='overdue'?'EN RETARD':r.cls==='soon'?'BIENTÔT':'OK'}</span></div>
-            </div>`).join('') : `<div class="tt-empty">${I('calendar-check')}Aucun rappel en attente</div>`}
-          </div>
-        </div>
-      </div>
-
-      <div class="tt-lower">
-        <div class="tt-card">
-          <div class="tt-card-h"><span class="tt-card-t">${I('chart-no-axes-combined')} Performances du garage</span><a class="tt-link" href="#/vehicles">Tous les véhicules →</a></div>
-          ${scores.length >= 2 ? ttSpark(scores, '#f97316') : `<div class="tt-empty">${I('trending-up')}Ajoutez des véhicules et diagnostics pour voir la courbe de performances</div>`}
-          <div class="tt-chart-sub" style="margin-top:.5rem">${vehicles.length} véhicule(s) — score santé moyen <b>${scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : '—'}/100</b></div>
-        </div>
-        <div class="tt-card">
-          <div class="tt-card-h"><span class="tt-card-t">${I('cable')} État & coûts</span></div>
-          <div class="tt-ring-row">
-            <div style="text-align:center">${ttRing(vehScore(0), 'Véhicule vedette', null, 84)}</div>
-            <div style="flex:1;min-width:0;font-size:.84rem;color:var(--tt-ink-2)">
-              <div style="display:flex;justify-content:space-between;margin-bottom:.25rem"><span>En service</span><b>${stats.operational ?? 0}</b></div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:.25rem"><span>Immobilisés</span><b>${stats.immobilized ?? 0}</b></div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:.25rem"><span>Entretiens dus bientôt</span><b>${stats.maintenance_due_soon ?? 0}</b></div>
-              <div style="display:flex;justify-content:space-between"><span>Coûts cette année</span><b>${stats.costs_ytd ? money(stats.costs_ytd) : '—'}</b></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="tt-card-h" style="margin:.4rem 0 .9rem"><span class="tt-card-t" style="font-size:1.05rem">${I('car')} Vos véhicules</span><a class="tt-biglink" href="#/vehicles">Voir tout ${I('arrow-right')}</a></div>
-      <div class="tt-veh-grid">${vehCards}</div>
-      ` : `<div class="tt-card"><div class="tt-empty">${I('car')}Aucun véhicule.<p style="margin-top:.4rem;color:var(--tt-ink-3)">Ajoutez votre premier véhicule pour commencer à suivre son entretien.</p><a href="#/vehicles/new" class="tt-btn" style="margin-top:.8rem">Ajouter un véhicule</a></div></div>`}
+    <div class="dash-header">${receptionActionBanner()}
+      <div><h1>Bonjour ${esc(firstName)} 👋</h1><p class="hint">Voici le résumé de votre véhicule.</p></div>
+      <a href="#/diagnostic" class="btn btn-danger">${I('alert-triangle')} MON VÉHICULE A UN PROBLÈME</a>
     </div>
+    ${v ? `
+    <div class="dash-hero card">
+      <div class="dash-hero-left">
+        <div class="dash-veh-icon">${I('car')}</div>
+        <div>
+          <div class="dash-veh-name">${esc(v.make)} ${esc(v.model)}</div>
+          <div class="dash-veh-sub">${esc(v.plate)} · ${Number(v.mileage).toLocaleString('fr')} km</div>
+          ${v.engine_name ? `<div class="dash-veh-sub">${esc(v.engine_name)} · ${FUEL_LABELS[v.fuel_type]||v.fuel_type}</div>` : ''}
+        </div>
+      </div>
+      <div class="dash-hero-right">
+        <div class="dash-score-label">SCORE C-AUTO</div>
+        ${scoreRing(maint.score)}
+      </div>
+    </div>
+    <div class="grid-dash">
+      ${maint.alerts.length ? `<div class="card dash-card"><div class="dash-card-title">${I('alert-triangle')} Alertes</div>${maint.alerts.map(a => `<div class="alert ${a.status==='OVERDUE'?'alert-ko':'alert-warn'}" style="margin:0.4rem 0">${I('alert-circle')} ${esc(a.label)} — ${a.status==='OVERDUE'?'ÉCHUE':'prochaine'}</div>`).join('')}</div>` : ''}
+      ${maint.next_due ? `<div class="card dash-card"><div class="dash-card-title">${I('clock')} Prochaine échéance</div><p style="margin:0.3rem 0">${esc(maint.next_due.label)}</p><p class="hint">${maint.next_due.km_left} km ou ${maint.next_due.days_left} jours</p></div>` : ''}
+      <div class="card dash-card"><div class="dash-card-title">${I('wrench')} Entretien</div><p style="margin:0.3rem 0">${maint.all.filter(i=>i.status!=='OK').length} opération(s) en attente</p><a href="#/vehicles/${v.id}" class="btn btn-sm btn-ghost">Voir le programme →</a></div>
+      <div class="card dash-card"><div class="dash-card-title">${I('calendar')} Rendez-vous</div><p style="margin:0.3rem 0">${appts.length} rendez-vous</p><a href="#/appointments" class="btn btn-sm btn-ghost">Voir →</a></div>
+      <div class="card dash-card"><div class="dash-card-title">${I('shield-check')} Garanties</div><p style="margin:0.3rem 0">12 mois sur chaque intervention</p></div>
+    </div>
+    ` : '<div class="empty-state">' + I('car') + '<h3>Aucun véhicule</h3><p>Ajoutez votre premier véhicule pour commencer.</p><a href="#/vehicles/new" class="btn btn-primary">Ajouter un véhicule</a></div>'}
     `);
   } catch(e) { layoutApp(err(e)); }
   hideLoading(); renderIcons();
@@ -905,7 +718,6 @@ function viewVehicleNew() {
 /* ====== FICHE VÉHICULE ====== */
 async function viewVehicleDetail(id) {
   showLoading();
-  ttBody(true);
   try {
     const [vd, hist, maint, healthR] = await Promise.all([
       api('/vehicles/'+id),
@@ -916,130 +728,58 @@ async function viewVehicleDetail(id) {
     const v = vd.vehicle;
     const hs = (healthR && healthR.health) || null;
     const hsOk = hs && hs.state === 'OK';
-    const score = hsOk ? hs.score : (typeof maint.score === 'number' ? maint.score : null);
-    const curColor = localStorage.getItem('cauto.vcolor.' + id) || '#f97316';
-    const SWATCHES = ['#f97316','#ef4444','#e11d48','#a855f7','#2563eb','#0ea5e9','#10b981','#84cc16','#eab308','#f59e0b','#64748b','#334155','#111827','#f8fafc','#dc2626','#7c2d12'];
-
-    // Anneaux d'état : domaine → libellé système (batterie, freins, etc.)
-    const sysMap = { 'Entretien': { label: 'Moteur & huile', icon: 'settings' }, 'Freinage': { label: 'Freins', icon: 'octagon-alert' }, 'Batterie': { label: 'Batterie', icon: 'battery' }, 'Suspension': { label: 'Suspension', icon: 'move-vertical' }, 'Historique': { label: 'Historique', icon: 'history' } };
-    const sysCells = (hs && hs.subscores && hs.subscores.length)
-      ? hs.subscores.map(s => {
-          const m = sysMap[s.domain] || { label: s.domain, icon: 'activity' };
-          return `<div class="tt-sys-cell">${ttRing(s.score, m.label, null, 74)}<span class="hint" style="display:block;font-size:.68rem;margin-top:.3rem;color:var(--tt-ink-3)">${s.score === null ? 'Données insuffisantes' : (s.score>=80?'Excellent':s.score>=45?'À surveiller':'À corriger')}</span></div>`;
-        }).join('')
-      : `<div class="tt-sys-cell">${ttRing(null, 'État', null, 74)}</div>`;
-
-    // Calendrier d'entretien : positions des opérations non-OK.
-    const calOps = (maint.all || []).filter(i => i.status !== 'OK');
-    const cal = Array.from({ length: 7 }, (_, i) => {
-      const op = calOps[i];
-      if (!op) return `<span class="tt-cal-dot d-none" title="Libre"></span>`;
-      const cls = op.status === 'OVERDUE' ? 'd-over' : 'd-soon';
-      return `<span class="tt-cal-dot ${cls}" title="${esc(op.label)} — ${op.status === 'OVERDUE' ? 'échéance dépassée' : 'bientôt'}"></span>`;
-    }).join('');
-
-    const alertItems = (maint.alerts || []).map(a => `
-      <div class="tt-rem st-${a.status === 'OVERDUE' ? 'overdue' : 'soon'}">
-        <div class="tt-rem-ic">${I(a.status === 'OVERDUE' ? 'alert-circle' : 'clock')}</div>
-        <div class="tt-rem-body"><b>${esc(a.label)}</b><span>${a.km_left !== undefined ? `${a.km_left} km · ${a.days_left} jours` : ''}</span></div>
-        <div class="tt-rem-right"><span class="tt-rem-badge b-${a.status === 'OVERDUE' ? 'overdue' : 'soon'}">${a.status === 'OVERDUE' ? 'EN RETARD' : 'BIENTÔT'}</span></div>
-      </div>`).join('');
-
-    const evts = (hist.history || []).slice(0, 5).map(h => `
-      <div style="padding:.55rem 0;border-bottom:1px dashed var(--tt-border);display:flex;gap:.6rem;align-items:center">
-        <span class="tt-doc-ic" style="width:34px;height:34px;font-size:.95rem">${I('file-text')}</span>
-        <div style="flex:1;min-width:0"><b style="font-size:.85rem;color:var(--tt-ink);display:block">${esc(h.title)}</b><span style="font-size:.72rem;color:var(--tt-ink-3)">${new Date(h.created_at).toLocaleDateString('fr')} · ${esc(h.author_name||'')}</span></div>
-      </div>`).join('');
-
-    layoutApp(`
-    <div class="tt-page">
-      <a href="#/vehicles" class="tt-link" style="display:inline-flex;align-items:center;gap:.3rem;margin-bottom:.9rem">${I('arrow-left')} Retour aux véhicules</a>
-      <div class="tt-top" style="margin-bottom:1.2rem">
+    const subRows = hs && hs.subscores
+      ? hs.subscores.map(s => s.score === null
+          ? { domain: s.domain, score: null, state: 'INSUFFICIENT_DATA', basis: ['Données insuffisantes'] }
+          : s).filter(() => true).map(s => `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid var(--border)">
+              <span><b>${esc(s.domain)}</b>${s.basis && s.basis[0] ? `<span class="hint" style="display:block;font-size:0.78rem;font-weight:400">${esc(s.basis[0])}</span>` : ''}</span>
+              <b class="${s.score === null ? '' : (s.score>=80?'score-high':s.score>=50?'score-mid':'score-low')}" style="${s.score === null ? 'color:var(--muted)' : ''}">${s.score === null ? esc(s.basis && s.basis[0] || 'Données insuffisantes') : s.score+'/100'}</b>
+            </div>`).join('')
+      : '';
+    const healthBlock = hsOk ? `
+      <div style="display:flex;gap:1.5rem;flex-wrap:wrap;align-items:center">
+        ${scoreRing(hs.score)}
+        <div style="flex:1;min-width:260px">
+          <h2 style="margin-bottom:0.3rem">Score de santé: ${hs.score}/100</h2>
+          <p class="hint" style="margin:0 0 0.4rem">${esc(hs.global_basis.join(' · ') || 'Évalué à partir des données disponibles')}</p>
+          ${subRows}
+        </div>
+      </div>` : `
+      <div style="display:flex;gap:1.5rem;flex-wrap:wrap;align-items:center">
+        <div class="score-ring score-low">—</div>
         <div>
-          <h1>${esc(v.make)} ${esc(v.model)}</h1>
-          <div class="tt-date">${esc(v.plate)} · ${v.year} · depuis ${new Date(v.created_at || Date.now()).toLocaleDateString('fr')}</div>
+          <h2 style="margin-bottom:0.3rem">Score de santé</h2>
+          <p class="hint">Données insuffisantes pour calculer un score.</p>
         </div>
-        <div class="tt-actions">
-          <a href="#/vehicles/${id}/passport" class="tt-btn ghost sm">${I('file-text')} Passeport</a>
-          <a href="#/vehicles/${id}/history" class="tt-btn ghost sm">${I('clock')} Carnet</a>
-          <a href="#/vehicles/${id}/edit" class="tt-btn ghost sm">${I('edit')} Modifier</a>
-        </div>
-      </div>
-
-      <div class="tt-detail-top">
-        <div class="tt-card" style="border:none;box-shadow:none;background:linear-gradient(150deg,#fffdf7,#f4e7cf);padding:.6rem 1.2rem 1rem;">
-          <div class="tt-veh-illus" style="background:transparent;border:none;padding:.4rem 0 0">
-            <div style="text-align:center">${ttVehIllust(curColor)}</div>
-            <div class="tt-card-h" style="margin:.9rem 0 .5rem"><span class="tt-card-t">${I('palette')} Couleur du véhicule</span></div>
-            <div class="tt-color-select" id="tt-swatches">
-              ${SWATCHES.map(c => `<button type="button" class="tt-swatch ${c === curColor ? 'active' : ''}" data-color="${c}" style="background:${c}" aria-label="Choisir ${c}"></button>`).join('')}
-            </div>
-          </div>
-          <div class="tt-sys" style="margin-top:.4rem">
-            ${sysCells}
-          </div>
-        </div>
-        <div class="tt-card" style="display:flex;flex-direction:column;gap:.6rem">
-          <div class="tt-card-h"><span class="tt-card-t">${I('heart-pulse')} Score de santé</span></div>
-          <div style="display:flex;align-items:center;gap:1.1rem;flex-wrap:wrap">
-            ${ttRing(score, '', null, 96)}
-            <div style="flex:1;min-width:150px;font-size:.85rem;color:var(--tt-ink-2)">
-              ${hsOk && hs.global_basis ? hs.global_basis.map(g => `<div style="display:flex;justify-content:space-between;padding:.22rem 0"><span>${esc(g.split(' : ')[0])}</span><b>${esc(g.split(' : ')[1])}</b></div>`).join('') : '<p class="hint">Données insuffisantes pour calculer un score complet.</p>'}
-            </div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.3rem">
-            <div class="tt-mini"><b>${Number(v.mileage).toLocaleString('fr')} km</b><span>Kilométrage actuel</span></div>
-            <div class="tt-mini"><b>${v.engine_name ? esc(v.engine_name) : '—'}</b><span>${FUEL_LABELS[v.fuel_type]||v.fuel_type || 'Moteur'}</span></div>
-          </div>
-          <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:auto">
-            <a href="#/diagnostic" class="tt-btn sm">${I('stethoscope')} Lancer un diagnostic</a>
-            <a href="#/service-requests/new" class="tt-btn sm ghost">${I('wrench')} Demander une intervention</a>
-            <a href="#/appointments" class="tt-btn sm ghost">${I('calendar-plus')} Rendez-vous</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="tt-lower" style="margin-bottom:1.2rem">
-        <div class="tt-card">
-          <div class="tt-card-h"><span class="tt-card-t">${I('calendar-range')} Entretien à venir</span><a class="tt-link" href="#/maintenance/${id}">Programme complet →</a></div>
-          <div class="tt-cal">${cal}</div>
-          <div style="display:flex;gap:1rem;margin-top:.6rem;font-size:.72rem;color:var(--tt-ink-3)">
-            <span><span class="tt-cal-dot d-over" style="vertical-align:middle"></span> En retard</span>
-            <span><span class="tt-cal-dot d-soon" style="vertical-align:middle"></span> Bientôt</span>
-            <span><span class="tt-cal-dot d-none" style="vertical-align:middle"></span> Libre</span>
-          </div>
-          ${alertItems || '<div class="tt-empty">' + I('calendar-check') + 'Aucune alerte en cours</div>'}
-        </div>
-        <div class="tt-card">
-          <div class="tt-card-h"><span class="tt-card-t">${I('book-open')} Derniers événements</span><a class="tt-link" href="#/vehicles/${id}/history">Carnet →</a></div>
-          ${evts || '<div class="tt-empty">' + I('file-text') + 'Aucun événement</div>'}
-        </div>
-      </div>
-
-      <div class="tt-card">
-        <div class="tt-card-h" style="margin-bottom:.5rem"><span class="tt-card-t">${I('info')} Fiche technique</span></div>
-        <div class="detail-grid">
-          <div class="card"><div class="detail-label">Immatriculation</div><div class="detail-value">${esc(v.plate)}</div></div>
-          <div class="card"><div class="detail-label">VIN</div><div class="detail-value">${esc(v.vin)}</div></div>
-          <div class="card"><div class="detail-label">Année</div><div class="detail-value">${v.year}</div></div>
-          <div class="card"><div class="detail-label">Kilométrage</div><div class="detail-value">${Number(v.mileage).toLocaleString('fr')} km</div></div>
-          ${v.engine_name ? `<div class="card"><div class="detail-label">Moteur</div><div class="detail-value">${esc(v.engine_name)}</div></div>` : ''}
-          ${v.fuel_type ? `<div class="card"><div class="detail-label">Carburant</div><div class="detail-value">${FUEL_LABELS[v.fuel_type]||v.fuel_type}</div></div>` : ''}
-          ${v.gearbox ? `<div class="card"><div class="detail-label">Boîte</div><div class="detail-value">${GEAR_LABELS[v.gearbox]||v.gearbox}</div></div>` : ''}
-          ${v.transmission ? `<div class="card"><div class="detail-label">Transmission</div><div class="detail-value">${TRANS_LABELS[v.transmission]||v.transmission}</div></div>` : ''}
-        </div>
+      </div>`;
+    layoutApp(`
+    <a href="#/vehicles" class="hint" style="display:inline-flex;align-items:center;gap:0.3rem;margin-bottom:0.5rem">${I('arrow-left')} Retour aux véhicules</a>
+    <div class="page-top"><h1>${I('car')} ${esc(v.make)} ${esc(v.model)}</h1>
+      <div style="display:flex;gap:0.5rem">
+        <a href="#/vehicles/${id}/passport" class="btn btn-ghost">${I('file-text')} Passeport</a>
+        <a href="#/vehicles/${id}/history" class="btn btn-ghost">${I('clock')} Carnet</a>
+        <a href="#/vehicles/${id}/edit" class="btn btn-ghost">${I('edit')} Modifier</a>
       </div>
     </div>
+    <div class="card" style="margin-bottom:1rem">
+      ${healthBlock}
+    </div>
+    <div class="detail-grid">
+      <div class="card"><div class="detail-label">Immatriculation</div><div class="detail-value">${esc(v.plate)}</div></div>
+      <div class="card"><div class="detail-label">VIN</div><div class="detail-value">${esc(v.vin)}</div></div>
+      <div class="card"><div class="detail-label">Année</div><div class="detail-value">${v.year}</div></div>
+      <div class="card"><div class="detail-label">Kilométrage</div><div class="detail-value">${Number(v.mileage).toLocaleString('fr')} km</div></div>
+      ${v.engine_name ? `<div class="card"><div class="detail-label">Moteur</div><div class="detail-value">${esc(v.engine_name)}</div></div>` : ''}
+      ${v.fuel_type ? `<div class="card"><div class="detail-label">Carburant</div><div class="detail-value">${FUEL_LABELS[v.fuel_type]||v.fuel_type}</div></div>` : ''}
+      ${v.gearbox ? `<div class="card"><div class="detail-label">Boîte</div><div class="detail-value">${GEAR_LABELS[v.gearbox]||v.gearbox}</div></div>` : ''}
+      ${v.transmission ? `<div class="card"><div class="detail-label">Transmission</div><div class="detail-value">${TRANS_LABELS[v.transmission]||v.transmission}</div></div>` : ''}
+    </div>
+    ${maint.alerts.length ? `<div class="card" style="margin-top:1rem"><div class="dash-card-title">${I('alert-triangle')} Alertes</div>${maint.alerts.map(a => `<div class="alert ${a.status==='OVERDUE'?'alert-ko':'alert-warn'}">${I('alert-circle')} <b>${esc(a.label)}</b> — ${a.status==='OVERDUE'?'ÉCHUE':'prochaine'}</div>`).join('')}</div>` : ''}
+    <div class="card" style="margin-top:1rem"><div class="dash-card-title">${I('book-open')} Derniers événements</div>
+      ${hist.history.slice(0,5).map(h => `<div style="padding:0.4rem 0;border-bottom:1px solid var(--border)"><b>${esc(h.title)}</b><br><span class="hint">${new Date(h.created_at).toLocaleDateString('fr')} · ${esc(h.author_name||'')}</span></div>`).join('') || '<p class="hint">Aucun événement</p>'}
+    </div>
     `);
-    const swatches = document.getElementById('tt-swatches');
-    if (swatches) swatches.onclick = (ev) => {
-      const b = ev.target.closest('.tt-swatch');
-      if (!b) return;
-      localStorage.setItem('cauto.vcolor.' + id, b.dataset.color);
-      swatches.querySelectorAll('.tt-swatch').forEach(s => s.classList.toggle('active', s === b));
-      const img = swatches.closest('.tt-veh-illus');
-      if (img) { const svg = img.querySelector('svg'); if (svg) svg.querySelectorAll('rect[fill],path[fill]').forEach(el => { if (el.getAttribute('fill') !== '#fff' && el.getAttribute('fill') !== '#2b2620' && el.getAttribute('fill') !== '#8b8577') el.setAttribute('fill', b.dataset.color); }); }
-    };
   } catch(e) { layoutApp(err(e)); }
   hideLoading(); renderIcons();
 }
@@ -1694,59 +1434,18 @@ async function viewFaultCodeDetail(code) {
 /* ====== ENTRETIEN - VUE GLOBALE ====== */
 async function viewMaintenance() {
   showLoading();
-  ttBody(true);
   try {
-    const data = await api('/maintenance');
-    const vehicles = data.vehicles || [];
-    // Parallélise les détails (scored) de chaque véhicule pour agréger les échéances.
-    const details = await Promise.allSettled(vehicles.map(v =>
-      api(`/maintenance/vehicle/${v.id}`).then(d => ({ vehicle: v, data: d })).catch(() => ({ vehicle: v, data: null }))
-    ));
-    const rows = details.map(x => x.status === 'fulfilled' ? x.value : { vehicle: x.value.vehicle, data: null }).filter(x => x);
-    const withData = rows.filter(r => r.data && r.data.score !== undefined);
-    const over = rows.reduce((n, r) => n + (r.data ? (r.data.alerts || []).filter(a => a.status === 'OVERDUE').length : 0), 0);
-    const soonAll = rows.reduce((n, r) => n + (r.data ? (r.data.alerts || []).filter(a => a.status !== 'OVERDUE').length : 0), 0);
+    const { vehicles } = await api('/maintenance');
     layoutApp(`
-    <div class="tt-page">
-      <div class="tt-top">
-        <div><h1>${I('wrench')} Entretien</h1><div class="tt-date">Alertes critiques, interventions en cours et prochaines échéances.</div></div>
-        <div class="tt-actions"><a href="#/vehicles/new" class="tt-btn ghost">${I('plus')} Ajouter un véhicule</a></div>
-      </div>
-
-      <div class="tt-kpis">
-        <div class="tt-kpi ${over.length ? 'acc-ko' : 'acc-ok'}"><div class="tt-kpi-ic">${I('octagon-alert')}</div><div><b>${over.length}</b><span>Alertes critiques</span></div></div>
-        <div class="tt-kpi acc-warn"><div class="tt-kpi-ic">${I('alert-triangle')}</div><div><b>${soonAll.length}</b><span>Entretiens à venir</span></div></div>
-        <div class="tt-kpi acc-teal"><div class="tt-kpi-ic">${I('calendar-check')}</div><div><b>${withData.length}/${vehicles.length}</b><span>Véhicules suivis</span></div></div>
-        <div class="tt-kpi"><div class="tt-kpi-ic">${I('activity')}</div><div><b>${withData.length ? Math.round(withData.reduce((a, r) => a + r.data.score, 0) / withData.length) : '—'}</b><span>Score moyen</span></div></div>
-      </div>
-
-      ${vehicles.length ? `
-      <div class="tt-card-h" style="margin:.3rem 0 .9rem"><span class="tt-card-t" style="font-size:1.05rem">${I('car')} Calendrier par véhicule</span></div>
-      <div class="tt-veh-grid">
-      ${rows.map(r => {
-        const veh = r.vehicle;
-        const d = r.data;
-        const nd = d && d.next_due;
-        const al = d ? (d.alerts || []) : [];
-        const worst = al.find(a => a.status === 'OVERDUE') || al[0];
-        const st = !d ? 'muted' : (worst && worst.status === 'OVERDUE' ? 'ko' : (al.length ? 'warn' : 'ok'));
-        const stLbl = !d ? 'Non évalué' : (st === 'ok' ? 'À jour' : st === 'warn' ? (worst ? 'Bientôt : ' + worst.label : 'À suivre') : 'En retard');
-        return `<a href="#/maintenance/${veh.id}" class="tt-veh b-${st}">
-          <div class="tt-veh-top"><span class="tt-veh-badge">${st==='ok'?I('check-circle'):st==='warn'?I('clock'):st==='ko'?I('octagon-alert'):I('help-circle')} ${esc(stLbl)}</span><span>${esc(veh.plate)}</span></div>
-          <div style="display:flex;align-items:center;gap:.9rem">
-            <div style="width:64px;flex-shrink:0">${ttRing(d ? d.score : null, '', null, 64)}</div>
-            <div style="flex:1;min-width:0">
-              <div class="tt-veh-name">${esc(veh.make)} ${esc(veh.model)}</div>
-              <div class="tt-veh-sub">${veh.year} · ${Number(veh.mileage).toLocaleString('fr')} km</div>
-              ${nd ? `<div class="tt-veh-sub" style="font-size:.74rem">${I('clock')} ${esc(nd.label)} — ${nd.km_left !== undefined ? nd.km_left + ' km ou ' + nd.days_left + ' j' : ''}</div>` : ''}
-            </div>
-          </div>
-          <div class="tt-veh-footer"><span class="tt-mini"><b>${I('calendar')} ${al.length} alertes</b><span>Voir le programme →</span></span></div>
-        </a>`;
-      }).join('')}
-      </div>
-      ` : `<div class="tt-card"><div class="tt-empty">${I('wrench')}Aucun véhicule.<p style="margin-top:.4rem;color:var(--tt-ink-3)">Ajoutez un véhicule pour gérer son entretien.</p><a href="#/vehicles/new" class="tt-btn" style="margin-top:.8rem">Ajouter un véhicule</a></div></div>`}
-    </div>
+    <div class="section-title" style="margin-bottom:1rem">${I('wrench')} Entretien</div>
+    ${vehicles.length ? `
+    <div class="grid-cards">${vehicles.map(v => `
+      <a href="#/maintenance/${v.id}" class="card veh-card-link">
+        <div class="veh-card-header"><div class="veh-card-icon">${I('car')}</div><span class="badge badge-muted">${v.year}</span></div>
+        <h3>${esc(v.make)} ${esc(v.model)}</h3>
+        <div class="veh-card-plate">${esc(v.plate)}</div>
+        <div class="veh-card-km">${Number(v.mileage).toLocaleString('fr')} km</div>
+      </a>`).join('')}</div>` : '<div class="empty-state">'+I('wrench')+'<h3>Aucun véhicule</h3><p>Ajoutez un véhicule pour gérer son entretien.</p></div>'}
     `);
   } catch(e) { layoutApp(err(e)); }
   hideLoading(); renderIcons();
@@ -1858,85 +1557,8 @@ async function viewVehicleMaintenance(id) {
   hideLoading(); renderIcons();
 }
 
-/* ====== COFFRE-FORT DOCUMENTS (TrueTrack) ====== */
-function ttSize(b) { if (!b) return '0 o'; if (b < 1024) return b + ' o'; if (b < 1048576) return (b / 1024).toFixed(1) + ' Ko'; return (b / 1048576).toFixed(1) + ' Mo'; }
-async function viewDocuments() {
-  showLoading();
-  ttBody(true);
-  try {
-    const { documents = [] } = await api('/documents').catch(() => ({ documents: [] }));
-    const ICONS = { PHOTO: 'image', VIDEO: 'video', AUDIO: 'audio-lines', PDF: 'file-text', INVOICE: 'receipt', REPORT: 'clipboard-list', VEHICLE: 'car', DOCUMENT: 'folder' };
-    const cats = [...new Set(documents.map(d => (d.category || 'DOCUMENT').toUpperCase()))];
-    const total = documents.reduce((a, d) => a + (d.size_bytes || 0), 0);
-    const used = Math.min(100, Math.round(total / (500 * 1048576) * 100));
-    const cards = documents.length
-      ? documents.map(d => {
-          const cat = (d.category || 'DOCUMENT').toUpperCase();
-          const ic = ICONS[cat] || 'folder';
-          return `<a class="tt-doc c-ok" href="#/documents" data-dl="${d.id}" data-name="${esc(d.original_name || d.name)}">
-            <div class="tt-doc-ic">${I(ic)}</div>
-            <div class="tt-doc-body">
-              <b>${esc(d.original_name || d.name)}</b>
-              <span>${ttSize(d.size_bytes)} · ${new Date(d.created_at).toLocaleDateString('fr')}</span>
-              <span style="text-transform:uppercase">${esc(cat)}</span>
-            </div>
-          </a>`;
-        }).join('')
-      : `<div class="tt-card"><div class="tt-empty">${I('folder-lock')}Aucun document. <p style="margin-top:.4rem;color:var(--tt-ink-3)">Les fichiers liés à vos devis, garanties et entretiens seront regroupés ici.</p></div></div>`;
-    layoutApp(`
-    <div class="tt-page">
-      <div class="tt-top">
-        <div><h1>${I('shield-check')} Coffre-fort numérique</h1><div class="tt-date">Tous vos fichiers centralisés — actifs, expirants, retrouvés.</div></div>
-        <div class="tt-actions"><a class="tt-btn" href="#" id="tt-upload">${I('upload')} Ajouter un fichier</a></div>
-      </div>
-
-      <div class="tt-docs-header">
-        <div class="tt-kpi acc-ok" style="flex:0 0 200px;margin:0"><div class="tt-kpi-ic">${I('files')}</div><div><b>${documents.length}</b><span>Fichiers</span></div></div>
-        <div class="tt-kpi acc-warn" style="flex:0 0 200px;margin:0"><div class="tt-kpi-ic">${I('folder-clock')}</div><div><b>${cats.length}</b><span>Catégories</span></div></div>
-        <div class="tt-storage">
-          <div style="display:flex;justify-content:space-between;font-size:.82rem;color:var(--tt-ink-2)"><span>${I('database')} Espace stockage</span><b>${ttSize(total)} / 500 Mo</b></div>
-          <div class="tt-storage-bar"><div style="width:${Math.max(2, used)}%"></div></div>
-        </div>
-      </div>
-
-      <div class="tt-card-h" style="margin:.3rem 0 .9rem"><span class="tt-card-t" style="font-size:1.05rem">${I('folder-open')} Documents</span></div>
-      <div class="tt-doc-grid" id="tt-doc-grid">${cards}</div>
-      <p class="hint" style="margin-top:1rem;font-size:.78rem">${I('info')} Cliquez sur un document pour le télécharger. Les documents expirants sont signalés par C-AUTO.</p>
-    </div>
-    `);
-    const up = document.getElementById('tt-upload');
-    if (up) up.onclick = (ev) => {
-      ev.preventDefault();
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.onchange = async () => {
-        const f = input.files[0];
-        if (!f) return;
-        const fd = new FormData();
-        fd.append('file', f);
-        fd.append('name', f.name);
-        fd.append('category', 'DOCUMENT');
-        try { await api('/documents', { method: 'POST', body: fd }); toast('Fichier ajouté', 'success'); viewDocuments(); }
-        catch (e) { toast(e.message || 'Échec du téléversement', 'error'); }
-      };
-      input.click();
-    };
-    const dlWrap = document.getElementById('tt-doc-grid');
-    if (dlWrap) dlWrap.onclick = (ev) => {
-      const t = ev.target.closest('[data-dl]');
-      if (!t) return;
-      ev.preventDefault();
-      const id = t.dataset.dl; const name = t.dataset.name;
-      fetch('/api/documents/' + id + '/download', { headers: { Authorization: 'Bearer ' + window.S.token } })
-        .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.blob(); })
-        .then(b => { const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = name || 'document'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(u); })
-        .catch(() => toast('Téléchargement impossible', 'error'));
-    };
-  } catch(e) { layoutApp(err(e)); }
-  hideLoading(); renderIcons();
-}
-
 function renderMaintItem(item) {
+  const statusMap = { OVERDUE: { cls: 'ko', icon: 'alert-circle', label: 'ÉCHUE' }, DUE_SOON: { cls: 'warn', icon: 'clock', label: 'Bientôt' }, OK: { cls: 'ok', icon: 'check-circle', label: 'OK' } };
   const st = statusMap[item.status] || statusMap.OK;
   return `<div class="extra ${item.status}">
     <div style="display:flex;justify-content:space-between;align-items:center">
@@ -2027,7 +1649,6 @@ const routes = [
   [/^#\/repairs$/, () => viewRepairs()],
   [/^#\/repairs\/([0-9a-f-]+)$/, (m) => viewRepairDetail(m[1])],
   [/^#\/warranties$/, () => viewWarranties()],
-  [/^#\/documents$/, () => viewDocuments()],
   [/^#\/warranties\/([0-9a-f-]+)$/, (m) => viewWarrantyDetail(m[1])],
   [/^#\/disputes$/, () => viewDisputes()],
   [/^#\/disputes\/new$/, () => viewDisputeNew()],
@@ -2100,7 +1721,6 @@ function route() {
   // qu'une vue asynchrone encore en cours ne réécrase la page d'authentification.
   if (S.user && (h === '#/login' || h === '#/register')) { location.hash = S.user.role === 'SUPPLIER' ? '#/supplier/dashboard' : (isPro() ? '#/pro/dashboard' : (isAdmin() ? '#/admin/dashboard' : '#/app')); return; }
   if (S.user && !isAdmin() && ADMIN_HASH.test(h)) { location.hash = '#/app'; return; }
-  ttBody(false);
   for (const [re,fn] of routes) { const m=h.match(re); if(m) { if(!S.user && !PUBLIC.some(p=>p.test(h))){location.hash='#/login';return;} fn(m); return; } }
   if(!S.user){viewLogin();return;}
   layoutApp(window.UX ? UX.notFound() : '<p>Page introuvable.</p>');
