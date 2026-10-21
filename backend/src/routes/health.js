@@ -52,8 +52,18 @@ router.get('/', async (_req, res) => {
   // Redis non configure = dependance optionnelle non activee : ce n'est pas
   // une degradation. Configure mais injoignable = degradation reelle.
   const redisOk = redis.status === 'ok' || redis.status === 'disabled';
-  const status = dbOk && redisOk ? 'ok' : 'degraded';
-  res.status(status === 'ok' ? 200 : 503).json({ status, database, redis, uptime: process.uptime(), version: pkgVersion });
+  // /health = LIVENESS : le process repond-il ? C'est ce chemin que la plateforme
+  // de deploiement interroge pour valider une instance. L'etat de la base est
+  //rapporte dans le corps de la reponse, mais il ne doit pas faire tuer un
+  // conteneur valide (sinon un incident base coupe l'acces au diagnostic).
+  // La stricte disponibilite metier est verifiee par /health/ready et
+  // /health/database.
+  res.json({
+    status: dbOk && redisOk ? 'ok' : 'degraded',
+    database, redis,
+    uptime: process.uptime(),
+    version: pkgVersion
+  });
 });
 
 router.get('/ready', async (_req, res) => {
