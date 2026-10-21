@@ -20,9 +20,15 @@ async function checkDb() {
 }
 
 async function checkRedis() {
+  // Redis est une dependance OPTIONNELLE : l'application degrade proprement
+  // (rate limiter en memoire, Socket.io en mono-instance) quand il n'est pas
+  // configure. Son absence ne doit donc pas faire echouer le health check
+  // (Render s'en sert pour valider les deploiements).
+  const url = String(process.env.REDIS_URL || '').trim();
+  if (!url) return { status: 'disabled' };
   try {
     const Redis = require('ioredis');
-    const redis = new Redis(process.env.REDIS_URL || 'redis://redis:6379', {
+    const redis = new Redis(url, {
       maxRetriesPerRequest: 1,
       connectTimeout: 1500,
       retryStrategy: () => null
@@ -43,7 +49,9 @@ router.get('/', async (_req, res) => {
   const database = await checkDb();
   const redis = await checkRedis();
   const dbOk = database.status === 'ok';
-  const redisOk = redis.status === 'ok';
+  // Redis non configure = dependance optionnelle non activee : ce n'est pas
+  // une degradation. Configure mais injoignable = degradation reelle.
+  const redisOk = redis.status === 'ok' || redis.status === 'disabled';
   const status = dbOk && redisOk ? 'ok' : 'degraded';
   res.status(status === 'ok' ? 200 : 503).json({ status, database, redis, uptime: process.uptime(), version: pkgVersion });
 });
@@ -52,7 +60,7 @@ router.get('/ready', async (_req, res) => {
   const database = await checkDb();
   const redis = await checkRedis();
   const dbOk = database.status === 'ok';
-  const redisOk = redis.status === 'ok';
+  const redisOk = redis.status === 'ok' || redis.status === 'disabled';
   const status = dbOk && redisOk ? 'ok' : 'degraded';
   res.status(status === 'ok' ? 200 : 503).json({
     status,
@@ -70,7 +78,8 @@ router.get('/database', async (_req, res) => {
 
 router.get('/redis', async (_req, res) => {
   const redis = await checkRedis();
-  res.status(redis.status === 'ok' ? 200 : 503).json({ status: redis.status === 'ok' ? 'ok' : 'degraded', redis });
+  const ok = redis.status === 'ok' || redis.status === 'disabled';
+  res.status(ok ? 200 : 503).json({ status: ok ? 'ok' : 'degraded', redis });
 });
 
 // Compat : ancien agrégat /api/health ({status, app, db, redis}) — contract inchangé.
@@ -81,14 +90,9 @@ legacy.get('/', async (_req, res) => {
     await db.query('SELECT 1');
     out.db = true;
   } catch { /* ignore */ }
-  try {
-    const Redis = require('ioredis');
-    const redis = new Redis(process.env.REDIS_URL || 'redis://redis:6379', {
-      maxRetriesPerRequest: 1, connectTimeout: 1500, retryStrategy: () => null
-    });
-    out.redis = (await redis.ping()) === 'PONG';
-    redis.disconnect();
-  } catch { /* ignore */ }
+  const redisInfo = await checkRedis();
+  // Redis non configure : dependance optionnelle, ce n'est pas une degradation.
+  out.redis = redisInfo.status === 'ok' || redisInfo.status === 'disabled';
   if (!out.db || !out.redis) return res.status(503).json({ ...out, status: 'degraded' });
   res.json(out);
 });
@@ -100,8 +104,9 @@ module.exports.checkRedis = checkRedis;
 module.exports.readyInfo = async () => {
   const database = await checkDb();
   const redis = await checkRedis();
+  const redisOk = redis.status === 'ok' || redis.status === 'disabled';
   return {
-    status: database.status === 'ok' && redis.status === 'ok' ? 'ok' : 'degraded',
+    status: database.status === 'ok' && redisOk ? 'ok' : 'degraded',
     database, redis,
     uptime: process.uptime(),
     version: pkgVersion
