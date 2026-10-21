@@ -5,16 +5,31 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Le contexte `secrets` n'est PAS autorisé dans une expression `if:` (ni au
+# niveau du job, ni au niveau d'une etape) : GitHub refuse alors tout le
+# fichier au chargement ("failed to parse workflow: Unrecognized named-value:
+# 'secrets'", 0 job cree, 0 log). Un secret n'est lisible que dans `env:`,
+# `with:` et les corps `run:`. On fait donc transiter la valeur par `env:` et
+# on la teste en bash.
 jobs:
   deploy:
     name: Trigger Render Deploy
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Render Deploy Hook
-        if: ${{ secrets.RENDER_DEPLOY_HOOK != '' }}
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
         run: |
+          if [ -z "$RENDER_DEPLOY_HOOK" ]; then
+            echo "RENDER_DEPLOY_HOOK absent : aucun deploiement a declencher."
+            echo "1. Render Dashboard > Web Service > Settings > Deploy Hook"
+            echo "2. Copier l'URL du Deploy Hook"
+            echo "3. GitHub Repo > Settings > Secrets and variables > Actions > New repository secret"
+            echo "4. Nom : RENDER_DEPLOY_HOOK - valeur : l'URL du Deploy Hook"
+            exit 0
+          fi
           echo "🚀 Triggering Render deploy..."
-          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}")
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$RENDER_DEPLOY_HOOK")
           echo "HTTP response: $HTTP_CODE"
           if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
             echo "✅ Deploy triggered successfully"
@@ -22,13 +37,3 @@ jobs:
             echo "⚠️ Deploy hook returned HTTP $HTTP_CODE - secret URL may be invalid/expired"
             echo "Go to Render Dashboard > Web Service > Settings > Deploy Hook to regenerate"
           fi
-      - name: Skip (no deploy hook configured)
-        if: ${{ secrets.RENDER_DEPLOY_HOOK == '' }}
-        run: |
-          echo "⚠️ RENDER_DEPLOY_HOOK secret not set."
-          echo "1. Go to Render Dashboard > Your Web Service > Settings > Deploy Hook"
-          echo "2. Copy the Deploy Hook URL"
-          echo "3. Go to GitHub Repo > Settings > Secrets and variables > Actions > New repository secret"
-          echo "4. Name: RENDER_DEPLOY_HOOK"
-          echo "5. Paste the URL as value"
-          echo "6. Next push will auto-deploy!"

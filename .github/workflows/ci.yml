@@ -215,18 +215,47 @@ jobs:
         run: docker compose build backend worker frontend
 
   # ---------------------------------------------------------------------------
-  # 6) Deploy — main branch uniquement ; bloqué tant que tests critiques ou
+  # 6) Prérequis du déploiement — `secrets` n'est PAS lisible dans une
+  #    expression `if:` (ni job, ni étape) : GitHub refuse alors tout le
+  #    fichier au chargement ("failed to parse workflow: Unrecognized
+  #    named-value: 'secrets'", 0 job cree, 0 log). On expose donc un drapeau
+  #    via `needs.<job>.outputs.*`, qui EST autorisé dans un `if:` de job.
+  # ---------------------------------------------------------------------------
+  check-deploy-secrets:
+    name: Secrets de déploiement disponibles ?
+    runs-on: ubuntu-latest
+    outputs:
+      has_ssh: ${{ steps.check.outputs.has_ssh }}
+    steps:
+      - id: check
+        name: Vérifie SSH_HOST / SSH_USER / SSH_PRIVATE_KEY
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -n "$SSH_HOST" ] && [ -n "$SSH_USER" ] && [ -n "$SSH_PRIVATE_KEY" ]; then
+            echo "has_ssh=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_ssh=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # ---------------------------------------------------------------------------
+  # 7) Deploy — main branch uniquement ; bloqué tant que tests critiques ou
   #    build ne sont pas passés (needs). Approbation : environment production.
+  #    Ignoré (sans échec) quand les secrets SSH ne sont pas configurés : la
+  #    CI reste verte sur une fork ou sans infrastructure de déploiement.
   # ---------------------------------------------------------------------------
   deploy:
     name: Deploy production (SSH)
     runs-on: ubuntu-latest
     environment: production
-    needs: [lint-typecheck, tests, build]
+    needs: [lint-typecheck, tests, build, check-deploy-secrets]
     if: |
+      needs.check-deploy-secrets.outputs.has_ssh == 'true' &&
       (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
-      github.ref == 'refs/heads/main' &&
-      secrets.SSH_HOST != ''
+      github.ref == 'refs/heads/main'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
