@@ -13,8 +13,14 @@
 databases:
   - name: cauto-db
     plan: free
-    databaseName: cauto
-    user: cauto
+    databaseName: cauto_ppaa
+    user: cauto_web
+    postgresMajorVersion: "17"
+    # WARNING : l'instance free expire 30 jours apres creation (2026-11-20 pour
+    # l'instance actuelle) puis base et donnees sont supprimees. Passer a un
+    # plan payant (`basic-256mb`) pour une production durable.
+    # L'hote interne de la base est l'IDENTIFIANT de l'instance
+    # (`dpg-xxxxxxxx-a`), pas son nom (`cauto-db`) : voir docs/deployment.md.
 
 services:
   # ----------------------- Backend + Frontend (un seul conteneur) ----------

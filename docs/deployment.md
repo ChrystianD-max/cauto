@@ -155,9 +155,19 @@ En CI/CD, le job `build` vérifie la construction sur `main` avant tout déploie
 - PostgreSQL **16** (base `cauto`, user `cauto`).
 - Recommandé : base managée (Neon, Supabase, RDS, Aiven) + Redis managé (Upstash, Render Redis, ElastiCache) — ou les services du compose sur le VPS.
 - Connexion : `DATABASE_URL=postgresql://cauto:CHANGE_ME@HOST:5432/cauto?sslmode=require` (TLS obligatoire pour une base managée).
-- **Production actuelle (déployée sur Render `cauto.onrender.com`)** : base **PostgreSQL managée sur Render** (`dpg-dbcb30jncjis738uj86g-a`, nom interne `cauto-db`, PG 17, région `oregon`, base `cauto_ppaa`, user `cauto_ppaa_user`) — `DATABASE_URL=postgresql://cauto_ppaa_user:<MDP>@cauto-db:5432/cauto_ppaa` (hôte interne du réseau privé Render, TLS non requis en interne). Le schéma complet s'applique au boot (migrations v1→v28 puis seeds).
+- **Production actuelle (déployée sur Render `cauto.onrender.com`)** : base **PostgreSQL managée sur Render** — instance `dpg-dbcb30jncjis738uj86g-a` (nom d'instance `cauto-db`, PG 17, région `oregon`, base `cauto_ppaa`, credential applicatif `cauto_web`).
+  - **Hôte interne = l'identifiant de l'instance**, pas son nom d'instance : `dpg-dbcb30jncjis738uj86g-a`. Le nom d'instance (`cauto-db`) **ne résout pas** sur le réseau privé (`getaddrinfo ENOTFOUND cauto-db`).
+  - `DATABASE_URL=postgresql://cauto_web:<MDP>@dpg-dbcb30jncjis738uj86g-a:5432/cauto_ppaa` (réseau privé Render, TLS non requis en interne ; le port 5432 est implicite dans la chaîne interne).
+  - Hôte externe (pour un client hors Render, TLS obligatoire, et **uniquement si l'IP est dans l'allowlist**) : `dpg-dbcb30jncjis738uj86g-a.oregon-postgres.render.com` — le suffixe de région est `oregon-postgres`, pas `oregon`.
+  - Le schéma complet s'applique au boot (migrations v1→v28 puis seeds) ; le résultat est exposé dans `/api/ops/info` (champ `migration.status` / `migration.detail`, protégé par `METRICS_TOKEN`).
   - ⚠️ Instance **plan free** : elle **expire le 2026-11-20** et sera supprimée (base et données) à cette date. Passer à un plan payant (`basic-256mb` ou plus) pour une production durable ; le web service est lui aussi en plan free (mise en veille après inactivité).
   - L'ancien projet Supabase (`postgres.sopbrwnhyykeuibpvskx`, région `ca-central-1`) a été **supprimé** (NXDOMAIN sur l'hôte direct, `tenant/user not found` sur le pooler) : impossible de le réutiliser.
+  - ⚠️ Pièges de l'API Render rencontrés sur cette instance :
+    - `GET /v1/postgres/{id}/connection-info` est la source de vérité pour les chaînes de connexion (interne + externe) et le mot de passe du credential **par défaut** ;
+    - `POST /v1/postgres/{id}/credentials` **ignore le champ `password`** de la requête : le mot de passe est généré par Render et se récupère ensuite via `connection-info` ;
+    - changer le credential par défaut **fait pivoter le mot de passe** : le credential devient `default: true` et l'ancien mot de passe n'est plus valable ;
+    - `ipAllowList` vide = **aucun accès externe** (la connexion externe se ferme) : la seule voie d'accès est le réseau privé Render ;
+    - `PUT /v1/postgres/{id}` (allowlist) et `POST .../credentials/{u}/reset` ne sont pas exposed par l'API.
 - Le schéma se crée/applique par migration (étape 6) ; `db/init.sql` pose le socle au premier boot en local uniquement.
 
 ### 5. Environment variables
@@ -218,7 +228,8 @@ docker compose -f docker-compose.yml -f deploy/docker-compose.caddy.yml up -d
 
 - **Logs JSON structurés** sur stdout (`LOG_LEVEL`) → collectables par Docker json-file, Loki, Datadog…
 - **Métriques Prometheus** protégées : `/api/ops/metrics` (Bearer `METRICS_TOKEN`) ; **obligatoire** : sans token configuré l'endpoint est refusé (404) en production — jamais exposé nu. Namespace `cauto` (`METRICS_PREFIX`).
-- **Disponibilité réelle** : `/health/ready` (db + redis) et `/api/ops/info` (runtime, alertes, latences).
+- **Disponibilité réelle** : `/health/ready` (db + redis) et `/api/ops/info` (runtime, alertes, latences, état de la migration).
+- **Liveness vs readiness** : `/health` est le contrôle de **vivacité** (le process répond-il ?) — c'est le chemin utilisé par la plateforme de déploiement, il renvoie donc `200` même si la base est injoignable (l'état base/cache figure dans le corps de la réponse, `status: degraded`). Un incident base ne doit pas faire rejeter un déploiement valide ni couper l'accès au diagnostic. La disponibilité métier stricte est vérifiée par `/health/ready` et `/health/database` ; `/api/health` conserve sa sémantique stricte (503 si la base est down).
 - **Watchdog d'alerte** : après `ALERT_UNHEALTHY_THRESHOLD` sondes dégradées consécutives, `ALERT_WEBHOOK_URL` est notifié (et à la récupération) — idéal pour brancher Slack/Discord/PagerDuty.
 - **Sauvegardes** : planifier `deploy/backup.sh` (cron quotidien → rotation + stockage objet S3) et vérifier régulièrement `deploy/restore-test.sh` (restauration testée). Une sauvegarde sans restauration réussie n'est PAS une sauvegarde.
 
