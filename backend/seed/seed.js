@@ -36,6 +36,16 @@ const BCRYPT_ROUNDS = 12;
 const IS_PROD = process.env.NODE_ENV === 'production' || process.env.APP_ENV === 'production';
 const DEMO_PASSWORD_ENV = String(process.env.SEED_DEMO_PASSWORD || '').trim();
 const SEED_ADMIN_EMAIL = String(process.env.SEED_ADMIN_EMAIL || '').trim().toLowerCase();
+const SEED_SUPER_ADMIN_EMAIL = String(process.env.SEED_SUPER_ADMIN_EMAIL || '').trim().toLowerCase();
+// Comptes d'exploitation explicitement renseigne par l'exploitant : ils ne
+// suivent jamais la politique des comptes de demonstration (ni suspension,
+// ni mot de passe aleatoire).
+function isSeedOperator(email) {
+  const e = String(email || '').trim().toLowerCase();
+  if (!e) return false;
+  return (!!SEED_ADMIN_EMAIL && e === SEED_ADMIN_EMAIL)
+    || (!!SEED_SUPER_ADMIN_EMAIL && e === SEED_SUPER_ADMIN_EMAIL);
+}
 const DEMO_PASSWORD = IS_PROD
   ? (DEMO_PASSWORD_ENV || crypto.randomBytes(24).toString('hex'))
   : 'Test1234!';
@@ -62,7 +72,7 @@ async function q1(c, text, params) { const r = await c.query(text, params); retu
 async function upsertUser(c, name, email, phone, role) {
   // Le compte d'administration de production est protege de la politique
   // des comptes de demonstration (jamais suspendu, jamais mot de passe aleatoire).
-  const isSeedAdmin = !!SEED_ADMIN_EMAIL && email.toLowerCase() === SEED_ADMIN_EMAIL;
+  const isSeedAdmin = isSeedOperator(email);
   const status = isSeedAdmin ? 'ACTIVE' : DEMO_STATUS;
   let u = await q1(c, 'SELECT * FROM users WHERE email=$1', [email]);
   if (!u) {
@@ -86,10 +96,10 @@ async function upsertUser(c, name, email, phone, role) {
    defaut : soit l'exploitant fournit SEED_DEMO_PASSWORD, soit le mot de passe
    est aleatoire (inutilisable) et le compte est suspendu. */
 async function ensureDemoPassword(c, email) {
-  // Le compte d'administration de production (SEED_ADMIN_EMAIL) n'est jamais
-  // soumis a la politique des comptes de demonstration : il ne doit ni etre
-  // suspendu, ni recevoir un mot de passe aleatoire.
-  if (SEED_ADMIN_EMAIL && email.toLowerCase() === SEED_ADMIN_EMAIL) return;
+  // Les comptes d'exploitation (SEED_ADMIN_EMAIL / SEED_SUPER_ADMIN_EMAIL) ne
+  // sont jamais soumis a la politique des comptes de demonstration : ils ne
+  // doivent ni etre suspendus, ni recevoir un mot de passe aleatoire.
+  if (isSeedOperator(email)) return;
   const u = await q1(c, 'SELECT id,password_hash FROM users WHERE email=$1', [email]);
   if (!u) return;
   let match = false;

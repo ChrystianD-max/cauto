@@ -1,8 +1,6 @@
 // frontend/www/app/push-manager.js
 // Web Push Notifications — gestion abonnement + UI (VAPID public key requise côté backend)
 
-const VAPID_PUBLIC_KEY = 'BAvK9xJ5Q7vR2mN8pL3wE6yU1oI4aH7cD0eF9gG3hJ6kL2mN5oP8qR1sT4uV7wX0yZ3'; // REMPLACE par ta vraie clé publique VAPID
-
 function urlB64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -19,6 +17,24 @@ class PushManager {
     this.subscription = null;
     this.isSupported = 'serviceWorker' in navigator && 'PushManager' in window;
     this.permission = this.isSupported ? Notification.permission : 'denied';
+    this.vapidPublicKey = null;
+  }
+
+  // La cle publique VAPID est publiee par le backend (GET /api/push/vapid) :
+  // aucune cle n'est codee en dur dans le frontend.
+  async fetchVapidPublicKey() {
+    if (this.vapidPublicKey) return this.vapidPublicKey;
+    try {
+      const res = await fetch('/api/push/vapid', { headers: { Accept: 'application/json' } });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      if (!data || !data.publicKey) throw new Error('cle publique absente');
+      this.vapidPublicKey = data.publicKey;
+      return this.vapidPublicKey;
+    } catch (e) {
+      console.error('[push] Cle VAPID publique indisponible:', e);
+      return null;
+    }
   }
 
   async init() {
@@ -36,10 +52,12 @@ class PushManager {
   async subscribe() {
     if (!this.isSupported) return;
     try {
+      const vapidPublicKey = await this.fetchVapidPublicKey();
+      if (!vapidPublicKey) return;
       const reg = await navigator.serviceWorker.ready;
       this.subscription = await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlB64ToUint8Array(VAPID_PUBLIC_KEY)
+        applicationServerKey: urlB64ToUint8Array(vapidPublicKey)
       });
       await this.sendSubscriptionToServer(this.subscription);
       return this.subscription;
