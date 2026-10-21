@@ -115,6 +115,18 @@ services:
       ALERT_WEBHOOK_URL: ${ALERT_WEBHOOK_URL:-}
       ALERT_CHECK_INTERVAL_MS: ${ALERT_CHECK_INTERVAL_MS:-30000}
       ALERT_UNHEALTHY_THRESHOLD: ${ALERT_UNHEALTHY_THRESHOLD:-3}
+      # --- Comptes de seed (module 80 / 76) ---
+      # Aucun mot de passe par defaut : ces variables restent vides sauf si
+      # l'exploitant les renseigne dans .env (jamais versionne).
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-}
+      SEED_ADMIN_NAME: ${SEED_ADMIN_NAME:-}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
+      SEED_ADMIN_PHONE: ${SEED_ADMIN_PHONE:-}
+      SEED_SUPER_ADMIN_EMAIL: ${SEED_SUPER_ADMIN_EMAIL:-}
+      SEED_SUPER_ADMIN_NAME: ${SEED_SUPER_ADMIN_NAME:-}
+      SEED_SUPER_ADMIN_PASSWORD: ${SEED_SUPER_ADMIN_PASSWORD:-}
+      SEED_SUPER_ADMIN_PHONE: ${SEED_SUPER_ADMIN_PHONE:-}
+      SEED_DEMO_PASSWORD: ${SEED_DEMO_PASSWORD:-}
     volumes:
       - uploads:/data/uploads
     healthcheck:

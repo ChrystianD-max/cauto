@@ -134,16 +134,77 @@ async function seedEnvAdmin(c) {
   }
   const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
   const existing = await q1(c, 'SELECT id FROM users WHERE email=$1', [email]);
+  let userId;
   if (existing) {
-    await c.query('UPDATE users SET name=$1, phone=$2, role=$3, status=$4, password_hash=$5 WHERE id=$6',
+    const upd = await q1(c,
+      `UPDATE users SET name=$1, phone=$2, role=$3, status=$4, password_hash=$5 WHERE id=$6 RETURNING id`,
       [name, phone, 'ADMIN', 'ACTIVE', hash, existing.id]);
+    userId = upd.id;
   } else {
-    await c.query(
+    const ins = await q1(c,
       `INSERT INTO users (name,email,phone,password_hash,role,status)
-       VALUES ($1,$2,$3,$4,'ADMIN','ACTIVE')`,
+       VALUES ($1,$2,$3,$4,'ADMIN','ACTIVE') RETURNING id`,
       [name, email, phone, hash]);
+    userId = ins.id;
   }
+  // Le RBAC fin (user_roles + role_permissions) doit etre aligne sur le role,
+  // sans quoi le compte n'a aucune permission metier.
+  await c.query(
+    `INSERT INTO user_roles (user_id, role_id)
+     SELECT $1, r.id FROM roles r WHERE r.code='ADMIN'
+     ON CONFLICT DO NOTHING`,
+    [userId]
+  );
   console.log('+ compte admin de developpement cree/mis a jour : ' + email);
+  return { email, name };
+}
+
+/* ---------------------------------------------------------------------------
+   MODULE 76 - COMPTE SUPER_ADMIN (env uniquement).
+
+   Aucun SUPER_ADMIN n'est cree par defaut : la migration v11 duplique le
+   mot de passe de l'admin principal, ce qui n'est acceptable ni en local
+   partage ni en production. L'exploitant doit fournir explicitement
+   SEED_SUPER_ADMIN_EMAIL / SEED_SUPER_ADMIN_PASSWORD (>= 12 caracteres).
+   Sans ces variables, aucun compte n'est cree ni modifie.
+   ------------------------------------------------------------------------- */
+async function seedEnvSuperAdmin(c) {
+  const email = String(process.env.SEED_SUPER_ADMIN_EMAIL || '').trim().toLowerCase();
+  const password = String(process.env.SEED_SUPER_ADMIN_PASSWORD || '').trim();
+  if (!email || !password || password === 'CHANGE_ME') {
+    console.log('! SEED_SUPER_ADMIN_* non renseignes - aucun compte super admin cree.');
+    return null;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new Error('SEED_SUPER_ADMIN_EMAIL invalide : ' + email);
+  }
+  if (password.length < 12) {
+    throw new Error('SEED_SUPER_ADMIN_PASSWORD trop court (12 caracteres minimum).');
+  }
+  const name = String(process.env.SEED_SUPER_ADMIN_NAME || 'Super Admin').trim();
+  const phone = String(process.env.SEED_SUPER_ADMIN_PHONE || '+22997000000').trim();
+  const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+  const existing = await q1(c, 'SELECT id FROM users WHERE email=$1', [email]);
+  let userId;
+  if (existing) {
+    const upd = await q1(c,
+      `UPDATE users SET name=$1, phone=$2, role=$3, status=$4, password_hash=$5 WHERE id=$6 RETURNING id`,
+      [name, phone, 'SUPER_ADMIN', 'ACTIVE', hash, existing.id]);
+    userId = upd.id;
+  } else {
+    const ins = await q1(c,
+      `INSERT INTO users (name,email,phone,password_hash,role,status)
+       VALUES ($1,$2,$3,$4,'SUPER_ADMIN','ACTIVE') RETURNING id`,
+      [name, email, phone, hash]);
+    userId = ins.id;
+  }
+  await c.query(
+    `INSERT INTO user_roles (user_id, role_id)
+     SELECT $1, r.id FROM roles r WHERE r.code='SUPER_ADMIN'
+     ON CONFLICT DO NOTHING`,
+    [userId]
+  );
+  console.log('+ compte super admin cree/mis a jour : ' + email);
   return { email, name };
 }
 
@@ -1015,6 +1076,9 @@ async function main() {
     /* === ÉTAPE 12 : admin de développement (module 80, env uniquement) === */
     const devAdmin = await seedEnvAdmin(c);
 
+    /* === ÉTAPE 13 : super admin (module 76, env uniquement) === */
+    const envSuperAdmin = await seedEnvSuperAdmin(c);
+
     /* === RÉSUMÉ === */
     const counts = {
       users: 8,
@@ -1039,6 +1103,7 @@ async function main() {
       password_demo: IS_PROD ? null : DEMO_PASSWORD,
       demo_accounts_status: IS_PROD ? DEMO_STATUS : 'ACTIVE',
       dev_admin: devAdmin ? { email: devAdmin.email, name: devAdmin.name } : null,
+      super_admin: envSuperAdmin ? { email: envSuperAdmin.email, name: envSuperAdmin.name } : null,
       demo_accounts: {
         admin: 'admin.demo@cauto.local',
         client: 'client.demo@cauto.local',
