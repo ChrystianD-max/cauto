@@ -155,7 +155,9 @@ En CI/CD, le job `build` vérifie la construction sur `main` avant tout déploie
 - PostgreSQL **16** (base `cauto`, user `cauto`).
 - Recommandé : base managée (Neon, Supabase, RDS, Aiven) + Redis managé (Upstash, Render Redis, ElastiCache) — ou les services du compose sur le VPS.
 - Connexion : `DATABASE_URL=postgresql://cauto:CHANGE_ME@HOST:5432/cauto?sslmode=require` (TLS obligatoire pour une base managée).
-- **Production actuelle (déployée sur Render `cauto.onrender.com`)** : base **Supabase** (PostgreSQL 17, région `ca-central-1`) connectée via le *transaction pooler* PyPgBouncer — `DATABASE_URL=postgresql://postgres.<ref>:<MDP>@aws-0-ca-central-1.pooler.supabase.com:6543/postgres`. Le schéma complet (migrations + seeds) s'est appliqué au boot ; l'ancien Postgres Render free (`dpg-dacmgoifngtc73e0n9ng-a`, disque saturé) est abandonné.
+- **Production actuelle (déployée sur Render `cauto.onrender.com`)** : base **PostgreSQL managée sur Render** (`dpg-dbcb30jncjis738uj86g-a`, nom interne `cauto-db`, PG 17, région `oregon`, base `cauto_ppaa`, user `cauto_ppaa_user`) — `DATABASE_URL=postgresql://cauto_ppaa_user:<MDP>@cauto-db:5432/cauto_ppaa` (hôte interne du réseau privé Render, TLS non requis en interne). Le schéma complet s'applique au boot (migrations v1→v28 puis seeds).
+  - ⚠️ Instance **plan free** : elle **expire le 2026-11-20** et sera supprimée (base et données) à cette date. Passer à un plan payant (`basic-256mb` ou plus) pour une production durable ; le web service est lui aussi en plan free (mise en veille après inactivité).
+  - L'ancien projet Supabase (`postgres.sopbrwnhyykeuibpvskx`, région `ca-central-1`) a été **supprimé** (NXDOMAIN sur l'hôte direct, `tenant/user not found` sur le pooler) : impossible de le réutiliser.
 - Le schéma se crée/applique par migration (étape 6) ; `db/init.sql` pose le socle au premier boot en local uniquement.
 
 ### 5. Environment variables
