@@ -73,7 +73,7 @@ git -C $base push origin main 2>&1 | Out-Null
 
 '=== DEPLOY RENDER (services.svc) ==='
 $svc='srv-dacmhkafngtc73e0ptsg'
-$token='rnd_SamnOaQAblnWevO0dJF3nmDGnAhe'
+$token = if ($env:RENDER_API_TOKEN) { $env:RENDER_API_TOKEN } else { '' }  # token via env uniquement
 $hdr=@{ Authorization=('Bearer '+$token) }
 $commit2=(git -C $base rev-parse HEAD).Trim()
 $body=@{ commit=$commit2 } | ConvertTo-Json -Compress

@@ -15,10 +15,17 @@ class PresenceClient {
     this.listeners = new Map(); this.currentModule = null;
     this.cursors = new Map(); this.onlineUsers = new Map(); this.typingUsers = new Map();
   }
+  // Le serveur verifie ce jeton et en deduit l'identite : sans lui, la
+  // connexion temps reel est refusee. L'identite client n'est plus acceptee.
+  socketAuth() {
+    let token = '';
+    try { token = localStorage.getItem('token') || ''; } catch (_) { token = ''; }
+    return { token, userId: this.userId, userName: this.userName, userRole: this.userRole, route: location.hash };
+  }
   connect() {
     if (this.disabled || !io) return;
     this.presenceSocket = io(PRESENCE_URL, {
-      auth: { userId: this.userId, userName: this.userName, userRole: this.userRole, route: location.hash }
+      auth: this.socketAuth()
     });
 
     this.presenceSocket.on('connect', () => {
@@ -89,7 +96,7 @@ class PresenceClient {
 
     this.collabSocket = io(COLLAB_URL, {
       query: { moduleId },
-      auth: { userId: this.userId, userName: this.userName }
+      auth: this.socketAuth()
     });
 
     this.collabSocket.on('connect', () => {

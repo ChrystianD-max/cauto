@@ -104,6 +104,17 @@ app.use((err, req, res, _next) => {
   }
   const status = err.status || err.statusCode;
   if (status && status < 500) return res.status(status).json(errorBody(status, safeMessage(err), err.code || 'REQUEST_ERROR'));
+  // Violations d'integrite PostgreSQL traduites en reponses HTTP explicites :
+  // une contrainte d'unicite violee est un conflit (409), pas une panne (500).
+  if (err.code === '23505') {
+    return res.status(409).json(errorBody(409, 'Ressource deja existante', 'CONFLICT'));
+  }
+  if (err.code === '23503') {
+    return res.status(409).json(errorBody(409, 'Reference invalide : ressource liee inexistante', 'CONSTRAINT_VIOLATION'));
+  }
+  if (err.code === '23514' || err.code === '22P02') {
+    return res.status(400).json(errorBody(400, 'Donnees invalides', 'CONSTRAINT_VIOLATION'));
+  }
   const reqLog = req.log || logger;
   metrics.counter('errors_total', 'Erreurs 5xx').inc({}, 1);
   reqLog.error({ msg: 'unhandled_error', err: String(err && err.stack || err) });

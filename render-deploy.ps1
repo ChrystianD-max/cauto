@@ -1,8 +1,27 @@
 $ErrorActionPreference='Stop'
 
-$token = 'rnd_SamnOaQAblnWevO0dJF3nmDGnAhe'
-$svc   = 'srv-dacmhkafngtc73e0ptsg'
-$git   = 'C:\Users\utilisateur\Documents\Default Project'
+# C-AUTO - deploiement Render.
+# Le token API n'est JAMAIS stocke dans le depot : il est lu depuis
+# l'environnement (variable RENDER_API_TOKEN) ou depuis un fichier local
+# non versionne (render-token.local.txt). Aucune cle en dur ici.
+
+$svc = 'srv-dacmhkafngtc73e0ptsg'
+$git = Split-Path -Parent $MyInvocation.MyCommand.Path
+
+$token = $env:RENDER_API_TOKEN
+if (-not $token) {
+  $local = Join-Path $git 'render-token.local.txt'
+  if (Test-Path -LiteralPath $local) {
+    $token = (Get-Content -LiteralPath $local -Raw).Trim()
+  }
+}
+if (-not $token) {
+  'ERREUR : token Render introuvable.'
+  'Definissez la variable d''environnement RENDER_API_TOKEN,'
+  'ou creez un fichier (non versionne) render-token.local.txt contenant le token.'
+  'Token : Render Dashboard > Account Settings > API Keys.'
+  exit 1
+}
 
 $headers = @{ Authorization = ('Bearer ' + $token) }
 
@@ -36,7 +55,7 @@ if ($status -eq 'live') {
   '=== verif serveur ==='
   foreach ($u in @('https://cauto.onrender.com/api/health')) {
     try {
-      $resp = Invoke-WebRequest -Uri $u -UseBasicParsing -TimeoutSec 30
+      $resp = Invoke-WebRequest -Uri $u -UseBasicParsing -TimeoutSec 60
       ('{0}  HTTP {1}  {2} B' -f $u, $resp.StatusCode, $resp.Content.Length)
       '  -> ' + $resp.Content
     } catch { '  ERREUR ' + $u + ' : ' + $_.Exception.Message }

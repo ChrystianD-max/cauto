@@ -4,12 +4,44 @@
 const { Server } = require('socket.io');
 const { createAdapter } = require('@socket.io/redis-adapter');
 const { createClient } = require('redis');
+const jwt = require('jsonwebtoken');
 const Y = require('yjs');
 const { WebsocketProvider } = require('y-websocket');
+const config = require('../config');
+const db = require('../db');
 
 let io = null;
 let pubClient = null;
 let subClient = null;
+
+// --- Authentification des sockets -------------------------------------------
+// L'identite (id, nom, role) provient EXCLUSIVEMENT du JWT verifie et de la
+// base : les valeurs envoyees par le client (handshake.auth.userId / userName
+// / userRole) sont ignorees, faute de quoi n'importe quel visiteur pouvait
+// se faire passer pour un autre utilisateur (usurpation d'identite).
+function socketAuth() {
+  return async (socket, next) => {
+    try {
+      const token = String(socket.handshake.auth?.token || '').replace(/^Bearer\s+/i, '').trim();
+      if (!token) return next(new Error('unauthorized'));
+      const payload = jwt.verify(token, config.jwtSecret);
+      const userId = payload.sub;
+      if (!userId) return next(new Error('unauthorized'));
+      const user = await db
+        .one('SELECT id,name,role,status FROM users WHERE id=$1', [userId])
+        .catch(() => null);
+      if (!user || user.status === 'SUSPENDED') return next(new Error('unauthorized'));
+      socket.data.user = { id: user.id, name: user.name, role: user.role };
+      next();
+    } catch {
+      next(new Error('unauthorized'));
+    }
+  };
+}
+
+// Identifiant de module : jeu de caracteres restreint (evite l'injection de
+// cle Redis `collab:doc:<moduleId>` et la collision entre modules).
+const MODULE_ID_RE = /^[A-Za-z0-9_-]{1,64}$/;
 
 function initPresenceServer(httpServer) {
   // Redis clients for scaling
@@ -21,7 +53,7 @@ function initPresenceServer(httpServer) {
 
   // Socket.io server
   io = new Server(httpServer, {
-    cors: { origin: process.env.CORS_ORIGINS?.split(',') || '*', methods: ['GET', 'POST'] },
+    cors: { origin: config.allowedOrigins, methods: ['GET', 'POST'] },
     adapter: createAdapter(pubClient, subClient)
   });
 
@@ -29,11 +61,14 @@ function initPresenceServer(httpServer) {
   const presenceNs = io.of('/presence');
   const collabNs = io.of('/collab');
 
+  presenceNs.use(socketAuth());
+  collabNs.use(socketAuth());
+
   // ===== PRESENCE (who's online, where) =====
   presenceNs.on('connection', (socket) => {
-    const userId = socket.handshake.auth?.userId;
-    const userName = socket.handshake.auth?.userName || 'Anonyme';
-    const userRole = socket.handshake.auth?.userRole || 'user';
+    const userId = socket.data.user.id;
+    const userName = socket.data.user.name;
+    const userRole = socket.data.user.role;
     
     if (!userId) return socket.disconnect();
 
@@ -46,7 +81,7 @@ function initPresenceServer(httpServer) {
       userId,
       userName,
       userRole,
-      currentRoute: socket.handshake.auth?.route || '/',
+      currentRoute: String(socket.handshake.auth?.route || '/').slice(0, 120),
       lastSeen: Date.now(),
       status: 'online'
     };
@@ -60,10 +95,10 @@ function initPresenceServer(httpServer) {
 
     // Update route
     socket.on('route:change', (route) => {
-      presenceData.currentRoute = route;
+      presenceData.currentRoute = String(route || '/').slice(0, 120);
       presenceData.lastSeen = Date.now();
       pubClient.hSet('presence:users', userId, JSON.stringify(presenceData));
-      presenceNs.to('presence:global').emit('user:route', { userId, route });
+      presenceNs.to('presence:global').emit('user:route', { userId, route: presenceData.currentRoute });
     });
 
     // Heartbeat
@@ -74,26 +109,32 @@ function initPresenceServer(httpServer) {
 
     // Typing indicator
     socket.on('typing:start', (data) => {
+      if (!MODULE_ID_RE.test(String(data?.moduleId || ''))) return;
       socket.to(`module:${data.moduleId}`).emit('user:typing', { userId, userName, moduleId: data.moduleId });
     });
     socket.on('typing:stop', (data) => {
+      if (!MODULE_ID_RE.test(String(data?.moduleId || ''))) return;
       socket.to(`module:${data.moduleId}`).emit('user:typing:stop', { userId, moduleId: data.moduleId });
     });
 
     // Join module room for cursors/presence
     socket.on('module:join', (moduleId) => {
+      if (!MODULE_ID_RE.test(String(moduleId || ''))) return;
       socket.join(`module:${moduleId}`);
       socket.to(`module:${moduleId}`).emit('user:joined:module', { userId, userName, moduleId });
     });
     socket.on('module:leave', (moduleId) => {
+      if (!MODULE_ID_RE.test(String(moduleId || ''))) return;
       socket.leave(`module:${moduleId}`);
       socket.to(`module:${moduleId}`).emit('user:left:module', { userId, moduleId });
     });
 
     // Cursor position
     socket.on('cursor:move', (data) => {
+      if (!MODULE_ID_RE.test(String(data?.moduleId || ''))) return;
       socket.to(`module:${data.moduleId}`).emit('cursor:move', {
-        userId, userName, x: data.x, y: data.y, selection: data.selection
+        userId, userName, x: Number(data.x) || 0, y: Number(data.y) || 0,
+        selection: typeof data.selection === 'string' ? data.selection.slice(0, 2000) : null
       });
     });
 
@@ -111,11 +152,11 @@ function initPresenceServer(httpServer) {
   const docs = new Map(); // moduleId -> Y.Doc
 
   collabNs.on('connection', (socket) => {
-    const moduleId = socket.handshake.query.moduleId;
-    const userId = socket.handshake.auth?.userId;
-    const userName = socket.handshake.auth?.userName || 'Anonyme';
+    const moduleId = String(socket.handshake.query.moduleId || '').trim();
+    const userId = socket.data.user.id;
+    const userName = socket.data.user.name;
 
-    if (!moduleId || !userId) return socket.disconnect();
+    if (!MODULE_ID_RE.test(moduleId) || !userId) return socket.disconnect();
 
     // Get or create Y.Doc for this module
     let doc = docs.get(moduleId);

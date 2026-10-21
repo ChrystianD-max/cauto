@@ -85,7 +85,7 @@ $commit=(git -C $base rev-parse HEAD).Trim()
 '  commit pousse : '+$commit
 
 $svc='srv-dacmhkafngtc73e0ptsg'
-$token='rnd_SamnOaQAblnWevO0dJF3nmDGnAhe'
+$token = if ($env:RENDER_API_TOKEN) { $env:RENDER_API_TOKEN } else { '' }  # token via env uniquement
 $headers=@{ Authorization='Bearer '+$token }
 try {
   $body=@{ commit=$commit } | ConvertTo-Json -Compress

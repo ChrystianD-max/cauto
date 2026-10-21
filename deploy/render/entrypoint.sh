@@ -33,6 +33,32 @@ server {
         proxy_pass http://127.0.0.1:4000;
         proxy_set_header Host \$host;
     }
+    # Temps reel (Socket.io : presence, curseurs, collaboration) : le chemin
+    # par defaut de Socket.io est /socket.io/ et doit etre proxifie avec la
+    # negociation WebSocket, sinon la connexion temps reel echoue silencieusement.
+    location /socket.io/ {
+        proxy_pass http://127.0.0.1:4000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_read_timeout 300s;
+        proxy_send_timeout 300s;
+    }
+
+    # Defense en profondeur : la racine statique ne doit exposer QUE des
+    # fichiers web. Scripts, journaux, dumps SQL, sauvegardes, cles, fichiers
+    # caches ou de configuration sont refuses (404) meme s'ils se retrouvaient
+    # dans l'artefact de build.
+    location ~* \.(ps1|sh|bash|bat|cmd|py|rb|pl|php|sql|log|bak|old|orig|tmp|swp|dump|env|ini|conf|cfg|yaml|yml|toml|lock|map|md)$ {
+        return 404;
+    }
+    location ~* (^|/)\. {
+        return 404;
+    }
 
     location /app/ {
         add_header Cache-Control "no-cache, must-revalidate";

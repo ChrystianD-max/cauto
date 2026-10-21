@@ -6,8 +6,12 @@
 //     (mot de passe ou OTP SUPER_CONFIRM).
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
+const crypto = require('crypto');
 const { api, login, register, uniqEmail, uniqPlate, PASS } = require('./helpers');
-const rand = () => Math.random().toString(36).slice(2, 8);
+// Alphabet large et non reproductible : Math.random().toString(36) ne
+// fournissait que ~1300 combinaisons et provoquait des collisions de cle
+// entre deux executions (devises deja creees -> erreur 500).
+const rand = () => crypto.randomBytes(5).toString('hex');
 
 const SA_EMAIL = 'superadmin@cauto.local';
 const SA_PASS = PASS; // même mot de passe que admin@cauto.local

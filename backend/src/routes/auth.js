@@ -22,7 +22,13 @@ const otpLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: Number(process.env
 // Recherche à coût constant : la valeur d'une liste de cibles est elle aussi divulguée,
 // mais on évite une énumération triviale par différence de timing.
 async function constantTarget(rows, code) {
-  return rows.some((r) => crypto.timingSafeEqual(Buffer.from(r.code_hash, 'hex'), Buffer.from(sha256(code), 'hex')));
+  const expected = Buffer.from(sha256(code), 'hex');
+  return rows.some((r) => {
+    const actual = Buffer.from(String(r.code_hash || ''), 'hex');
+    // timingSafeEqual exige deux tampons de meme longueur.
+    if (actual.length !== expected.length) return false;
+    return crypto.timingSafeEqual(actual, expected);
+  });
 }
 
 function sha256(v) {
@@ -130,12 +136,18 @@ router.post('/otp/request', otpLimiter, wrap(async (req, res) => {
     );
     const delivery = await deliverOtp(req, user, code, purpose || 'LOGIN');
     await audit(req, 'otp.request', 'user', user.id, { purpose });
-    res.json({ ok: true, medium: delivery.medium, ...(['debug', 'demo'].includes(delivery.medium) ? { debug_code: code } : {}) });
+    // Le code n'est JAMAIS renvoye en production : en mode demo/debug il est
+    // affiche au client pour le parcours de test, ce qui reviendrait a
+    // laisser n'importe qui prendre la main sur un compte (takeover).
+    const exposeCode = !config.isProduction && ['debug', 'demo'].includes(delivery.medium);
+    res.json({ ok: true, medium: delivery.medium, ...(exposeCode ? { debug_code: code } : {}) });
     return;
   }
-  // Anti-énumération : réponse uniforme même si l'email n'existe pas.
+  // Anti-énumération : réponse strictement identique à celle d'un email
+  // existant (meme statut, meme medium, meme forme) — sinon la presence
+  // d'un compte est devoilée.
   await audit(req, 'otp.request', 'email', sha256(email.toLowerCase()).slice(0, 16), { purpose });
-  res.json({ ok: true, medium: 'debug', note: 'email inconnu' });
+  res.json({ ok: true, medium: 'debug' });
 }));
 
 router.post('/otp/verify', otpLimiter, wrap(async (req, res) => {
@@ -151,9 +163,16 @@ router.post('/otp/verify', otpLimiter, wrap(async (req, res) => {
      ORDER BY o.created_at DESC LIMIT 1`,
     [user.id, purpose || 'LOGIN']
   ).catch(() => null);
+  // Le quota d'essais est verifie AVANT la comparaison du code : apres 5
+  // tentatives, le code devient inutilisable jusqu'a expiration.
+  if (row && row.attempts >= 5) throw new HttpError(429, 'Trop de tentatives, demandez un nouveau code');
   const matched = row && await constantTarget([row], code);
-  if (!matched) throw new HttpError(401, 'Code invalide ou expiré');
-  if (row.attempts >= 5) throw new HttpError(429, 'Trop de tentatives, demandez un nouveau code');
+  if (!matched) {
+    // Le compteur d'essais doit etre incremente meme en cas d'echec :
+    // sinon il ne limite jamais rien et le code est devinable indefiniment.
+    if (row) await db.query('UPDATE otp_codes SET attempts=attempts+1 WHERE id=$1', [row.otp_id]);
+    throw new HttpError(401, 'Code invalide ou expiré');
+  }
   await db.query(`UPDATE otp_codes SET attempts=attempts+1 WHERE id=$1`, [row.otp_id]);
   await db.query(`UPDATE otp_codes SET consumed_at=now() WHERE id=$1`, [row.otp_id]);
   await audit(req, 'otp.verify', 'user', row.user_id, { purpose });
@@ -179,9 +198,11 @@ router.post('/logout', requireAuth, wrap(async (req, res) => {
   const refresh_token = body || cookieValue(req.headers.cookie, config.cookie.name) || '';
   if (refresh_token) {
     const hash = sha256(refresh_token);
+    // La revocation est scopee au demandeur : un utilisateur ne doit pas
+    // pouvoir revoquer le refresh token d'un autre compte.
     await db.query(
-      `UPDATE refresh_tokens SET revoked_at=now() WHERE token_hash=$1 AND revoked_at IS NULL AND (user_id IS NULL OR true)`,
-      [hash]
+      `UPDATE refresh_tokens SET revoked_at=now() WHERE token_hash=$1 AND user_id=$2 AND revoked_at IS NULL`,
+      [hash, req.user.sub]
     );
   }
   clearRefreshCookie(res);
@@ -270,6 +291,13 @@ router.post('/login', authLimiter, wrap(async (req, res) => {
   const user = await db.one('SELECT * FROM users WHERE email=$1', [email.toLowerCase()]);
   const ok = user && (await bcrypt.compare(password, user.password_hash));
   if (!ok) throw new HttpError(401, 'Identifiants invalides');
+  // Un compte suspendu (ou desactive) ne peut plus s'authentifier, meme avec
+  // le bon mot de passe : le controle est fait cote serveur, jamais en amont.
+  if (user.status && user.status !== 'ACTIVE') {
+    throw new HttpError(403, user.status === 'SUSPENDED'
+      ? 'Compte suspendu. Contactez le support.'
+      : 'Compte desactive. Contactez le support.');
+  }
   const proRow = await db.one('SELECT is_certified FROM professionals WHERE user_id=$1', [user.id]).catch(() => null);
   const safe = { id: user.id, name: user.name, email: user.email, phone: user.phone, role: user.role, is_certified: !!(proRow && proRow.is_certified) };
   await audit(req, 'auth.login', 'user', user.id, {});

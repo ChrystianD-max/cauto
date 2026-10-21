@@ -13,8 +13,12 @@ RUN apk add --no-cache nginx
 WORKDIR /app
 
 # --- Backend (node) ---
-COPY backend/package.json ./
-RUN npm install --omit=dev
+# Le lockfile est copie et npm ci est utilise : l'image installe exactement les
+# versions verrouillees (express/qs/proxy-addr patches). Sans cela, npm install
+# resolvait les dernieres versions au hasard et les correctifs de securite
+# n'etaient pas appliques en production.
+COPY backend/package.json backend/package-lock.json ./
+RUN npm ci --omit=dev
 COPY backend/src ./src
 COPY backend/seed ./seed
 COPY backend/scripts ./scripts

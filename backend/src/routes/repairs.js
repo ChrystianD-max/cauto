@@ -295,7 +295,13 @@ router.post('/:id/client-confirm', wrap(async (req, res) => {
     }
 
     await db.tx(async (c) => {
-        await c.query(`UPDATE repairs SET status='CLOSED' WHERE id=$1`, [req.params.id]);
+        // La table de suivi est `repair_orders` (cle : intervention_id) :
+        // l'ancienne table `repairs` n'existe plus dans le schema et provoquait
+        // une erreur 500 a la cloture du dossier.
+        // L'intervention passe elle aussi a CLOSED : c'est l'etat attendu par la
+        // porte de paiement (`/api/payments/intent`), sinon le vehicule valide
+        // par le client restait impossible a facturer.
+        await c.query(`UPDATE interventions SET status='CLOSED' WHERE id=$1`, [req.params.id]);
         await c.query(`UPDATE repair_orders SET status='CLOSED' WHERE intervention_id=$1`, [req.params.id]);
         if (repair.appointment_id) {
             await c.query(`UPDATE appointments SET status='DONE' WHERE id=$1`, [repair.appointment_id]);

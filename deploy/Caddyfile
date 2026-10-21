@@ -45,6 +45,11 @@ http://{$CADDY_DOMAIN}, http://{$CADDY_WWW_DOMAIN}, http://{$CADDY_APP_DOMAIN}, 
 		reverse_proxy backend:4000
 	}
 
+	# Temps reel (Socket.io : presence, curseurs, collaboration)
+	handle /socket.io/* {
+		reverse_proxy backend:4000
+	}
+
 	# Application + pages marketing (SPA statique servie par nginx/frontend)
 	handle {
 		reverse_proxy frontend:80
@@ -66,6 +71,11 @@ http://{$CADDY_DOMAIN}, http://{$CADDY_WWW_DOMAIN}, http://{$CADDY_APP_DOMAIN}, 
 		reverse_proxy backend:4000
 	}
 	handle /health* {
+		reverse_proxy backend:4000
+	}
+
+	# Temps reel (Socket.io : presence, curseurs, collaboration)
+	handle /socket.io/* {
 		reverse_proxy backend:4000
 	}
 
@@ -92,6 +102,11 @@ http://{$CADDY_DOMAIN}, http://{$CADDY_WWW_DOMAIN}, http://{$CADDY_APP_DOMAIN}, 
 		reverse_proxy backend:4000
 	}
 
+	# Temps reel (Socket.io : presence, curseurs, collaboration)
+	handle /socket.io/* {
+		reverse_proxy backend:4000
+	}
+
 	handle {
 		reverse_proxy frontend:80
 	}
@@ -110,6 +125,11 @@ http://{$CADDY_DOMAIN}, http://{$CADDY_WWW_DOMAIN}, http://{$CADDY_APP_DOMAIN}, 
 
 	# Healthchecks exposés aussi sur l'hôte API
 	handle /health* {
+		reverse_proxy backend:4000
+	}
+
+	# Temps reel (Socket.io : presence, curseurs, collaboration)
+	handle /socket.io/* {
 		reverse_proxy backend:4000
 	}
 

@@ -1,0 +1,37 @@
+# C-AUTO — contexte de build Docker.
+# Tout ce qui n'est pas necessaire a l'image est exclu : le contexte
+# n'est donc jamais televerse ni copie dans l'image.
+.git
+.gitignore
+.github
+node_modules
+**/node_modules
+npm-debug.log*
+*.log
+*.local
+*.local.txt
+render-token.local.txt
+
+# Fichiers d'environnement (secrets) — jamais dans l'image
+.env
+.env.*
+!.env.example
+!.env.development.example
+!.env.production.example
+
+# Secrets
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+credentials.json
+serviceAccount*.json
+
+# Tests, docs et outils de dev
+backend/tests
+docs
+e2e
+scripts/checks
+agent
+archive

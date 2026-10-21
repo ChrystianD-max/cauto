@@ -1859,7 +1859,16 @@ function renderCursors() {
       el = document.createElement('div');
       el.className = 'remote-cursor';
       el.style.setProperty('--color', data.color);
-      el.innerHTML = `<div class="cursor-caret"></div><div class="cursor-label">${data.name}</div>`;
+      // Le nom vient d'un autre utilisateur (presence temps reel) : il ne
+      // doit jamais etre injecte en HTML (XSS). On construit le DOM et on
+      // utilise textContent.
+      const caret = document.createElement('div');
+      caret.className = 'cursor-caret';
+      const label = document.createElement('div');
+      label.className = 'cursor-label';
+      label.textContent = data.name == null ? '' : String(data.name);
+      el.appendChild(caret);
+      el.appendChild(label);
       document.body.appendChild(el);
       cursorElements.set(userId, el);
     }

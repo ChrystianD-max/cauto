@@ -15,16 +15,17 @@ module.exports = {
   // URL publique par laquelle l'application est réellement servie (utilisée
   // pour l'origin CORS/CSRF de production, ex : https://c-auto.example.com).
   appPublicUrl: process.env.APP_PUBLIC_URL || process.env.APP_URL || 'http://localhost:3000',
-  // Origines autorisées pour CORS (module 61 — domaines). Toujours acceptées :
-  // appUrl, appPublicUrl, les hôtes de dev. En plus, CORS_ORIGINS (CSV) permet
-  // de déclarer les autres sous-domaines du déploiement (app.*, admin.*, CDN…),
-  // quand le frontend n'est pas servi par la même origine que l'API.
+  // Origines autorisées pour CORS (module 61 — domaines). En production,
+  // seules les origines réellement déclarées (APP_URL / APP_PUBLIC_URL /
+  // CORS_ORIGINS) sont acceptées : les hôtes de développement ne sont
+  // jamais autorisés sur un déploiement public.
   allowedOrigins: [
     process.env.APP_URL || 'http://localhost:3000',
     process.env.APP_PUBLIC_URL || process.env.APP_URL || 'http://localhost:3000',
-    'http://localhost:3000',
-    'https://localhost',
-    ...(process.env.CORS_ORIGINS || '').split(',').map((s) => s.trim()).filter(Boolean)
+    ...(process.env.CORS_ORIGINS || '').split(',').map((s) => s.trim()).filter(Boolean),
+    ...(process.env.NODE_ENV === 'production' || process.env.APP_ENV === 'production'
+      ? []
+      : ['http://localhost:3000', 'http://127.0.0.1:3000', 'https://localhost'])
   ].filter((v, i, self) => v && self.indexOf(v) === i),
   uploadDir: process.env.UPLOAD_DIR || '/data/uploads',
   // Passerelle de stockage objet fournisseur-agnostique (modules 59/60).

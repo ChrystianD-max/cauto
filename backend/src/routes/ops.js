@@ -10,6 +10,7 @@
    =========================================================================== */
 
 const express = require('express');
+const crypto = require('crypto');
 const config = require('../config');
 const { current: alertState } = require('../observability/alerts');
 const { errorBody } = require('../utils/errorResponse');
@@ -18,11 +19,20 @@ const router = express.Router();
 const enabled = config.observability.metricsEnabled;
 const token = config.observability.metricsToken || '';
 
+// Comparaison a temps constant : evite un oracle de timing sur le token.
+function tokenMatches(given) {
+  if (!token || !given) return false;
+  const a = Buffer.from(String(given));
+  const b = Buffer.from(String(token));
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
+}
+
 function authorize(req, res) {
   if (!enabled) { res.status(404).json(errorBody(404, 'Introuvable', 'NOT_FOUND')); return false; }
   if (token) {
     const given = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '').trim();
-    if (given !== token) { res.status(401).json(errorBody(401, 'Non autorisé', 'METRICS_UNAUTHORIZED')); return false; }
+    if (!tokenMatches(given)) { res.status(401).json(errorBody(401, 'Non autorisé', 'METRICS_UNAUTHORIZED')); return false; }
   } else if (config.isProduction) {
     // Prod : ne JAMAIS exposer les métriques sans token.
     res.status(404).json(errorBody(404, 'Introuvable', 'NOT_FOUND'));
@@ -31,7 +41,17 @@ function authorize(req, res) {
   return true;
 }
 
-router.get('/info', (_req, res) => {
+router.get('/info', (req, res) => {
+  // En production, l'etat detaille (hostname, pid, version, latences) est
+  // protege par le meme token que les metriques : sur un deploiement public
+  // il ne doit pas etre devoile sans authentification.
+  if (config.isProduction) {
+    const given = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '').trim();
+    if (!tokenMatches(given)) {
+      res.status(404).json(errorBody(404, 'Introuvable', 'NOT_FOUND'));
+      return;
+    }
+  }
   const mem = process.memoryUsage();
   res.json({
     service: config.observability.serviceName,

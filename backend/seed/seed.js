@@ -15,13 +15,40 @@
    =========================================================================== */
 
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const db = require('../src/db');
 // Module 80 : le seed lit .env (racine du dépôt) pour les identifiants du
 // compte admin de développement — jamais un mot de passe en dur dans le repo.
 require('dotenv').config({ path: require('path').join(__dirname, '..', '..', '.env') });
 
-const DEMO_PASSWORD = 'Test1234!';
 const BCRYPT_ROUNDS = 12;
+
+/* ---------------------------------------------------------------------------
+   SECURITE — POLITIQUE DES COMPTES DE DEMONSTRATION
+   ---------------------------------------------------------------------------
+   Hors production : mot de passe de demonstration classique (Test1234!).
+   En production  : un mot de passe connu (present dans le depot public) est
+   inacceptable. Le mot de passe des comptes demo est donc :
+     - soit fourni explicitement par l'exploitant (SEED_DEMO_PASSWORD) ;
+     - soit aleatoire et inutilisable, et le compte est SUSPENDED.
+   Aucune valeur par defaut n'est appliquee en production.
+   ------------------------------------------------------------------------- */
+const IS_PROD = process.env.NODE_ENV === 'production' || process.env.APP_ENV === 'production';
+const DEMO_PASSWORD_ENV = String(process.env.SEED_DEMO_PASSWORD || '').trim();
+const SEED_ADMIN_EMAIL = String(process.env.SEED_ADMIN_EMAIL || '').trim().toLowerCase();
+const DEMO_PASSWORD = IS_PROD
+  ? (DEMO_PASSWORD_ENV || crypto.randomBytes(24).toString('hex'))
+  : 'Test1234!';
+// Hors production : ACTIVE. En production : ACTIVE seulement si l'exploitant
+// a explicitement fourni un mot de passe demo, sinon SUSPENDED.
+const DEMO_STATUS = (!IS_PROD || DEMO_PASSWORD_ENV) ? 'ACTIVE' : 'SUSPENDED';
+
+const DEMO_ACCOUNTS = [
+  'client.test@cauto.local', 'technicien.test@cauto.local',
+  'admin.test@cauto.local', 'admin@cauto.local', 'superadmin@cauto.local',
+  'pro.garage@cauto.local', 'pro.meca@cauto.local', 'pro.diag@cauto.local',
+  'pro.mobile@cauto.local', 'pro.bmw@cauto.local'
+];
 
 /* ---------------------------------------------------------------------------
    Petites requêtes sur le client de transaction
@@ -33,27 +60,45 @@ async function q1(c, text, params) { const r = await c.query(text, params); retu
    UTILISATEURS
    ------------------------------------------------------------------------- */
 async function upsertUser(c, name, email, phone, role) {
+  // Le compte d'administration de production est protege de la politique
+  // des comptes de demonstration (jamais suspendu, jamais mot de passe aleatoire).
+  const isSeedAdmin = !!SEED_ADMIN_EMAIL && email.toLowerCase() === SEED_ADMIN_EMAIL;
+  const status = isSeedAdmin ? 'ACTIVE' : DEMO_STATUS;
   let u = await q1(c, 'SELECT * FROM users WHERE email=$1', [email]);
   if (!u) {
     const hash = await bcrypt.hash(DEMO_PASSWORD, BCRYPT_ROUNDS);
     u = await q1(c,
       `INSERT INTO users (name,email,phone,password_hash,role,status)
-       VALUES ($1,$2,$3,$4,$5,'ACTIVE') RETURNING id,name,email,role`,
-      [name, email, phone, hash, role]);
+       VALUES ($1,$2,$3,$4,$5,$6) RETURNING id,name,email,role`,
+      [name, email, phone, hash, role, status]);
+  } else if (IS_PROD && !isSeedAdmin) {
+    // En production, le statut d'un compte demo existant suit la meme
+    // politique (SUSPENDED tant qu'aucun mot de passe demo n'est configure).
+    await c.query('UPDATE users SET status=$1 WHERE id=$2 AND status<>$1', [DEMO_STATUS, u.id]);
+    u.status = DEMO_STATUS;
   }
   return u;
 }
 
 /* Garantit qu'un compte se connecte avec le mot de passe démo (sans casser
-   ceux qui fonctionnent déjà). */
+   ceux qui fonctionnent déjà).
+   En production, le mot de passe de demonstration n'est JAMAIS applique par
+   defaut : soit l'exploitant fournit SEED_DEMO_PASSWORD, soit le mot de passe
+   est aleatoire (inutilisable) et le compte est suspendu. */
 async function ensureDemoPassword(c, email) {
+  // Le compte d'administration de production (SEED_ADMIN_EMAIL) n'est jamais
+  // soumis a la politique des comptes de demonstration : il ne doit ni etre
+  // suspendu, ni recevoir un mot de passe aleatoire.
+  if (SEED_ADMIN_EMAIL && email.toLowerCase() === SEED_ADMIN_EMAIL) return;
   const u = await q1(c, 'SELECT id,password_hash FROM users WHERE email=$1', [email]);
   if (!u) return;
   let match = false;
   try { match = bcrypt.compareSync(DEMO_PASSWORD, u.password_hash); } catch (_) { match = false; }
   if (!match) {
     const hash = await bcrypt.hash(DEMO_PASSWORD, BCRYPT_ROUNDS);
-    await c.query('UPDATE users SET password_hash=$1 WHERE id=$2', [hash, u.id]);
+    await c.query('UPDATE users SET password_hash=$1, status=$2 WHERE id=$3', [hash, DEMO_STATUS, u.id]);
+  } else if (IS_PROD) {
+    await c.query('UPDATE users SET status=$1 WHERE id=$2 AND status<>$1', [DEMO_STATUS, u.id]);
   }
 }
 
@@ -62,11 +107,19 @@ async function ensureDemoPassword(c, email) {
    Cree uniquement HORS production, a partir de SEED_ADMIN_* (jamais de
    mot de passe reel dans le repository). SEED_ADMIN_PASSWORD vide ou laisse
    a sa valeur de modele => aucun compte n'est cree ni modifie.
+
+   EN PRODUCTION : aucun administrateur n'est cree ou reinitialise tant que
+   l'exploitant n'a pas explicitement renseigne SEED_ADMIN_EMAIL ET
+   SEED_ADMIN_PASSWORD. Aucun mot de passe par defaut n'est applique (le
+   compte de developpement ne doit jamais exister avec un mot de passe connu).
    ------------------------------------------------------------------------- */
 async function seedEnvAdmin(c) {
-  const isProd = process.env.NODE_ENV === 'production' || process.env.APP_ENV === 'production';
-  const email = String(process.env.SEED_ADMIN_EMAIL || 'admin.dev@cauto.local').trim().toLowerCase();
-  const password = process.env.SEED_ADMIN_PASSWORD || 'Dev#Admin#85';
+  const email = String(process.env.SEED_ADMIN_EMAIL || '').trim().toLowerCase();
+  const password = String(process.env.SEED_ADMIN_PASSWORD || '').trim();
+  if (IS_PROD && (!email || !password)) {
+    console.log('! Production : SEED_ADMIN_EMAIL/SEED_ADMIN_PASSWORD absents - aucun compte admin de developpement cree.');
+    return null;
+  }
   if (!email || !password || password === 'CHANGE_ME') {
     console.log('! SEED_ADMIN_* non renseignes (modele) - aucun admin de developpement cree.');
     return null;
@@ -75,6 +128,9 @@ async function seedEnvAdmin(c) {
   const phone = String(process.env.SEED_ADMIN_PHONE || '+22997000000').trim();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     throw new Error('SEED_ADMIN_EMAIL invalide : ' + email);
+  }
+  if (password.length < 12) {
+    throw new Error('SEED_ADMIN_PASSWORD trop court (12 caracteres minimum).');
   }
   const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
   const existing = await q1(c, 'SELECT id FROM users WHERE email=$1', [email]);
@@ -477,10 +533,7 @@ async function fleetCost(c, data) {
 async function main() {
   await db.tx(async (c) => {
     /* === ÉTAPE 1 : comptes critiques existants = accès garanti === */
-    for (const email of ['client.test@cauto.local','technicien.test@cauto.local',
-                         'admin.test@cauto.local','admin@cauto.local','superadmin@cauto.local',
-                         'pro.garage@cauto.local','pro.meca@cauto.local','pro.diag@cauto.local',
-                         'pro.mobile@cauto.local','pro.bmw@cauto.local']) {
+    for (const email of DEMO_ACCOUNTS) {
       await ensureDemoPassword(c, email);
     }
 
@@ -981,7 +1034,10 @@ async function main() {
 
     console.log(JSON.stringify({
       seeded: true,
-      password_demo: DEMO_PASSWORD,
+      // En production le mot de passe demo n'est jamais affiche ni applique
+      // par defaut : il ne doit pas apparaitre dans les journaux de deploiement.
+      password_demo: IS_PROD ? null : DEMO_PASSWORD,
+      demo_accounts_status: IS_PROD ? DEMO_STATUS : 'ACTIVE',
       dev_admin: devAdmin ? { email: devAdmin.email, name: devAdmin.name } : null,
       demo_accounts: {
         admin: 'admin.demo@cauto.local',

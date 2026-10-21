@@ -54,21 +54,25 @@ test('PIECE: crée en brouillon (DRAFT) → absente du catalogue, modifiable, pu
   const s = await newSupplier();
   await createBoutique(s.token);
   const ref = uniqRef();
-  const created = await api('POST', '/api/parts', { token: s.token, body: { reference: ref, name: 'Brouillon disque', unit_price_cents: 5000, stock_quantity: 5, status: 'DRAFT' } });
+  // Nom unique par execution : le catalogue est pagine (limit 20, trie par nom) ;
+  // des pieces homonymes accumulees d'un run a l'autre sortaient la nouvelle piece
+  // hors de la page 1 et faisaient echouer l'assertion 'publiee visible'.
+  const uniqName = Date.now().toString(36);
+  const created = await api('POST', '/api/parts', { token: s.token, body: { reference: ref, name: 'Brouillon disque ' + uniqName, unit_price_cents: 5000, stock_quantity: 5, status: 'DRAFT' } });
   assert.equal(created.status, 201);
   assert.equal(created.data.part.status, 'DRAFT');
   assert.ok(created.data.part.synthesis, 'synthèse pièce créée');
-  assert.equal(created.data.part.synthesis.name, 'Brouillon disque');
+  assert.equal(created.data.part.synthesis.name, 'Brouillon disque ' + uniqName);
 
-  const list = await api('GET', '/api/parts?q=' + encodeURIComponent('Brouillon disque'), { token: s.token });
+  const list = await api('GET', '/api/parts?q=' + encodeURIComponent('Brouillon disque ' + uniqName), { token: s.token });
   assert.ok(!list.data.parts.some(x => x.id === created.data.part.id), 'brouillon invisible dans le catalogue');
 
-  const mod = await api('PATCH', '/api/parts/' + created.data.part.id, { token: s.token, body: { name: 'Disque ventilé', status: 'ACTIVE' } });
+  const mod = await api('PATCH', '/api/parts/' + created.data.part.id, { token: s.token, body: { name: 'Disque ventilé ' + uniqName, status: 'ACTIVE' } });
   assert.equal(mod.status, 200);
   assert.equal(mod.data.part.status, 'ACTIVE');
-  assert.equal(mod.data.part.synthesis.name, 'Disque ventilé', 'synthèse mise à jour');
+  assert.equal(mod.data.part.synthesis.name, 'Disque ventilé ' + uniqName, 'synthèse mise à jour');
 
-  const pub = await api('GET', '/api/parts?q=' + encodeURIComponent('Disque ventilé'), { token: s.token });
+  const pub = await api('GET', '/api/parts?q=' + encodeURIComponent('Disque ventilé ' + uniqName), { token: s.token });
   assert.ok(pub.data.parts.some(x => x.id === created.data.part.id), 'pièce publiée visible');
 });
 

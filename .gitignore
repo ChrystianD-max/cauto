@@ -11,6 +11,19 @@ backups/
 reverse-proxy/certs/*.crt
 reverse-proxy/certs/*.key
 npm-debug.log*
+*.log
+
+# Jetons / fichiers locaux de deploiement — ne jamais versionner
+render-token.local.txt
+*.local.txt
+
+# La racine servie (frontend/www) ne doit contenir QUE des fichiers web :
+# aucun script, journal, dump ou configuration ne doit y atterrir.
+frontend/www/**/*.ps1
+frontend/www/**/*.sh
+frontend/www/**/*.log
+frontend/www/**/*.sql
+frontend/www/**/*.env
 
 # Clés / secrets — ne jamais versionner
 *.pem
@@ -20,3 +33,11 @@ npm-debug.log*
 secrets/
 credentials.json
 serviceAccount*.json
+
+# Projets etrangers a C-AUTO presents dans le dossier de travail :
+# ils ne font pas partie de l'application et ne doivent jamais etre versionnes ici.
+/mql5/
+/agent/
+/content-factory/
+/DerivVolatilityEA.ex5
+/DerivVolatilityEA.mq5
