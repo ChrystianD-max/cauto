@@ -36,7 +36,7 @@ async function api(path, opts = {}) {
   if (body && !(body instanceof FormData)) { headers['Content-Type'] = 'application/json'; body = JSON.stringify(body); }
   let res;
   try {
-    res = await fetch('/api' + path, { ...opts, body, headers });
+    res = await fetch('/api' + path, { ...opts, body, headers, credentials: 'include' });
   } catch (netErr) {
     if (window.offlineError) throw window.offlineError();
     const e = new Error('Impossible de joindre le serveur. Vérifiez votre connexion.');
@@ -60,7 +60,7 @@ async function tryRefreshToken() {
   if (_refreshPromise) return _refreshPromise;
   _refreshPromise = (async () => {
     try {
-      const r = await fetch('/api/auth/refresh', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      const r = await fetch('/api/auth/refresh', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include' });
       const d = await r.json().catch(() => ({}));
       if (!r.ok || !d.token) return false;
       S.token = d.token;
