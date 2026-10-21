@@ -1,9 +1,14 @@
-# C-AUTO - RENDER BLUEPRINT (premier essai gratuit)
-# Service web unique (nginx + node dans un conteneur) + PostgreSQL + Redis (Key Value).
+# C-AUTO - RENDER BLUEPRINT
+# Service web unique (nginx + node dans un conteneur) + PostgreSQL.
 # TLS gere par Render (https://cauto.onrender.com).
-
+#
 # La migration + seed sont executes au demarrage du web service (idempotents),
 # donc aucune action manuelle requise apres le deploiement.
+#
+# NOTE : Redis n'est plus declare. Redis est une dependance OPTIONNELLE
+# (le backend degrade proprement : rate limiter en memoire, Socket.io en
+# mono-instance, health check 200). Si un Redis est ajoute, declarer ici une
+# ressource `type: keyvalue` et relancer REDIS_URL via fromService.
 
 databases:
   - name: cauto-db
@@ -39,6 +44,25 @@ services:
         sync: false
       - key: SEED_ADMIN_PHONE
         sync: false
+      # Compte SUPER_ADMIN de production : mot de passe dedie, >= 12 caracteres.
+      # La migration v11 duplique le hash de l'admin principal : sans ces
+      # variables, aucun SUPER_ADMIN n'est cree et le compte historique est
+      # suspendu (comptes de demonstration).
+      - key: SEED_SUPER_ADMIN_EMAIL
+        sync: false
+      - key: SEED_SUPER_ADMIN_NAME
+        sync: false
+      - key: SEED_SUPER_ADMIN_PASSWORD
+        sync: false
+      - key: SEED_SUPER_ADMIN_PHONE
+        sync: false
+      # Web Push (VAPID) : la cle privee ne quitte jamais l'environnement.
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: VAPID_SUBJECT
+        sync: false
       - key: APP_PUBLIC_URL
         value: https://cauto.onrender.com
       - key: CORS_ORIGINS
@@ -57,15 +81,3 @@ services:
         fromDatabase:
           name: cauto-db
           property: connectionString
-      - key: REDIS_URL
-        fromService:
-          type: keyvalue
-          name: cauto-redis
-          property: connectionString
-
-  # ----------------------- Cache Redis / Key Value (plan free) ---------------
-  - type: keyvalue
-    name: cauto-redis
-    plan: free
-    maxmemoryPolicy: noeviction
-    ipAllowList: []
