@@ -19,17 +19,23 @@ const router = express.Router();
 const enabled = config.observability.metricsEnabled;
 const token = config.observability.metricsToken || '';
 
+// Expurge les secrets d'un message technique (URL de connexion, mot de passe)
+// avant toute exposition dans /api/ops/info.
+function redactSecrets(text) {
+  return String(text || '')
+    .replace(/(postgres(?:ql)?:\/\/[^\s:@/]+):[^\s@/]+@/gi, '$1:***@')
+    .replace(/(password|mot de passe|secret|token|api[_-]?key)\s*[=:]\s*[^\s,;"']+/gi, '$1=***');
+}
+
 // Comparaison a temps constant : evite un oracle de timing sur le token.
-function tokenMatches(given) {
-  if (!token || !given) return false;
+function tokenMatches(given) {  if (!token || !given) return false;
   const a = Buffer.from(String(given));
   const b = Buffer.from(String(token));
   if (a.length !== b.length) return false;
   return crypto.timingSafeEqual(a, b);
 }
 
-function authorize(req, res) {
-  if (!enabled) { res.status(404).json(errorBody(404, 'Introuvable', 'NOT_FOUND')); return false; }
+function authorize(req, res) {  if (!enabled) { res.status(404).json(errorBody(404, 'Introuvable', 'NOT_FOUND')); return false; }
   if (token) {
     const given = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '').trim();
     if (!tokenMatches(given)) { res.status(401).json(errorBody(401, 'Non autorisé', 'METRICS_UNAUTHORIZED')); return false; }
@@ -62,6 +68,13 @@ router.get('/info', (req, res) => {
     startTime: new Date(Date.now() - process.uptime() * 1000).toISOString(),
     uptimeSeconds: Math.floor(process.uptime()),
     runtime: `node ${process.version}`,
+    // Etat des migrations DB posees par l'entrypoint de deploiement : permet
+    // de diagnostiquer un demarrage degrade sans acces aux logs du build.
+    // Toute URL de connexion presente dans le detail est expurgee.
+    migration: {
+      status: process.env.MIGRATION_STATUS || 'unknown',
+      detail: redactSecrets(String(process.env.MIGRATION_DETAIL || '')).slice(0, 300)
+    },
     memoryBytes: { rss: mem.rss, heapUsed: mem.heapUsed, heapTotal: mem.heapTotal },
     topLatenciesMs: config.observability.metricsEnabled
       ? require('../observability/index').metrics.percentiles('http_request_duration_seconds').slice(0, 10)

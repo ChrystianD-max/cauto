@@ -85,14 +85,27 @@ server {
 EOF
 
 echo "[entrypoint] Migrations DB (idempotent)..."
-node /app/scripts/db-migrate.js
+# La migration ne doit pas tuer le conteneur : le backend doit demarrer pour
+# que l'etat reel soit consultable (/api/ops/info expose le statut et le
+# detail de la migration). Un echec de migration rend l'API degradee, ce que
+# le health check signale.
+if MIG_OUT="$(node /app/scripts/db-migrate.js 2>&1)"; then
+    echo "$MIG_OUT"
+    MIGRATION_STATUS="ok"
+    MIGRATION_DETAIL="$(printf '%s' "$MIG_OUT" | tail -c 300 | tr '\n' ' ')"
+else
+    echo "$MIG_OUT"
+    echo "[entrypoint] WARN migrations echouees - le backend demarre en mode degrade (details via /api/ops/info)"
+    MIGRATION_STATUS="failed"
+    MIGRATION_DETAIL="$(printf '%s' "$MIG_OUT" | tail -c 300 | tr '\n' ' ')"
+fi
 echo "[entrypoint] Seed DB (idempotent, non bloquant)..."
 node /app/scripts/db-seed.js || echo "[entrypoint] WARN seed SQL ignoré (base peut-être pleine / déjà seedée)"
 echo "[entrypoint] Seed JS (comptes demo, non bloquant)..."
 node /app/seed/seed.js || echo "[entrypoint] WARN seed JS ignoré (base peut-être pleine / déjà seedée)"
 
 echo "[entrypoint] Demarrage du backend node sur :4000 (PORT web = ${LISTEN_PORT})"
-PORT=4000 node /app/src/server.js &
+MIGRATION_STATUS="$MIGRATION_STATUS" MIGRATION_DETAIL="$MIGRATION_DETAIL" PORT=4000 node /app/src/server.js &
 NODE_PID=$!
 # NOTE : $PORT (Render) reste reserve a nginx. Le backend est force sur 4000
 # interne, nginx proxye /api vers 127.0.0.1:4000.
