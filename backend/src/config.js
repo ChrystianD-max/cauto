@@ -100,7 +100,7 @@ module.exports = {
       : process.env.NODE_ENV === 'production',
     sameSite: String(process.env.COOKIE_SAME_SITE || 'lax').toLowerCase(),
     domain: process.env.COOKIE_DOMAIN || undefined,
-    path: '/api/auth',
+    path: '/api',
     maxAgeMs: parseInt(process.env.REFRESH_COOKIE_MAX_AGE_MS || String(30 * 24 * 3600 * 1000), 10)
   },
   // Module 65 — Observabilité : logs structurés, métriques, alertes, disponibilité.

@@ -60,11 +60,18 @@ async function tryRefreshToken() {
   if (_refreshPromise) return _refreshPromise;
   _refreshPromise = (async () => {
     try {
-      const r = await fetch('/api/auth/refresh', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include' });
+      const body = localStorage.getItem('refresh_token') ? { refresh_token: localStorage.getItem('refresh_token') } : undefined;
+      const r = await fetch('/api/auth/refresh', { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' }, 
+        credentials: 'include',
+        body: body ? JSON.stringify(body) : undefined
+      });
       const d = await r.json().catch(() => ({}));
       if (!r.ok || !d.token) return false;
       S.token = d.token;
       localStorage.setItem('token', d.token);
+      if (d.refresh_token) localStorage.setItem('refresh_token', d.refresh_token);
       if (d.user) {
         S.user = { ...(S.user || {}), ...d.user };
         localStorage.setItem('user', JSON.stringify(S.user));
@@ -86,7 +93,7 @@ function forceLogout(status) {
   document.body.removeAttribute('data-role');
   location.hash = '#/login';
 }
-function setSession(token, user) { S.token = token; S.user = user; localStorage.setItem('token', token); localStorage.setItem('user', JSON.stringify(user)); document.body.setAttribute('data-role', user.role || 'CLIENT'); if (window.cautoResyncPush) window.cautoResyncPush(); } window.setSession = setSession;
+function setSession(token, user, refreshToken) { S.token = token; S.user = user; localStorage.setItem('token', token); localStorage.setItem('user', JSON.stringify(user)); if (refreshToken) localStorage.setItem('refresh_token', refreshToken); document.body.setAttribute('data-role', user.role || 'CLIENT'); if (window.cautoResyncPush) window.cautoResyncPush(); } window.setSession = setSession;
 function logout() { localStorage.clear(); S.token = null; S.user = null; document.body.removeAttribute('data-role'); location.hash = '#/login'; }
 
 /* ====== HELPERS ====== */
@@ -413,7 +420,7 @@ function viewLogin(msg='') {
   </div>`;
   document.getElementById('f-login').onsubmit = async (ev) => {
     ev.preventDefault();
-    try { const d = await api('/auth/login',{method:'POST',body:Object.fromEntries(new FormData(ev.target))}); setSession(d.token,d.user); toast('Connexion réussie','success'); location.hash = S.user.role==='SUPPLIER'?'#/supplier/dashboard':(isPro()?'#/pro/dashboard':(isAdmin()?'#/admin/dashboard':'#/app')); }
+    try { const d = await api('/auth/login',{method:'POST',body:Object.fromEntries(new FormData(ev.target))}); setSession(d.token,d.use,d.refresh_tokenr); toast('Connexion réussie','success'); location.hash = S.user.role==='SUPPLIER'?'#/supplier/dashboard':(isPro()?'#/pro/dashboard':(isAdmin()?'#/admin/dashboard':'#/app')); }
     catch(e) { viewLogin(err(e)); }
   };
   const pk = document.getElementById('login-peek');
