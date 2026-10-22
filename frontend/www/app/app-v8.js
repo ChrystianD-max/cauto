@@ -420,7 +420,7 @@ function viewLogin(msg='') {
   </div>`;
   document.getElementById('f-login').onsubmit = async (ev) => {
     ev.preventDefault();
-    try { const d = await api('/auth/login',{method:'POST',body:Object.fromEntries(new FormData(ev.target))}); setSession(d.token,d.use,d.refresh_tokenr); toast('Connexion réussie','success'); location.hash = S.user.role==='SUPPLIER'?'#/supplier/dashboard':(isPro()?'#/pro/dashboard':(isAdmin()?'#/admin/dashboard':'#/app')); }
+    try { const d = await api('/auth/login',{method:'POST',body:Object.fromEntries(new FormData(ev.target))}); setSession(d.token,d.user,d.refresh_token); toast('Connexion réussie','success'); location.hash = S.user.role==='SUPPLIER'?'#/supplier/dashboard':(isPro()?'#/pro/dashboard':(isAdmin()?'#/admin/dashboard':'#/app')); }
     catch(e) { viewLogin(err(e)); }
   };
   const pk = document.getElementById('login-peek');
