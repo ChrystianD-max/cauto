@@ -388,6 +388,375 @@ function layoutApp(html) {
   updateChatUnread();
 }
 
+/* ====== LANDING PAGE (public) ====== */
+function viewLanding() {
+  document.querySelector('header').classList.remove('hidden');
+  document.querySelector('footer').classList.remove('hidden');
+  $app.innerHTML = `
+    <section class="landing" id="landing">
+      <!-- Hero -->
+      <header class="landing-hero">
+        <div class="hero-bg">
+          <svg class="hero-shape hero-shape-1" viewBox="0 0 400 400" aria-hidden="true">
+            <defs>
+              <linearGradient id="heroGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#2563eb" stop-opacity="0.15"/>
+                <stop offset="100%" stop-color="#22d3ee" stop-opacity="0.05"/>
+              </linearGradient>
+            </defs>
+            <circle cx="200" cy="200" r="180" fill="url(#heroGrad1)" filter="url(#blur)"/>
+          </svg>
+          <svg class="hero-shape hero-shape-2" viewBox="0 0 300 300" aria-hidden="true">
+            <defs>
+              <linearGradient id="heroGrad2" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.1"/>
+                <stop offset="100%" stop-color="#ef4444" stop-opacity="0.03"/>
+              </linearGradient>
+            </defs>
+            <path d="M150 30 L270 270 L30 270 Z" fill="url(#heroGrad2)" filter="url(#blur)"/>
+          </svg>
+          <svg class="hero-shape hero-shape-3" viewBox="0 0 200 200" aria-hidden="true">
+            <circle cx="100" cy="100" r="80" fill="none" stroke="#2563eb" stroke-opacity="0.08" stroke-width="2" stroke-dasharray="10 10"/>
+          </svg>
+          <defs>
+            <filter id="blur"><feGaussianBlur stdDeviation="60"/></filter>
+          </defs>
+        </div>
+        <div class="hero-content">
+          <div class="hero-badge" data-animate="fade-up">
+            <i data-lucide="sparkles" class="badge-icon"></i>
+            <span data-i18n="landing.badge">Nouveau : Maintenance prédictive par IA</span>
+          </div>
+          <h1 class="hero-title" data-animate="fade-up" data-delay="100" data-i18n="landing.title">
+            La maintenance automobile <span class="gradient-text">intelligente</span> pour tous
+          </h1>
+          <p class="hero-subtitle" data-animate="fade-up" data-delay="200" data-i18n="landing.subtitle">
+            Suivi véhicules, diagnostics IA, devis instantanés, paiement sécurisé — 
+            une plateforme unique pour propriétaires, garages, flottes et experts.
+          </p>
+          <div class="hero-cta" data-animate="fade-up" data-delay="300">
+            <a href="#/register" class="btn btn-primary btn-lg" data-i18n="landing.cta.primary">
+              <i data-lucide="rocket" aria-hidden="true"></i> Démarrer gratuitement
+            </a>
+            <a href="#/login" class="btn btn-outline btn-lg" data-i18n="landing.cta.secondary">
+              <i data-lucide="log-in" aria-hidden="true"></i> Se connecter
+            </a>
+          </div>
+          <div class="hero-trust" data-animate="fade-up" data-delay="400">
+            <div class="trust-item">
+              <i data-lucide="shield-check" aria-hidden="true"></i>
+              <span data-i18n="landing.trust.secure">Sécurisé</span>
+            </div>
+            <div class="trust-item">
+              <i data-lucide="users" aria-hidden="true"></i>
+              <span data-i18n="landing.trust.community">10k+ utilisateurs</span>
+            </div>
+            <div class="trust-item">
+              <i data-lucide="zap" aria-hidden="true"></i>
+              <span data-i18n="landing.trust.fast">Devis en 2 min</span>
+            </div>
+            <div class="trust-item">
+              <i data-lucide="shield" aria-hidden="true"></i>
+              <span data-i18n="landing.trust.warranty">Garantie pièces</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero-illustration" data-animate="float" aria-hidden="true">
+          <svg class="hero-car" viewBox="0 0 400 200" role="img" aria-label="Voiture connectée C-AUTO">
+            <!-- Car body -->
+            <g class="car-body">
+              <path d="M60 140 L60 90 Q60 60 90 60 L310 60 Q340 60 340 90 L340 140" 
+                    fill="#1e293b" stroke="#334155" stroke-width="2"/>
+              <path d="M90 60 Q120 30 280 30 L280 60" fill="#334155" stroke="#475569" stroke-width="1"/>
+              <!-- Windows -->
+              <path d="M100 65 L130 35 L270 35 L300 65" fill="#0f172a" opacity="0.8" stroke="#475569" stroke-width="1"/>
+              <!-- Wheels -->
+              <circle cx="120" cy="155" r="25" fill="#0f172a" stroke="#334155" stroke-width="2"/>
+              <circle cx="120" cy="155" r="15" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+              <circle cx="280" cy="155" r="25" fill="#0f172a" stroke="#334155" stroke-width="2"/>
+              <circle cx="280" cy="155" r="15" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+              <!-- Connection waves -->
+              <g class="waves" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" opacity="0.7">
+                <path d="M360 100 Q380 80 400 100"/>
+                <path d="M365 110 Q390 85 410 110"/>
+                <path d="M370 120 Q400 100 420 120"/>
+              </g>
+              <!-- Data points -->
+              <g class="data-points" fill="#22d3ee">
+                <circle cx="380" cy="70" r="4"/>
+                <circle cx="400" cy="50" r="3"/>
+                <circle cx="410" cy="85" r="3"/>
+                <circle cx="425" cy="60" r="2"/>
+              </g>
+            </g>
+          </svg>
+        </div>
+      </header>
+
+      <!-- Features -->
+      <section class="landing-features" id="features">
+        <div class="container">
+          <div class="section-header" data-animate="fade-up">
+            <h2 data-i18n="landing.features.title">Tout pour votre maintenance</h2>
+            <p data-i18n="landing.features.subtitle">7 innovations réunies en une seule plateforme</p>
+          </div>
+          <div class="features-grid" id="featuresGrid">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Process / How it works -->
+      <section class="landing-process" id="process">
+        <div class="container">
+          <div class="section-header" data-animate="fade-up">
+            <h2 data-i18n="landing.process.title">Comment ça marche</h2>
+            <p data-i18n="landing.process.subtitle">De l'alerte au paiement, tout est fluide</p>
+          </div>
+          <div class="process-timeline" id="processTimeline">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Stats / Social proof -->
+      <section class="landing-stats" id="stats">
+        <div class="container">
+          <div class="stats-grid" id="statsGrid">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA Final -->
+      <section class="landing-cta" id="cta">
+        <div class="container">
+          <div class="cta-card" data-animate="fade-up">
+            <div class="cta-glow" aria-hidden="true"></div>
+            <h2 data-i18n="landing.cta.title">Prêt à simplifier votre maintenance ?</h2>
+            <p data-i18n="landing.cta.subtitle">Rejoignez des milliers d'utilisateurs qui font confiance à C-AUTO</p>
+            <div class="cta-actions">
+              <a href="#/register" class="btn btn-primary btn-lg" data-i18n="landing.cta.primary">
+                <i data-lucide="rocket" aria-hidden="true"></i> Créer mon compte gratuit
+              </a>
+              <a href="#/login" class="btn btn-outline btn-lg" data-i18n="landing.cta.secondary">
+                <i data-lucide="log-in" aria-hidden="true"></i> J'ai déjà un compte
+              </a>
+            </div>
+            <p class="cta-note" data-i18n="landing.cta.note">Aucune carte bancaire requise · Annulable à tout moment</p>
+          </div>
+        </div>
+      </section>
+    </section>
+  `;
+
+  // Initialize landing animations
+  initLandingAnimations();
+  initLandingInteractions();
+  renderIcons();
+}
+
+function initLandingAnimations() {
+  // Respect reduced-motion
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReduced) {
+    document.documentElement.style.setProperty('--anim-duration', '0.01ms');
+    document.documentElement.style.setProperty('--anim-delay', '0ms');
+    return;
+  }
+
+  // Staggered entrance animations
+  const animatedElements = document.querySelectorAll('[data-animate]');
+  animatedElements.forEach((el, i) => {
+    const delay = parseInt(el.dataset.delay || '0', 10);
+    const animType = el.dataset.animate;
+    el.style.animation = `${animType} var(--anim-duration, 0.6s) ease-out ${delay}ms both`;
+    if (animType === 'float') {
+      el.style.animation = 'float 6s ease-in-out infinite';
+    }
+  });
+
+  // IntersectionObserver for scroll-triggered animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in-view');
+        // Stagger children
+        const children = entry.target.querySelectorAll('[data-animate-child]');
+        children.forEach((child, i) => {
+          setTimeout(() => child.classList.add('in-view'), i * 100);
+        });
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+  document.querySelectorAll('.landing-section, .feature-card, .process-step, .stat-item').forEach(el => {
+    observer.observe(el);
+  });
+
+  // Counter animation for stats
+  const statObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const target = entry.target.querySelector('[data-count]');
+        if (target && !target.dataset.animated) {
+          target.dataset.animated = 'true';
+          animateCounter(target);
+        }
+        statObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('.stat-item').forEach(el => statObserver.observe(el));
+}
+
+function initLandingInteractions() {
+  // Smooth scroll for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', e => {
+      const targetId = anchor.getAttribute('href').slice(1);
+      const target = document.getElementById(targetId);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  // Parallax hero illustration (subtle, respects reduced-motion)
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!prefersReduced) {
+    const heroIllustration = document.querySelector('.hero-illustration');
+    if (heroIllustration) {
+      window.addEventListener('mousemove', e => {
+        const x = (e.clientX / window.innerWidth - 0.5) * 20;
+        const y = (e.clientY / window.innerHeight - 0.5) * 15;
+        heroIllustration.style.transform = `translate(${x}px, ${y}px)`;
+      });
+    }
+  }
+
+  // Car animation loop
+  const carBody = document.querySelector('.car-body');
+  if (carBody && !prefersReduced) {
+    let waveOffset = 0;
+    setInterval(() => {
+      waveOffset += 0.1;
+      const waves = document.querySelectorAll('.waves path');
+      waves.forEach((path, i) => {
+        const phase = waveOffset + i * 0.5;
+        const y = 100 + Math.sin(phase) * 8;
+        const cp = y - 20 + Math.cos(phase) * 5;
+        path.setAttribute('d', `M360 ${y} Q380 ${cp} 400 ${y}`);
+      });
+      // Data points pulse
+      document.querySelectorAll('.data-points circle').forEach((circle, i) => {
+        const scale = 1 + Math.sin(waveOffset * 2 + i) * 0.3;
+        circle.setAttribute('r', Math.max(2, parseFloat(circle.getAttribute('r') || 3) * scale));
+      });
+    }, 50);
+  }
+}
+
+function animateCounter(el) {
+  const target = parseInt(el.dataset.count, 10);
+  const duration = 2000;
+  const start = performance.now();
+  function step(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+    el.textContent = Math.floor(target * eased).toLocaleString('fr-FR');
+    if (progress < 1) requestAnimationFrame(step);
+    else el.textContent = target.toLocaleString('fr-FR');
+  }
+  requestAnimationFrame(step);
+}
+
+// Features data
+const LANDING_FEATURES = [
+  { icon: 'car', titleKey: 'landing.features.1.title', descKey: 'landing.features.1.desc', color: '#2563eb' },
+  { icon: 'stethoscope', titleKey: 'landing.features.2.title', descKey: 'landing.features.2.desc', color: '#10b981' },
+  { icon: 'file-text', titleKey: 'landing.features.3.title', descKey: 'landing.features.3.desc', color: '#f59e0b' },
+  { icon: 'credit-card', titleKey: 'landing.features.4.title', descKey: 'landing.features.4.desc', color: '#8b5cf6' },
+  { icon: 'users', titleKey: 'landing.features.5.title', descKey: 'landing.features.5.desc', color: '#ec4899' },
+  { icon: 'shield-check', titleKey: 'landing.features.6.title', descKey: 'landing.features.6.desc', color: '#06b6d4' },
+  { icon: 'qr-code', titleKey: 'landing.features.7.title', descKey: 'landing.features.7.desc', color: '#84cc16' },
+];
+
+function renderFeatures() {
+  const grid = document.getElementById('featuresGrid');
+  if (!grid) return;
+  grid.innerHTML = LANDING_FEATURES.map((f, i) => `
+    <article class="feature-card landing-section" data-animate-child="fade-up" style="--delay: ${i * 100}ms" style="--accent-color: ${f.color}">
+      <div class="feature-icon" style="background: ${f.color}20; color: ${f.color}">
+        <i data-lucide="${f.icon}" aria-hidden="true"></i>
+      </div>
+      <h3 data-i18n="${f.titleKey}"></h3>
+      <p data-i18n="${f.descKey}"></p>
+    </article>
+  `).join('');
+}
+
+const LANDING_PROCESS = [
+  { step: 1, icon: 'bell', titleKey: 'landing.process.1.title', descKey: 'landing.process.1.desc' },
+  { step: 2, icon: 'stethoscope', titleKey: 'landing.process.2.title', descKey: 'landing.process.2.desc' },
+  { step: 3, icon: 'file-text', titleKey: 'landing.process.3.title', descKey: 'landing.process.3.desc' },
+  { step: 4, icon: 'credit-card', titleKey: 'landing.process.4.title', descKey: 'landing.process.4.desc' },
+  { step: 5, icon: 'check-circle', titleKey: 'landing.process.5.title', descKey: 'landing.process.5.desc' },
+];
+
+function renderProcess() {
+  const timeline = document.getElementById('processTimeline');
+  if (!timeline) return;
+  timeline.innerHTML = LANDING_PROCESS.map((p, i) => `
+    <article class="process-step landing-section" data-animate-child="fade-right" style="--delay: ${i * 150}ms">
+      <div class="step-number" aria-hidden="true">${p.step}</div>
+      <div class="step-content">
+        <div class="step-icon" aria-hidden="true"><i data-lucide="${p.icon}"></i></div>
+        <h3 data-i18n="${p.titleKey}"></h3>
+        <p data-i18n="${p.descKey}"></p>
+      </div>
+      ${i < LANDING_PROCESS.length - 1 ? '<div class="step-connector" aria-hidden="true"></div>' : ''}
+    </article>
+  `).join('');
+}
+
+const LANDING_STATS = [
+  { count: 15000, suffix: '+', labelKey: 'landing.stats.1' },
+  { count: 500, suffix: '+', labelKey: 'landing.stats.2' },
+  { count: 98, suffix: '%', labelKey: 'landing.stats.3' },
+  { count: 2, suffix: ' min', labelKey: 'landing.stats.4' },
+];
+
+function renderStats() {
+  const grid = document.getElementById('statsGrid');
+  if (!grid) return;
+  grid.innerHTML = LANDING_STATS.map((s, i) => `
+    <article class="stat-item landing-section" data-animate-child="fade-up" style="--delay: ${i * 100}ms">
+      <div class="stat-value" data-count="${s.count}">0</div>
+      <div class="stat-suffix">${s.suffix}</div>
+      <p data-i18n="${s.labelKey}"></p>
+    </article>
+  `).join('');
+}
+
+// Initialize all dynamic content
+function initLandingContent() {
+  renderFeatures();
+  renderProcess();
+  renderStats();
+  // Re-render icons after dynamic content
+  setTimeout(renderIcons, 0);
+}
+
+// Hook into viewLanding
+const originalViewLanding = viewLanding;
+viewLanding = function() {
+  originalViewLanding.call(this);
+  initLandingContent();
+};
+
 /* ====== AUTH ====== */
 function viewLogin(msg='') {
   document.querySelector('header').classList.remove('hidden');
@@ -1585,9 +1954,9 @@ function renderMaintItem(item) {
 
 /* ====== ROUTER ====== */
 const routes = [
+  [/^#\/$/, () => (S.user ? (S.user.role==='SUPPLIER' ? location.hash='#/supplier/dashboard' : (isPro() ? location.hash='#/pro/dashboard' : (isAdmin() ? location.hash='#/admin/dashboard' : viewDashboard()))) : viewLanding())],
   [/^#\/login$/, () => viewLogin()],
   [/^#\/register$/, () => viewRegister()],
-  [/^#\/$/, () => (S.user ? (S.user.role==='SUPPLIER' ? location.hash='#/supplier/dashboard' : (isPro() ? location.hash='#/pro/dashboard' : (isAdmin() ? location.hash='#/admin/dashboard' : viewDashboard()))) : viewLogin())],
   [/^#\/app$/, () => viewDashboard()],
   [/^#\/mobile$/, () => viewMobile()],
   [/^#\/fleet$/, () => location.hash = '#/fleet/dashboard'],
@@ -1709,7 +2078,7 @@ const routes = [
   [/^#\/admin\/(users|audit|notif)$/, (m) => viewAdmin(m[1])]
 ];
 
-const PUBLIC = [/^#\/login$/, /^#\/register$/];
+const PUBLIC = [/^#\/$/, /^#\/login$/, /^#\/register$/];
 const ADMIN_HASH = /^#\/admin(\/|$)/;
 // Module 61 — Domaines : sans ancre explicite, la destination dépend de l'hôte
 // (app.c-auto.xxx -> tableau de bord application ; admin.c-auto.xxx -> zone
