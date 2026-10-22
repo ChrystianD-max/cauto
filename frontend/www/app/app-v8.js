@@ -1954,6 +1954,7 @@ function renderMaintItem(item) {
 
 /* ====== ROUTER ====== */
 const routes = [
+  [/^#?$/, () => { if (!S.user) location.hash = '#/'; else location.hash = '#/app'; }],
   [/^#\/$/, () => (S.user ? (S.user.role==='SUPPLIER' ? location.hash='#/supplier/dashboard' : (isPro() ? location.hash='#/pro/dashboard' : (isAdmin() ? location.hash='#/admin/dashboard' : viewDashboard()))) : viewLanding())],
   [/^#\/login$/, () => viewLogin()],
   [/^#\/register$/, () => viewRegister()],
